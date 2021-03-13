@@ -1,0 +1,58 @@
+import { Notebook, Note, ROOT_NOTEBOOK_ID } from 'domain/entity';
+import { emit, Repository } from './BaseRepository';
+import type { Dao } from './BaseRepository';
+import { NOTEBOOK_DAO_TOKEN, NOTE_DAO_TOKEN } from './daoTokens';
+import { singleton, inject } from 'tsyringe';
+import { shallowReactive } from '@vue/runtime-core';
+
+@singleton()
+export class NotebookRepository extends Repository {
+  constructor(
+     @inject(NOTE_DAO_TOKEN) protected noteDao?: Dao<Note>,
+     @inject(NOTEBOOK_DAO_TOKEN) protected notebookDao?: Dao<Notebook>,
+    ) {
+      super()
+  }
+
+  @emit('itemFetched')
+  queryChildrenOf(notebook: Notebook): Promise<(Notebook | Note)[]> {
+    return Promise.all([
+      this.notebookDao!.all({parentId: notebook.id}),
+      this.noteDao!.all({notebookId: notebook.id} ,['id', 'title', 'sortOrder', 'userCreatedAt', 'userModifiedAt', 'notebookId']),
+    ]).then(([notebooks, notes]) => {
+      const childrenNotebooks = notebooks.map(notebook => {
+        return new Notebook(notebook);
+      });
+      const childrenNotes = notes.map(note => {
+        return new Note(note);
+      });
+
+      return [...childrenNotebooks, ...childrenNotes];
+    });
+  }
+
+  @emit('itemFetched')
+  async queryOrCreateRootNotebook() {
+    const root = await this.notebookDao!.one({id: ROOT_NOTEBOOK_ID});
+    const rootNotebook = root ? new Notebook(root) : Notebook.createRootNotebook();
+    
+    if (!root) {
+      await this.createNotebook(rootNotebook);
+    }
+
+    rootNotebook.children.value = shallowReactive(await this.queryChildrenOf(rootNotebook));
+
+    return rootNotebook;
+  }
+
+
+  @emit('notebookCreated')
+  createNotebook(notebook: Notebook) {
+    return this.notebookDao!.create(notebook.toDo());
+  }
+
+  @emit('notebookUpdated')
+  updateNote(notebook: Notebook) {
+    return this.notebookDao!.update(notebook.toDo());
+  }
+}

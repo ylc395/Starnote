@@ -1,0 +1,75 @@
+{
+  "name": "note-app",
+  "version": "1.0.0",
+  "private": true,
+  "author": {
+    "name": "ylc395"
+  },
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint",
+    "electron:build": "vue-cli-service electron:build",
+    "electron:serve": "vue-cli-service electron:serve",
+    "postinstall": "electron-builder install-app-deps",
+    "postuninstall": "electron-builder install-app-deps"
+  },
+  "dependencies": {
+    "@ant-design/icons-vue": "^6.0.1",
+    "@tailwindcss/postcss7-compat": "^2.0.2",
+    "@types/lodash": "^4.14.168",
+    "@types/sqlite3": "^3.1.7",
+    "@types/uuid": "^8.3.0",
+    "@vue/reactivity": "^3.0.6",
+    "ant-design-vue": "^2.0.1",
+    "autoprefixer": "^9",
+    "core-js": "^3.6.5",
+    "dayjs": "^1.10.4",
+    "eventemitter3": "^4.0.7",
+    "lodash": "^4.17.21",
+    "postcss": "^7",
+    "reflect-metadata": "^0.1.13",
+    "sequelize": "^6.5.0",
+    "sqlite3": "^5.0.2",
+    "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.0.2",
+    "tree-model": "^1.0.7",
+    "tsyringe": "^4.4.0",
+    "uuid": "^8.3.2",
+    "vue": "^3.0.0",
+    "vue-composable": "^1.0.0-beta.20"
+  },
+  "devDependencies": {
+    "@types/electron-devtools-installer": "^2.2.0",
+    "@typescript-eslint/eslint-plugin": "^2.33.0",
+    "@typescript-eslint/parser": "^2.33.0",
+    "@vue/cli-plugin-babel": "~4.5.0",
+    "@vue/cli-plugin-eslint": "~4.5.0",
+    "@vue/cli-plugin-typescript": "~4.5.0",
+    "@vue/cli-service": "~4.5.0",
+    "@vue/compiler-sfc": "^3.0.0",
+    "@vue/eslint-config-typescript": "^5.0.2",
+    "babel-plugin-import": "^1.13.3",
+    "electron": "^11.3.0",
+    "electron-devtools-installer": "^3.1.0",
+    "eslint": "^7.21.0",
+    "eslint-config-prettier": "^8.1.0",
+    "eslint-plugin-vue": "^7.0.0-0",
+    "lint-staged": "^9.5.0",
+    "prettier": "^1.19.1",
+    "typescript": "^4.2.2",
+    "vue-cli-plugin-electron-builder": "~2.0.0-rc.6",
+    "vue-cli-plugin-tailwind": "~2.0.6"
+  },
+  "_id": "note-app@1.0.0",
+  "gitHooks": {
+    "pre-commit": "lint-staged"
+  },
+  "license": "MIT",
+  "lint-staged": {
+    "*.{js,jsx,vue,ts,tsx}": [
+      "vue-cli-service lint",
+      "git add"
+    ]
+  },
+  "readme": "ERROR: No README data found!"
+}
