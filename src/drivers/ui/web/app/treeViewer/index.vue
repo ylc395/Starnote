@@ -79,13 +79,14 @@ export default defineComponent({
 });
 </script>
 <template>
-  <div class="bg-gray-700 select-none h-screen">
+  <div class="notebook-tree-viewer">
     <Button :block="true" @click="startCreating">
       <template #icon> <PlusOutlined /> 创建笔记本</template>
     </Button>
     <Tree
       :treeData="treeData"
       :blockNode="true"
+      :openAnimation="false"
       @select="handleSelect"
       @expand="handleExpand"
       v-model:expandedKeys="expandedKeys"
@@ -94,24 +95,58 @@ export default defineComponent({
   </div>
 </template>
 <style scoped>
-.ant-tree >>> .ant-tree-title {
+.notebook-tree-viewer {
+  user-select: none;
+  height: 100vh;
+  background-color: rgba(55, 65, 81);
+}
+
+.ant-tree :deep(li) {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+:deep(.ant-tree-title) {
   color: #eeeeee;
   font-size: 16px;
 }
 
-.ant-tree >>> .ant-tree-switcher {
+:deep(.ant-tree-switcher) {
   color: #7c7e81;
 }
 
-.ant-tree >>> .ant-tree-treenode-selected,
-.ant-tree >>> .ant-tree-node-content-wrapper.ant-tree-node-selected {
+:deep(.ant-tree-treenode-selected) {
+  position: relative;
+  left: -9999px;
+  padding-left: 9999px;
+  width: 9999px;
+  box-sizing: content-box;
   background-color: #131313;
 }
+.ant-tree :deep(.ant-tree-node-content-wrapper.ant-tree-node-selected) {
+  background-color: inherit;
+}
 
-.ant-tree >>> .ant-tree-treenode-selected:hover,
-.ant-tree >>> .ant-tree-treenode-selected:hover .ant-tree-node-content-wrapper,
-.ant-tree >>> li:hover,
-.ant-tree >>> li .ant-tree-node-content-wrapper:hover {
-  background-color: #26282d;
+.ant-tree :deep(.ant-tree-node-content-wrapper) {
+  padding-left: 0;
+  margin: 3px 0;
+  transition-duration: 0s;
+}
+
+.ant-tree :deep(.ant-tree-switcher) {
+  margin: 3px 0;
+}
+
+.ant-tree :deep(.ant-tree-node-content-wrapper:hover) {
+  background-color: inherit;
+}
+
+:deep(.ant-tree-child-tree) {
+  position: relative;
+  left: -9999px;
+  padding-left: calc(9999px + 18px);
+  width: 9999px;
+  box-sizing: content-box;
+  background-color: rgba(55, 65, 81);
 }
 </style>
