@@ -12,7 +12,12 @@ import { Notebook } from 'domain/entity';
 import NotebookCreating from './NotebookCreating.vue';
 
 export default defineComponent({
-  components: { Tree, PlusOutlined, FolderOutlined, NotebookCreating },
+  components: {
+    Tree: Tree.DirectoryTree,
+    PlusOutlined,
+    FolderOutlined,
+    NotebookCreating,
+  },
   setup() {
     const treeViewerService = container.resolve(TreeViewerService);
     const notebookCreatingService = new NotebookCreatingService(
@@ -84,13 +89,14 @@ export default defineComponent({
       </button>
     </div>
     <Tree
-      class="overflow-x-hidden"
+      multiple
       :treeData="treeData"
-      :blockNode="true"
+      :showIcon="false"
       openAnimation="none"
-      @expand="handleExpand"
+      expandAction="dblclick"
       v-model:expandedKeys="expandedKeys"
       v-model:selectedKeys="selectedKeys"
+      @expand="handleExpand"
     />
     <NotebookCreating />
   </div>
@@ -107,45 +113,33 @@ export default defineComponent({
 
 :deep(.ant-tree-title) {
   color: #eeeeee;
-  font-size: 16px;
+  font-size: 14px;
 }
 
 :deep(.ant-tree-switcher) {
   color: #7c7e81;
+  cursor: auto !important;
+  height: 30px !important;
 }
 
-:deep(.ant-tree-treenode-selected) {
-  position: relative;
-  left: -9999px;
-  padding-left: 9999px;
-  width: 9999px;
-  box-sizing: content-box;
-  background-color: #131313;
-}
-.ant-tree :deep(.ant-tree-node-content-wrapper.ant-tree-node-selected) {
-  background-color: inherit;
+:deep(.ant-tree-node-content-wrapper) {
+  padding-left: 0 !important;
+  transition-duration: 0s !important;
+  cursor: auto !important;
+  height: 30px !important;
 }
 
-.ant-tree :deep(.ant-tree-node-content-wrapper) {
-  padding-left: 0;
-  margin: 3px 0;
-  transition-duration: 0s;
+:deep(.ant-tree-node-content-wrapper::before) {
+  height: 30px !important;
+  transition-duration: 0s !important;
 }
 
-.ant-tree :deep(.ant-tree-switcher) {
-  margin: 3px 0;
+:deep(.ant-tree-node-content-wrapper:hover::before) {
+  background-color: inherit !important;
+  transition-duration: 0s !important;
 }
 
-.ant-tree :deep(.ant-tree-node-content-wrapper:hover) {
-  background-color: inherit;
-}
-
-:deep(.ant-tree-child-tree) {
-  position: relative;
-  left: -9999px;
-  padding-left: calc(9999px + 18px);
-  width: 9999px;
-  box-sizing: content-box;
-  background-color: rgba(55, 65, 81);
+:deep(.ant-tree-node-content-wrapper.ant-tree-node-selected::before) {
+  background-color: #131313 !important;
 }
 </style>
