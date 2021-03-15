@@ -1,7 +1,7 @@
 <script lang="ts">
 import { defineComponent, computed, provide } from 'vue';
-import { Button, Tree } from 'ant-design-vue';
-import { PlusOutlined } from '@ant-design/icons-vue';
+import { Tree } from 'ant-design-vue';
+import { PlusOutlined, FolderOutlined } from '@ant-design/icons-vue';
 import { ExpendEvent, TreeDataItem } from 'ant-design-vue/lib/tree/Tree';
 import { container } from 'tsyringe';
 import {
@@ -13,7 +13,7 @@ import { Notebook } from 'domain/entity';
 import NotebookCreating from './NotebookCreating.vue';
 
 export default defineComponent({
-  components: { Button, Tree, PlusOutlined, NotebookCreating },
+  components: { Tree, PlusOutlined, FolderOutlined, NotebookCreating },
   setup() {
     const treeViewerService = container.resolve(TreeViewerService);
     const notebookCreatingService = new NotebookCreatingService(
@@ -79,14 +79,24 @@ export default defineComponent({
 });
 </script>
 <template>
-  <div class="notebook-tree-viewer">
-    <Button :block="true" @click="startCreating">
-      <template #icon> <PlusOutlined /> 创建笔记本</template>
-    </Button>
+  <div class="notebook-tree-viewer select-none h-screen">
+    <div class="text-white flex justify-between items-center px-2 py-2">
+      <h1 class="text-inherit text-sm uppercase my-0">
+        <FolderOutlined class="mr-1" />
+        Notebooks
+      </h1>
+      <button
+        @click="startCreating"
+        class="bg-transparent border-none cursor-pointer focus:outline-none"
+      >
+        <PlusOutlined />
+      </button>
+    </div>
     <Tree
+      class="overflow-x-hidden"
       :treeData="treeData"
       :blockNode="true"
-      :openAnimation="false"
+      openAnimation="none"
       @select="handleSelect"
       @expand="handleExpand"
       v-model:expandedKeys="expandedKeys"
@@ -96,8 +106,6 @@ export default defineComponent({
 </template>
 <style scoped>
 .notebook-tree-viewer {
-  user-select: none;
-  height: 100vh;
   background-color: rgba(55, 65, 81);
 }
 

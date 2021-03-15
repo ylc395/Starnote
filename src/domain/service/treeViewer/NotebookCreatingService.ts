@@ -15,20 +15,32 @@ export class NotebookCreatingService {
   }
 
   expandTargetNotebook() {
-    if (this.targetNotebook) {
-      this.treeViewer.expandNotebook(this.targetNotebook.id);
+    if (!this.targetNotebook) {
+      throw new Error('no target notebook when expand');
     }
+
+    this.treeViewer.expandNotebook(this.targetNotebook.id, true);
   }
 
   startCreating() {
+    if (!this.targetNotebook) {
+      throw new Error('no target notebook when start creating');
+    }
+
     this.isCreating.value = true;
   }
 
   async stopCreating(isConfirmed: boolean) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const target = this.targetNotebook!;
+
     this.isCreating.value = false;
 
     if (isConfirmed) {
-      await this.createNotebook(this.title.value);
+      const newNotebook = await this.createNotebook(this.title.value);
+      if (target.children.value) {
+        target.children.value.push(newNotebook);
+      }
       this.expandTargetNotebook();
     }
 
@@ -39,7 +51,7 @@ export class NotebookCreatingService {
     const target = this.targetNotebook;
 
     if (!target) {
-      return;
+      throw new Error('no target notebook when create');
     }
 
     const newNotebook = new Notebook({
@@ -50,10 +62,6 @@ export class NotebookCreatingService {
     await notebookRepository.createNotebook(newNotebook);
     this.treeViewer.putTreeItemsInCache(newNotebook);
 
-    if (target.children.value) {
-      target.children.value.push(newNotebook);
-    } else {
-      await this.treeViewer.loadChildrenOf(newNotebook.id);
-    }
+    return newNotebook;
   }
 }

@@ -16,7 +16,6 @@ export class TreeViewerService {
   readonly root: Ref<Notebook | null> = shallowRef(null);
   private readonly itemsKV = new KvStorage();
   private selectedItem: Notebook | Note | null = null;
-
   expandedIds: Ref<Notebook['id'][]> = ref([]);
   constructor() {
     this.init();
@@ -71,23 +70,28 @@ export class TreeViewerService {
     this.selectedItem = item;
   }
 
-  expandNotebook(notebookId: Notebook['id']) {
-    if (!this.expandedIds.value.includes(notebookId)) {
-      this.expandedIds.value.push(notebookId);
-    }
-
+  async expandNotebook(notebookId: Notebook['id'], expandParent = true) {
     const notebook = this.itemsKV.getItem(notebookId, Notebook);
 
     if (!notebook.children.value) {
-      this.loadChildrenOf(notebookId); 
+      await this.loadChildrenOf(notebookId); 
     }
 
-    if (notebook.parentId.value) {
-      this.expandNotebook(notebook.parentId.value);
+    const hasParent = notebook.parentId.value && notebook.parentId.value !== this.root.value?.id
+
+    if (hasParent && expandParent) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      await this.expandNotebook(notebook.parentId.value!, true);
+    }
+
+    if (!this.expandedIds.value.includes(notebookId)) {
+      this.expandedIds.value.push(notebookId);
+      this.expandedIds.value = [...this.expandedIds.value];
     }
   }
 
   removeExpandedId(notebookId: Notebook['id']) {
     pull(this.expandedIds.value, notebookId);
+    this.expandedIds.value = [...this.expandedIds.value];
   }
 }
