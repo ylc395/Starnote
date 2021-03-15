@@ -3,7 +3,6 @@ import { container, singleton } from 'tsyringe';
 import { shallowReactive, shallowRef, ref } from '@vue/reactivity';
 import type { Ref } from '@vue/reactivity';
 import { Note, Notebook } from 'domain/entity';
-import { pull } from 'lodash';
 import { KvStorage } from "utils/kvStorage";
 
 const notebookRepository = container.resolve(NotebookRepository);

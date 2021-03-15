@@ -118,6 +118,10 @@ export default defineComponent({
   color: #7c7e81;
   cursor: auto !important;
   height: 30px !important;
+  width: 17px !important;
+  margin-left: 10px !important;
+  display: inline-flex !important;
+  align-items: center;
 }
 
 :deep(.ant-tree-node-content-wrapper) {
@@ -125,6 +129,9 @@ export default defineComponent({
   transition-duration: 0s !important;
   cursor: auto !important;
   height: 30px !important;
+  border: 0 !important;
+  display: inline-flex !important;
+  align-items: center;
 }
 
 :deep(.ant-tree-node-content-wrapper::before) {
