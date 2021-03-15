@@ -15,7 +15,11 @@ type TreeItem = Notebook | Note;
 export class TreeViewerService {
   readonly root: Ref<Notebook | null> = shallowRef(null);
   private readonly itemsKV = new KvStorage();
-  private selectedItem: Notebook | Note | null = null;
+  selectedIds: Ref<(Notebook['id'] | Note['id'])[]> = ref([]);
+  get selectedItem(): Notebook | Note | null {
+    const firstSelectedItemId = this.selectedIds.value[0];
+    return firstSelectedItemId ? this.itemsKV.getItem(firstSelectedItemId): null
+  }
   expandedIds: Ref<Notebook['id'][]> = ref([]);
   constructor() {
     this.init();
@@ -23,7 +27,6 @@ export class TreeViewerService {
   async init() {
     notebookRepository.addListener('itemFetched', this.putTreeItemsInCache, this);
     this.root.value = await notebookRepository.queryOrCreateRootNotebook();
-    this.selectedItem = this.root.value;
   }
 
   putTreeItemsInCache(items: TreeItem | TreeItem[]) {
@@ -44,13 +47,9 @@ export class TreeViewerService {
     notebook.children.value = shallowReactive(await notebookRepository.queryChildrenOf(notebook));
   }
 
-  getSelectedItem() {
-    return this.selectedItem;
-  }
-
   getSelectedNotebook() {
     if (!this.selectedItem) {
-      return this.root.value;      
+      return null;
     }
 
     if (this.selectedItem instanceof Notebook) {
@@ -58,16 +57,6 @@ export class TreeViewerService {
     }
 
     return this.itemsKV.getItem(this.selectedItem.notebookId.value, Notebook)
-  }
-
-  resetSelectedItem() {
-    this.selectedItem = this.root.value;
-  }
-
-  setSelectedItem(id: TreeItemId) {
-    const item = this.itemsKV.getItem<TreeItem>(id);
-
-    this.selectedItem = item;
   }
 
   async expandNotebook(notebookId: Notebook['id'], expandParent = true) {

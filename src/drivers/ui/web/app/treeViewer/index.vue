@@ -7,7 +7,6 @@ import { container } from 'tsyringe';
 import {
   TreeViewerService,
   NotebookCreatingService,
-  TreeItemId,
 } from 'domain/service/treeViewer';
 import { Notebook } from 'domain/entity';
 import NotebookCreating from './NotebookCreating.vue';
@@ -43,14 +42,6 @@ export default defineComponent({
       });
     });
 
-    const handleSelect = ([id]: TreeItemId[]) => {
-      if (id) {
-        treeViewerService.setSelectedItem(id);
-      } else {
-        treeViewerService.resetSelectedItem();
-      }
-    };
-
     const handleExpand = (
       ids: Notebook['id'],
       { expanded, node }: ExpendEvent,
@@ -69,10 +60,10 @@ export default defineComponent({
     };
 
     return {
-      expandedKeys: treeViewerService.expandedIds,
       treeData,
+      expandedKeys: treeViewerService.expandedIds,
+      selectedKeys: treeViewerService.selectedIds,
       startCreating,
-      handleSelect,
       handleExpand,
     };
   },
@@ -97,9 +88,9 @@ export default defineComponent({
       :treeData="treeData"
       :blockNode="true"
       openAnimation="none"
-      @select="handleSelect"
       @expand="handleExpand"
       v-model:expandedKeys="expandedKeys"
+      v-model:selectedKeys="selectedKeys"
     />
     <NotebookCreating />
   </div>

@@ -11,15 +11,7 @@ export class NotebookCreatingService {
   title = ref('');
   isCreating = ref(false);
   get targetNotebook() {
-    return this.treeViewer.getSelectedNotebook();
-  }
-
-  expandTargetNotebook() {
-    if (!this.targetNotebook) {
-      throw new Error('no target notebook when expand');
-    }
-
-    this.treeViewer.expandNotebook(this.targetNotebook.id, true);
+    return this.treeViewer.getSelectedNotebook() || this.treeViewer.root.value;
   }
 
   startCreating() {
@@ -41,7 +33,8 @@ export class NotebookCreatingService {
       if (target.children.value) {
         target.children.value.push(newNotebook);
       }
-      this.expandTargetNotebook();
+      this.treeViewer.expandNotebook(target.id, true);
+      this.treeViewer.selectedIds.value = [newNotebook.id];
     }
 
     this.title.value = '';
