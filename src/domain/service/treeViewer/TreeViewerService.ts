@@ -78,9 +78,4 @@ export class TreeViewerService {
       this.expandedIds.value = [...this.expandedIds.value];
     }
   }
-
-  removeExpandedId(notebookId: Notebook['id']) {
-    pull(this.expandedIds.value, notebookId);
-    this.expandedIds.value = [...this.expandedIds.value];
-  }
 }

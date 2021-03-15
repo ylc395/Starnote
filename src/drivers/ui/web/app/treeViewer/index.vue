@@ -55,8 +55,6 @@ export default defineComponent({
 
       if (expanded) {
         treeViewerService.expandNotebook(key);
-      } else {
-        treeViewerService.removeExpandedId(key);
       }
     };
 
