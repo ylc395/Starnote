@@ -20,11 +20,11 @@ export class NotebookRepository extends Repository {
       this.notebookDao!.all({parentId: notebook.id}),
       this.noteDao!.all({notebookId: notebook.id} ,['id', 'title', 'sortOrder', 'userCreatedAt', 'userModifiedAt', 'notebookId']),
     ]).then(([notebooks, notes]) => {
-      const childrenNotebooks = notebooks.map(notebook => {
-        return new Notebook(notebook);
+      const childrenNotebooks = notebooks.map(notebookDo => {
+        return Notebook.from(notebookDo, notebook);
       });
       const childrenNotes = notes.map(note => {
-        return new Note(note);
+        return Note.from(note, notebook);
       });
 
       return [...childrenNotebooks, ...childrenNotes];
@@ -34,7 +34,7 @@ export class NotebookRepository extends Repository {
   @emit('itemFetched')
   async queryOrCreateRootNotebook() {
     const root = await this.notebookDao!.one({id: ROOT_NOTEBOOK_ID});
-    const rootNotebook = root ? new Notebook(root) : Notebook.createRootNotebook();
+    const rootNotebook = root ? Notebook.from(root) : Notebook.createRootNotebook();
     
     if (!root) {
       await this.createNotebook(rootNotebook);

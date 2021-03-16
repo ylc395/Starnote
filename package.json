@@ -23,6 +23,7 @@
     "@vue/reactivity": "^3.0.6",
     "ant-design-vue": "^2.0.1",
     "autoprefixer": "^9",
+    "class-transformer": "^0.4.0",
     "core-js": "^3.6.5",
     "dayjs": "^1.10.4",
     "eventemitter3": "^4.0.7",

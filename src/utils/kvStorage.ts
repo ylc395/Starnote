@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @see https://2ality.com/2020/04/classes-as-values-typescript.html
-type Class<T> = new (...args: any[]) => T;
-
+import { Class } from './types';
 function cast<T>(obj: any, TheClass?: Class<T>): T {
   if (TheClass && !(obj instanceof TheClass)) {
     throw new Error(`Not an instance of ${TheClass.name}: ${obj}`);

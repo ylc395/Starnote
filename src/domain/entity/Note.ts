@@ -1,34 +1,62 @@
 import dayjs from 'dayjs';
 import type { Dayjs } from "dayjs";
 import customParseFormat from 'dayjs/plugin/customParseFormat';
-import { Ref, ref } from '@vue/runtime-core';
-import { Do, Entity } from 'domain/entity';
+import { ref, shallowRef } from '@vue/reactivity';
+import type { Ref } from '@vue/reactivity';
+import { Do, Entity, dataObjectToInstance } from 'domain/entity';
 import { TIME_FORMAT } from 'domain/constant';
 import { Notebook, ROOT_NOTEBOOK_ID } from './Notebook';
 import { Sortable } from './Sortable';
 import { Optional } from 'utils/types';
+import { Exclude, Transform } from 'class-transformer';
 
 dayjs.extend(customParseFormat);
 
 export class Note extends Entity implements Sortable {
-  readonly title: Ref<string>;
-  readonly content: Ref<string | null>;
-  readonly userModifiedAt: Ref<Dayjs>;
-  readonly userCreatedAt: Ref<Dayjs>;
-  readonly notebookId: Ref<Notebook['id']>;
-  readonly sortOrder: Ref<number>;
-  constructor(noteDo: NoteDo = {}) {
-    super(noteDo || { id: '' });
+  @Transform(({value}) => ref(value), {toClassOnly: true})
+  @Transform(({value}) => value.value, {toPlainOnly: true})
+  title: Ref<string> = ref('untitled note');
 
-    this.title = ref(noteDo.title || 'untitled note');
-    this.userCreatedAt = ref(dayjs(noteDo.userCreatedAt, TIME_FORMAT));
-    this.userModifiedAt = ref(dayjs(noteDo.userModifiedAt, TIME_FORMAT));
-    this.notebookId = ref(noteDo.notebookId || ROOT_NOTEBOOK_ID);
-    this.sortOrder = ref(noteDo.sortOrder || 0);
+  @Transform(({value}) => ref(value), {toClassOnly: true})
+  @Transform(({value}) => value.value, {toPlainOnly: true})
+  readonly content: Ref<string | null> = ref(null);
 
-    this.content = ref(
-      typeof noteDo.content === 'string' ? noteDo.content : null,
-    );
+  @Transform(({value}) => shallowRef(dayjs(value, TIME_FORMAT)), {toClassOnly: true})
+  @Transform(({value}) => value.value.format(TIME_FORMAT), {toPlainOnly: true})
+  readonly userModifiedAt: Ref<Dayjs> = shallowRef(dayjs());
+
+  @Transform(({value}) => shallowRef(dayjs(value, TIME_FORMAT)), {toClassOnly: true})
+  @Transform(({value}) => value.value.format(TIME_FORMAT), {toPlainOnly: true})
+  readonly userCreatedAt: Ref<Dayjs> = shallowRef(dayjs());
+
+  @Transform(({value}) => ref(value), {toClassOnly: true})
+  @Transform(({value}) => value.value, {toPlainOnly: true})
+  readonly notebookId: Ref<Notebook['id']> = ref(ROOT_NOTEBOOK_ID);
+
+  @Exclude()
+  private readonly parent: Ref<Notebook | null> = ref(null);
+
+  @Transform(({value}) => ref(value), {toClassOnly: true})
+  @Transform(({value}) => value.value, {toPlainOnly: true})
+  readonly sortOrder: Ref<number> = ref(0);
+
+  setParent(notebook: Notebook) {
+    this.parent.value = notebook;
+    this.notebookId.value = notebook.id;
+  }
+
+  static from(dataObject: NoteDo, parent?: Notebook) {
+    const note = dataObjectToInstance(this, dataObject);
+
+    if (parent) {
+      if (parent.id !== note.notebookId.value) {
+        throw new Error('wrong parent, since two ids are not equal');
+      }
+
+      note.setParent(parent)
+    }
+
+    return note;
   }
 }
 export type NoteDo = Optional<Do<Note>, 'content'>;

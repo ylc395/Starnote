@@ -1,9 +1,10 @@
 import { v4 as uuid } from 'uuid';
 import dayjs from "dayjs";
 import customParseFormat from 'dayjs/plugin/customParseFormat';
+import { classToPlain, plainToClass } from "class-transformer";
 import type { Dayjs } from "dayjs";
-import { ComputedRef, isReadonly, isRef, Ref, unref, UnwrapRef } from '@vue/runtime-core';
-import { TIME_FORMAT } from 'domain/constant';
+import type { ComputedRef, Ref, UnwrapRef } from '@vue/runtime-core';
+import { Class } from 'utils/types';
 
 dayjs.extend(customParseFormat);
 
@@ -25,24 +26,12 @@ export type Do<T> = {
 export interface ObjectWithId {
   id: string;
 }
-export class Entity {
-  readonly id: string;
-  constructor(dto: Partial<ObjectWithId>) {
-    this.id = dto.id || uuid();
-  }
-  // convert to Data Object
-  toDo(): Do<this> & ObjectWithId {
-    return JSON.parse(JSON.stringify(this, (key, value) => {
-      if (isReadonly(value)) {
-        return;
-      }
+export abstract class Entity {
+  readonly id: string = uuid();
 
-      const rawValue = isRef(value) ? unref(value) : value;
-
-      if (rawValue instanceof dayjs) {
-        return (rawValue as Dayjs).format(TIME_FORMAT);
-      }
-      return rawValue;
-    }));
+  toDo() {
+    return classToPlain(this) as ObjectWithId;
   }
 }
+
+export const dataObjectToInstance = <T>(aClass: Class<T>, dataObject: Record<string, unknown>) => plainToClass(aClass, dataObject, {exposeDefaultValues: true})

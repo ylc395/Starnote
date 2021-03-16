@@ -1,4 +1,3 @@
-import dayjs from 'dayjs';
 import { singleton, inject } from 'tsyringe';
 import { Note, Notebook } from 'domain/entity';
 import { emit, Repository } from './BaseRepository';
@@ -16,19 +15,19 @@ export class NoteRepository extends Repository {
   }
   queryNoteById(id: Note['id']) {
     return this.noteDao!.one({ id }).then(note =>
-      note ? new Note(note) : note,
+      note ? Note.from(note) : note,
     );
   }
 
   @emit('noteCreated')
   createNote(note: Note) {
-    this.notebookDao!.update({id: note.notebookId.value, userModifiedAt: dayjs().format(TIME_FORMAT)})
+    this.notebookDao!.update({id: note.notebookId.value, userModifiedAt: note.userCreatedAt.value.format(TIME_FORMAT)})
     return this.noteDao!.create(note.toDo());
   }
 
   @emit('noteUpdated')
   updateNote(note: Note) {
-    this.notebookDao!.update({id: note.notebookId.value, userModifiedAt: dayjs().format(TIME_FORMAT)})
+    this.notebookDao!.update({id: note.notebookId.value, userModifiedAt: note.userModifiedAt.value.format(TIME_FORMAT)})
     return this.noteDao!.update(note.toDo());
   }
 }
