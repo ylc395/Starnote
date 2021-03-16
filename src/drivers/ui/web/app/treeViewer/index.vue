@@ -69,10 +69,12 @@ export default defineComponent({
     };
 
     const aimIconRef: Ref<null | HTMLElement> = ref(null);
-    const { handleDragstart, handleDragenter, handleDragend } = useDraggable(
-      treeViewerService,
-      aimIconRef,
-    );
+    const {
+      handleDragstart,
+      handleDragenter,
+      handleRootDrop,
+      handleDrop,
+    } = useDraggable(treeViewerService, aimIconRef);
 
     return {
       aimIconRef,
@@ -83,7 +85,8 @@ export default defineComponent({
       handleExpand,
       handleDragstart,
       handleDragenter,
-      handleDragend,
+      handleDrop,
+      handleRootDrop,
     };
   },
 });
@@ -91,7 +94,11 @@ export default defineComponent({
 <template>
   <div class="notebook-tree-viewer select-none h-screen">
     <div class="text-white flex justify-between items-center p-2">
-      <h1 class="text-inherit text-sm uppercase my-0">
+      <h1
+        class="text-inherit text-sm uppercase my-0"
+        @dragover.prevent
+        @drop="handleRootDrop"
+      >
         <FolderOutlined class="mr-1" />
         Notebooks
       </h1>
@@ -120,7 +127,7 @@ export default defineComponent({
       @expand="handleExpand"
       @dragstart="handleDragstart"
       @dragenter="handleDragenter"
-      @dragend="handleDragend"
+      @drop="handleDrop"
     />
     <NotebookCreating />
     <div class="-ml-96 text-green-600">

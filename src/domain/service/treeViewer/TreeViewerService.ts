@@ -11,7 +11,7 @@ const notebookRepository = container.resolve(NotebookRepository);
 const noteRepository = container.resolve(NoteRepository);
 
 export type TreeItemId = Notebook['id'] | Note['id'];
-type TreeItem = Notebook | Note;
+export type TreeItem = Notebook | Note;
 
 @singleton()
 export class TreeViewerService extends EventEmitter {
