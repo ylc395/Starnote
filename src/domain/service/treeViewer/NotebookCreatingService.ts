@@ -5,16 +5,22 @@ import { NotebookRepository } from 'domain/repository';
 import { container } from 'tsyringe';
 
 const notebookRepository = container.resolve(NotebookRepository);
+
 export class NotebookCreatingService {
   static token = Symbol();
   constructor(private treeViewer: TreeViewerService) {}
   title = ref('');
   isCreating = ref(false);
+  private isTargetRoot = false;
   get targetNotebook() {
-    return this.treeViewer.getSelectedNotebook() || this.treeViewer.root.value;
+    return this.isTargetRoot
+      ? this.treeViewer.root.value
+      : this.treeViewer.getSelectedNotebook() || this.treeViewer.root.value;
   }
 
-  startCreating() {
+  startCreating(isTargetRoot = false) {
+    this.isTargetRoot = isTargetRoot;
+
     if (!this.targetNotebook) {
       throw new Error('no target notebook when start creating');
     }
@@ -32,12 +38,14 @@ export class NotebookCreatingService {
       const newNotebook = await this.createNotebook(this.title.value);
       if (target.children.value) {
         target.children.value.push(newNotebook);
+        target.children.value = [...target.children.value];
       }
       this.treeViewer.expandNotebook(target.id, true);
       this.treeViewer.selectedIds.value = [newNotebook.id];
     }
 
     this.title.value = '';
+    this.isTargetRoot = false;
   }
 
   async createNotebook(title: string) {
@@ -47,7 +55,7 @@ export class NotebookCreatingService {
       throw new Error('no target notebook when create');
     }
 
-    const newNotebook = new Notebook({
+    const newNotebook = Notebook.from({
       parentId: target.id,
       title,
     });

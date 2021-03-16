@@ -67,7 +67,7 @@ export class NotebookRepository extends Repository {
   }
 
   @emit('notebookUpdated')
-  updateNote(notebook: Notebook) {
+  updateNotebook(notebook: Notebook) {
     return this.notebookDao!.update(notebook.toDo());
   }
 }

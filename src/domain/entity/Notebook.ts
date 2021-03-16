@@ -81,26 +81,6 @@ export class Notebook
   //   return copy;
   // });
 
-  isAncestor(notebook: Notebook): boolean {
-    if (notebook.id === ROOT_NOTEBOOK_ID) {
-      return false;
-    }
-
-    if (!notebook.parent.value) {
-      throw new Error('notebook has no parent!');
-    }
-
-    if (notebook.parent.value.id === this.id) {
-      return true;
-    }
-
-    return this.isAncestor(notebook.parent.value);
-  }
-
-  isRoot() {
-    return this.id === ROOT_NOTEBOOK_ID;
-  }
-
   static createRootNotebook() {
     return this.from({
       id: ROOT_NOTEBOOK_ID,

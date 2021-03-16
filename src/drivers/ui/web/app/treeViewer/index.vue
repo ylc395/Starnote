@@ -1,8 +1,12 @@
 <script lang="ts">
-import { defineComponent, computed, provide } from 'vue';
+import { defineComponent, computed, provide, ref, Ref } from 'vue';
 import { Tree } from 'ant-design-vue';
-import { PlusOutlined, FolderOutlined } from '@ant-design/icons-vue';
-import { ExpendEvent, TreeDataItem } from 'ant-design-vue/lib/tree/Tree';
+import {
+  FolderAddOutlined,
+  FolderOutlined,
+  AimOutlined,
+} from '@ant-design/icons-vue';
+import type { ExpendEvent, TreeDataItem } from 'ant-design-vue/lib/tree/Tree';
 import { container } from 'tsyringe';
 import {
   TreeViewerService,
@@ -10,11 +14,13 @@ import {
 } from 'domain/service/treeViewer';
 import { Notebook } from 'domain/entity';
 import NotebookCreating from './NotebookCreating.vue';
+import { useDraggable } from './useDraggable';
 
 export default defineComponent({
   components: {
     Tree: Tree.DirectoryTree,
-    PlusOutlined,
+    AimOutlined,
+    FolderAddOutlined,
     FolderOutlined,
     NotebookCreating,
   },
@@ -58,36 +64,53 @@ export default defineComponent({
       }
     };
 
-    const startCreating = () => {
-      notebookCreatingService.startCreating();
+    const startCreating = (isInRoot: boolean) => {
+      notebookCreatingService.startCreating(isInRoot);
     };
 
+    const aimIconRef: Ref<null | HTMLElement> = ref(null);
+    const { handleDragstart, handleDragenter, handleDragend } = useDraggable(
+      treeViewerService,
+      aimIconRef,
+    );
+
     return {
+      aimIconRef,
       treeData,
       expandedKeys: treeViewerService.expandedIds,
       selectedKeys: treeViewerService.selectedIds,
       startCreating,
       handleExpand,
+      handleDragstart,
+      handleDragenter,
+      handleDragend,
     };
   },
 });
 </script>
 <template>
   <div class="notebook-tree-viewer select-none h-screen">
-    <div class="text-white flex justify-between items-center px-2 py-2">
+    <div class="text-white flex justify-between items-center p-2">
       <h1 class="text-inherit text-sm uppercase my-0">
         <FolderOutlined class="mr-1" />
         Notebooks
       </h1>
       <button
-        @click="startCreating"
+        @click="startCreating(false)"
         class="bg-transparent border-none cursor-pointer focus:outline-none"
       >
-        <PlusOutlined />
+        <FolderAddOutlined />
+      </button>
+      <button
+        @click="startCreating(true)"
+        class="bg-transparent border-none cursor-pointer focus:outline-none"
+      >
+        <FolderAddOutlined />
       </button>
     </div>
     <Tree
       multiple
+      draggable
       :treeData="treeData"
       :showIcon="false"
       openAnimation="none"
@@ -95,8 +118,14 @@ export default defineComponent({
       v-model:expandedKeys="expandedKeys"
       v-model:selectedKeys="selectedKeys"
       @expand="handleExpand"
+      @dragstart="handleDragstart"
+      @dragenter="handleDragenter"
+      @dragend="handleDragend"
     />
     <NotebookCreating />
+    <div class="-ml-96 text-green-600">
+      <AimOutlined ref="aimIconRef" />
+    </div>
   </div>
 </template>
 <style scoped>
@@ -146,5 +175,9 @@ export default defineComponent({
 
 :deep(.ant-tree-node-content-wrapper.ant-tree-node-selected::before) {
   background-color: #131313 !important;
+}
+
+:deep(.drag-over .ant-tree-node-content-wrapper) {
+  background-color: inherit !important;
 }
 </style>
