@@ -1,4 +1,4 @@
-import type { Entity,  Do, ObjectWithId } from 'domain/entity/Entity';
+import type { Entity,  Do, ObjectWithId } from 'domain/entity/abstract/Entity';
 import EventEmitter from 'eventemitter3';
 
 export type Query<T> = {

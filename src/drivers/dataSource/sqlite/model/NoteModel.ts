@@ -14,7 +14,7 @@ export const NoteModel = db.define('Note', {
     defaultValue: '',
     allowNull: false,
   },
-  notebookId: {
+  parentId: {
     type: DataTypes.UUIDV4,
     defaultValue: ROOT_NOTEBOOK_ID,
     allowNull: false,

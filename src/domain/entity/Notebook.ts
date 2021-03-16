@@ -1,20 +1,28 @@
 import dayjs, { Dayjs } from 'dayjs';
 import { NIL } from 'uuid';
 import { ref, shallowRef } from '@vue/reactivity';
-import type { Ref } from "@vue/reactivity";
-import { Do, Entity, dataObjectToInstance, RefTransform, DayjsRefTransform } from './Entity';
+import type { Ref } from '@vue/reactivity';
+import {
+  Do,
+  dataObjectToInstance,
+  RefTransform,
+  DayjsRefTransform,
+} from './abstract/Entity';
+import { Hierarchic, WithChildren } from './abstract/Hierarchic';
 import { Note } from './Note';
-import { SortByEnums, SortDirectEnums, Sortable } from './Sortable';
-import { Exclude } from 'class-transformer';
+import { SortByEnums, SortDirectEnums, Sortable } from './abstract/Sortable';
+import { Exclude, Expose } from 'class-transformer';
 
 export const ROOT_NOTEBOOK_ID: Notebook['id'] = NIL;
 
-export class Notebook extends Entity implements Sortable {
+export class Notebook
+  extends Hierarchic<Notebook>
+  implements Sortable, WithChildren {
   @RefTransform
   readonly title: Ref<string> = ref('untitled notebook');
 
   @Exclude()
-  private readonly parent: Ref<Notebook | null> = ref(null);
+  protected readonly parent: Ref<Notebook | null> = shallowRef(null);
 
   @Exclude()
   children: Ref<(Note | Notebook)[] | null> = shallowRef(null);
@@ -22,6 +30,7 @@ export class Notebook extends Entity implements Sortable {
   @RefTransform
   readonly parentId: Ref<Notebook['id'] | null> = ref(ROOT_NOTEBOOK_ID);
 
+  @Expose({ name: 'attachedNoteId' })
   @RefTransform
   readonly noteId: Ref<Note['id'] | null> = ref(null);
 
@@ -72,11 +81,6 @@ export class Notebook extends Entity implements Sortable {
   //   return copy;
   // });
 
-  setParent(notebook: Notebook) {
-    this.parent.value = notebook;
-    this.parentId.value = notebook.id;
-  }
-
   isAncestor(notebook: Notebook): boolean {
     if (notebook.id === ROOT_NOTEBOOK_ID) {
       return false;
@@ -101,7 +105,7 @@ export class Notebook extends Entity implements Sortable {
     return this.from({
       id: ROOT_NOTEBOOK_ID,
       title: 'ROOT',
-      parentId: null
+      parentId: null,
     });
   }
 

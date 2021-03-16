@@ -1,17 +1,23 @@
 import dayjs from 'dayjs';
-import type { Dayjs } from "dayjs";
+import type { Dayjs } from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import { ref, shallowRef } from '@vue/reactivity';
 import type { Ref } from '@vue/reactivity';
-import { Do, Entity, dataObjectToInstance, RefTransform, DayjsRefTransform } from 'domain/entity';
+import {
+  Do,
+  dataObjectToInstance,
+  RefTransform,
+  DayjsRefTransform,
+} from 'domain/entity';
+import { Hierarchic } from './abstract/Hierarchic';
 import { Notebook, ROOT_NOTEBOOK_ID } from './Notebook';
-import { Sortable } from './Sortable';
+import { Sortable } from './abstract/Sortable';
 import { Optional } from 'utils/types';
 import { Exclude } from 'class-transformer';
 
 dayjs.extend(customParseFormat);
 
-export class Note extends Entity implements Sortable {
+export class Note extends Hierarchic<Notebook> implements Sortable {
   @RefTransform
   title: Ref<string> = ref('untitled note');
 
@@ -25,28 +31,23 @@ export class Note extends Entity implements Sortable {
   readonly userCreatedAt: Ref<Dayjs> = shallowRef(dayjs());
 
   @RefTransform
-  readonly notebookId: Ref<Notebook['id']> = ref(ROOT_NOTEBOOK_ID);
+  readonly parentId: Ref<Notebook['id']> = ref(ROOT_NOTEBOOK_ID);
 
   @Exclude()
-  private readonly parent: Ref<Notebook | null> = ref(null);
+  protected readonly parent: Ref<Notebook | null> = shallowRef(null);
 
   @RefTransform
   readonly sortOrder: Ref<number> = ref(0);
-
-  setParent(notebook: Notebook) {
-    this.parent.value = notebook;
-    this.notebookId.value = notebook.id;
-  }
 
   static from(dataObject: NoteDo, parent?: Notebook) {
     const note = dataObjectToInstance(this, dataObject);
 
     if (parent) {
-      if (parent.id !== note.notebookId.value) {
+      if (parent.id !== note.parentId.value) {
         throw new Error('wrong parent, since two ids are not equal');
       }
 
-      note.setParent(parent)
+      note.setParent(parent);
     }
 
     return note;

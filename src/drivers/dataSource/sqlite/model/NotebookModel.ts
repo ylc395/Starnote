@@ -18,6 +18,13 @@ export const NotebookModel = db.define('Notebook', {
   },
   parentId: {
     type: DataTypes.UUIDV4,
+    validate: {
+      notNullExpectForRoot(value: unknown) {
+        if (!value && this.id !== ROOT_NOTEBOOK_ID) {
+          throw new Error('parent id can not be empty for non-root notebook');
+        }
+      },
+    },
   },
   sortBy: {
     type: DataTypes.ENUM(
