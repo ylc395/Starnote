@@ -2,17 +2,15 @@ import dayjs, { Dayjs } from 'dayjs';
 import { NIL } from 'uuid';
 import { ref, shallowRef } from '@vue/reactivity';
 import type { Ref } from "@vue/reactivity";
-import { Do, Entity, dataObjectToInstance } from './Entity';
+import { Do, Entity, dataObjectToInstance, RefTransform, DayjsRefTransform } from './Entity';
 import { Note } from './Note';
-import { TIME_FORMAT } from 'domain/constant';
 import { SortByEnums, SortDirectEnums, Sortable } from './Sortable';
-import { Exclude, Transform } from 'class-transformer';
+import { Exclude } from 'class-transformer';
 
 export const ROOT_NOTEBOOK_ID: Notebook['id'] = NIL;
 
 export class Notebook extends Entity implements Sortable {
-  @Transform(({ value }) => ref(value), { toClassOnly: true })
-  @Transform(({ value }) => value.value, { toPlainOnly: true })
+  @RefTransform
   readonly title: Ref<string> = ref('untitled notebook');
 
   @Exclude()
@@ -21,41 +19,26 @@ export class Notebook extends Entity implements Sortable {
   @Exclude()
   children: Ref<(Note | Notebook)[] | null> = shallowRef(null);
 
-  @Transform(({ value }) => ref(value), { toClassOnly: true })
-  @Transform(({ value }) => value.value, { toPlainOnly: true })
+  @RefTransform
   readonly parentId: Ref<Notebook['id'] | null> = ref(ROOT_NOTEBOOK_ID);
 
-  @Transform(({ value }) => ref(value), { toClassOnly: true })
-  @Transform(({ value }) => value.value, { toPlainOnly: true })
+  @RefTransform
   readonly noteId: Ref<Note['id'] | null> = ref(null);
 
-  @Transform(({ value }) => ref(value), { toClassOnly: true })
-  @Transform(({ value }) => value.value, { toPlainOnly: true })
+  @RefTransform
   readonly sortBy: Ref<SortByEnums> = ref(SortByEnums.Title);
 
-  @Transform(({ value }) => ref(value), { toClassOnly: true })
-  @Transform(({ value }) => value.value, { toPlainOnly: true })
+  @RefTransform
   readonly sortDirect: Ref<SortDirectEnums> = ref(SortDirectEnums.Asc);
 
-  @Transform(({ value }) => ref(value), { toClassOnly: true })
-  @Transform(({ value }) => value.value, { toPlainOnly: true })
+  @RefTransform
   readonly sortOrder: Ref<number> = ref(0);
 
-  @Transform(({ value }) => shallowRef(dayjs(value, TIME_FORMAT)), {
-    toClassOnly: true,
-  })
-  @Transform(({ value }) => value.value.format(TIME_FORMAT), {
-    toPlainOnly: true,
-  })
-  readonly userModifiedAt: Ref<Dayjs> = ref(dayjs());
+  @DayjsRefTransform
+  readonly userModifiedAt: Ref<Dayjs> = shallowRef(dayjs());
 
-  @Transform(({ value }) => shallowRef(dayjs(value, TIME_FORMAT)), {
-    toClassOnly: true,
-  })
-  @Transform(({ value }) => value.value.format(TIME_FORMAT), {
-    toPlainOnly: true,
-  })
-  readonly userCreatedAt: Ref<Dayjs> = ref(dayjs());
+  @DayjsRefTransform
+  readonly userCreatedAt: Ref<Dayjs> = shallowRef(dayjs());
   // readonly orderedChildren = computed(() => {
   //   if (!this.children) {
   //     return [];
