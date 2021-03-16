@@ -1971,15 +1971,10 @@ acorn-walk@^7.0.0, acorn-walk@^7.1.1:
   resolved "http://r.npm.sankuai.com/acorn-walk/download/acorn-walk-7.2.0.tgz#0de889a601203909b0fbe07b8938dc21d2e967bc"
   integrity sha1-DeiJpgEgOQmw++B7iTjcIdLpZ7w=
 
-acorn@^6.4.1:
-  version "6.4.2"
-  resolved "http://r.npm.sankuai.com/acorn/download/acorn-6.4.2.tgz#35866fd710528e92de10cf06016498e47e39e1e6"
-  integrity sha1-NYZv1xBSjpLeEM8GAWSY5H454eY=
-
-acorn@^7.0.0, acorn@^7.1.1, acorn@^7.4.0:
-  version "7.4.1"
-  resolved "http://r.npm.sankuai.com/acorn/download/acorn-7.4.1.tgz#feaed255973d2e77555b83dbc08851a6c63520fa"
-  integrity sha1-/q7SVZc9LndVW4PbwIhRpsY1IPo=
+acorn@8.0.1, acorn@^6.4.1, acorn@^7.0.0, acorn@^7.1.1, acorn@^7.4.0:
+  version "8.0.1"
+  resolved "https://registry.npmjs.org/acorn/-/acorn-8.0.1.tgz#d7e8eca9b71d5840db0e7e415b3b2b20e250f938"
+  integrity sha512-dmKn4pqZ29iQl2Pvze1zTrps2luvls2PBY//neO2WJ0s10B3AxJXshN+Ph7B4GrhfGhHXrl4dnUwyNNXQcnWGQ==
 
 address@^1.1.2:
   version "1.1.2"
