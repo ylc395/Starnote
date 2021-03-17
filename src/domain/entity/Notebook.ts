@@ -84,6 +84,10 @@ export class Notebook
     return this.id === ROOT_NOTEBOOK_ID;
   }
 
+  getParent() {
+    return this.parent.value;
+  }
+
   static createRootNotebook() {
     return this.from({
       id: ROOT_NOTEBOOK_ID,

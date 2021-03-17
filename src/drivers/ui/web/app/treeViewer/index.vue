@@ -8,11 +8,13 @@ import {
 } from '@ant-design/icons-vue';
 import { TreeViewerService } from 'domain/service/TreeViewerService';
 import NotebookCreator from './NotebookCreator.vue';
+import Contextmenu from './Contextmenu.vue';
 import { useDraggable } from './useDraggable';
 import { useTreeData } from './useTreeData';
+import { useContextmenu, token as CONTEXTMENU_TOKEN } from './useContextmenu';
 import {
   useNotebookCreate,
-  token as NotebookCreateToken,
+  token as NOTEBOOK_CREATING_TOKEN,
 } from './useNotebookCreate';
 
 export default defineComponent({
@@ -23,16 +25,19 @@ export default defineComponent({
     FolderOutlined,
     FileOutlined,
     NotebookCreator,
+    Contextmenu,
   },
   setup() {
-    const treeViewerService = new TreeViewerService();
-    const notebookCreatingService = useNotebookCreate(treeViewerService);
-
-    provide(NotebookCreateToken, notebookCreatingService);
-
     const notebookIconRef: Ref<null | HTMLElement> = ref(null);
     const noteIconRef: Ref<null | HTMLElement> = ref(null);
 
+    const treeViewerService = new TreeViewerService();
+    const notebookCreatingService = useNotebookCreate(treeViewerService);
+    const { treeData, handleExpand } = useTreeData(treeViewerService);
+    const contextmenuService = useContextmenu(
+      treeViewerService,
+      notebookCreatingService,
+    );
     const {
       handleDragstart,
       handleDragenter,
@@ -44,7 +49,8 @@ export default defineComponent({
       noteIconRef,
     });
 
-    const { treeData, handleExpand } = useTreeData(treeViewerService);
+    provide(NOTEBOOK_CREATING_TOKEN, notebookCreatingService);
+    provide(CONTEXTMENU_TOKEN, contextmenuService);
 
     return {
       notebookIconRef,
@@ -60,12 +66,13 @@ export default defineComponent({
       handleDrop,
       handleDragend,
       handleRootDrop,
+      openContextmenu: contextmenuService.openContextmenu,
     };
   },
 });
 </script>
 <template>
-  <div class="notebook-tree-viewer h-screen">
+  <div class="notebook-tree-viewer min-h-screen">
     <div class="text-white flex justify-between items-center p-2">
       <h1
         class="text-inherit text-sm uppercase my-0"
@@ -77,7 +84,7 @@ export default defineComponent({
       </h1>
       <div>
         <button
-          @click="startCreating()"
+          @click="startCreating(true)"
           class="bg-transparent border-none cursor-pointer focus:outline-none"
         >
           <PlusOutlined />
@@ -97,6 +104,7 @@ export default defineComponent({
       @dragenter="handleDragenter"
       @drop="handleDrop"
       @dragend="handleDragend"
+      @rightClick="openContextmenu"
     />
     <Modal
       :visible="isCreating"
@@ -107,7 +115,8 @@ export default defineComponent({
     >
       <NotebookCreator />
     </Modal>
-    <div class="-ml-96 text-gray-400">
+    <Contextmenu />
+    <div class="absolute -left-96 text-gray-400">
       <FileOutlined ref="noteIconRef" />
       <FolderOutlined ref="notebookIconRef" />
     </div>

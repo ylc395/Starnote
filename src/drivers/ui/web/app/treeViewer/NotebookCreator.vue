@@ -1,11 +1,18 @@
 <script lang="ts">
-import { defineComponent, inject, onMounted, Ref, ref } from 'vue';
+import { defineComponent, inject, onMounted, Ref, ref, computed } from 'vue';
 import { token } from './useNotebookCreate';
-import { Input, Button } from 'ant-design-vue';
+import { Input, Button, Breadcrumb } from 'ant-design-vue';
 import { FolderOpenOutlined } from '@ant-design/icons-vue';
+import type { Notebook } from 'domain/entity';
 
 export default defineComponent({
-  components: { Input, Button, FolderOpenOutlined },
+  components: {
+    Input,
+    Button,
+    Breadcrumb,
+    BreadcrumbItem: Breadcrumb.Item,
+    FolderOpenOutlined,
+  },
   setup() {
     const { title, isCreating, stopCreating, parent } = inject(token)!;
     const inputRef: Ref<null | HTMLInputElement> = ref(null);
@@ -25,7 +32,18 @@ export default defineComponent({
       isCreating,
       stopCreating,
       inputRef,
-      parent,
+      path: computed(() => {
+        let node: Notebook | null = parent.value;
+        const path = [];
+        while (node) {
+          if (!node.isRoot) {
+            path.push(node.title.value);
+          }
+          node = node.getParent();
+        }
+
+        return path.reverse();
+      }),
       handleEnter,
     };
   },
@@ -33,7 +51,10 @@ export default defineComponent({
 </script>
 <template>
   <div @submit.prevent>
-    <p><FolderOpenOutlined /> {{ parent.isRoot ? '根目录' : parent.title }}</p>
+    <Breadcrumb class="mb-4">
+      <BreadcrumbItem><FolderOpenOutlined /> 根目录</BreadcrumbItem>
+      <BreadcrumbItem v-for="p of path" :key="p">{{ p }}</BreadcrumbItem>
+    </Breadcrumb>
     <Input
       v-model:value="title"
       placeholder="新笔记本标题"

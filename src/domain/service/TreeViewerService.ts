@@ -38,8 +38,8 @@ export class TreeViewerService extends EventEmitter {
     this.root.value = await notebookRepository.queryOrCreateRootNotebook();
   }
 
-  setSelectedItem(item: TreeItem) {
-    this.selectedIds.value = [item.id];
+  setSelectedItem(item: TreeItem | TreeItemId) {
+    this.selectedIds.value = [typeof item === 'object' ? item.id : item];
   }
   private syncItem(item: Note | Notebook) {
     if (item instanceof Note) {

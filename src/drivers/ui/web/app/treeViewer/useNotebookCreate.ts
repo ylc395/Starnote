@@ -13,12 +13,14 @@ export function useNotebookCreate(treeViewerService: TreeViewerService) {
     title,
     isCreating,
     parent,
-    startCreating(target = treeViewerService.root.value) {
-      if (!target) {
-        throw new Error('no target notebook when start creating');
+    startCreating(isRoot = false) {
+      if (!isRoot && !(treeViewerService.selectedItem instanceof Notebook)) {
+        throw new Error('no target notebook!');
       }
 
-      parent.value = target;
+      parent.value = isRoot
+        ? treeViewerService.root.value
+        : (treeViewerService.selectedItem as Notebook);
       isCreating.value = true;
     },
     async stopCreating(isConfirmed: boolean) {
@@ -27,13 +29,13 @@ export function useNotebookCreate(treeViewerService: TreeViewerService) {
           throw new Error('no target notebook when stop creating');
         }
 
+        await treeViewerService.expandNotebook(parent.value.id);
         const newNotebook = await notebookService.create(
           parent.value,
           title.value,
         );
 
         treeViewerService.setSelectedItem(newNotebook);
-        treeViewerService.expandNotebook(newNotebook.parentId.value);
       }
 
       title.value = '';
