@@ -2,9 +2,9 @@
 import { defineComponent, computed, provide, ref, Ref } from 'vue';
 import { Tree } from 'ant-design-vue';
 import {
-  FolderAddOutlined,
   FolderOutlined,
   AimOutlined,
+  PlusOutlined,
 } from '@ant-design/icons-vue';
 import type { ExpendEvent, TreeDataItem } from 'ant-design-vue/lib/tree/Tree';
 import { container } from 'tsyringe';
@@ -20,7 +20,7 @@ export default defineComponent({
   components: {
     Tree: Tree.DirectoryTree,
     AimOutlined,
-    FolderAddOutlined,
+    PlusOutlined,
     FolderOutlined,
     NotebookCreating,
   },
@@ -73,6 +73,7 @@ export default defineComponent({
       handleDragstart,
       handleDragenter,
       handleRootDrop,
+      handleDragend,
       handleDrop,
     } = useDraggable(treeViewerService, aimIconRef);
 
@@ -86,6 +87,7 @@ export default defineComponent({
       handleDragstart,
       handleDragenter,
       handleDrop,
+      handleDragend,
       handleRootDrop,
     };
   },
@@ -102,21 +104,16 @@ export default defineComponent({
         <FolderOutlined class="mr-1" />
         Notebooks
       </h1>
-      <button
-        @click="startCreating(false)"
-        class="bg-transparent border-none cursor-pointer focus:outline-none"
-      >
-        <FolderAddOutlined />
-      </button>
-      <button
-        @click="startCreating(true)"
-        class="bg-transparent border-none cursor-pointer focus:outline-none"
-      >
-        <FolderAddOutlined />
-      </button>
+      <div>
+        <button
+          @click="startCreating(true)"
+          class="bg-transparent border-none cursor-pointer focus:outline-none"
+        >
+          <PlusOutlined />
+        </button>
+      </div>
     </div>
     <Tree
-      multiple
       draggable
       :treeData="treeData"
       :showIcon="false"
@@ -128,6 +125,7 @@ export default defineComponent({
       @dragstart="handleDragstart"
       @dragenter="handleDragenter"
       @drop="handleDrop"
+      @dragend="handleDragend"
     />
     <NotebookCreating />
     <div class="-ml-96 text-green-600">

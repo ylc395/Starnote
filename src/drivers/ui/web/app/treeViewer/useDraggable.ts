@@ -41,8 +41,6 @@ export function useDraggable(
       }
     },
     handleDrop: ({ node, dragNode, dropToGap }: DropEvent) => {
-      draggingItemId = null;
-
       if (node.dataRef.isLeaf) {
         return;
       }
@@ -57,6 +55,9 @@ export function useDraggable(
       if (draggingItemId && treeViewerService.root.value?.id) {
         setParent(draggingItemId, treeViewerService.root.value.id);
       }
+    },
+    handleDragend: () => {
+      draggingItemId = null;
     },
   };
 }
