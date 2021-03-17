@@ -1,10 +1,5 @@
 import type { TreeDragEvent, DropEvent } from 'ant-design-vue/lib/tree/Tree';
-import type {
-  TreeItemId,
-  TreeItem,
-  TreeViewerService,
-} from 'domain/service/treeViewer';
-import { Notebook } from 'domain/entity';
+import type { TreeItemId, TreeViewerService } from 'domain/service/treeViewer';
 import { Ref } from 'vue';
 
 export function useDraggable(
@@ -12,18 +7,6 @@ export function useDraggable(
   dragIcon: Ref<HTMLElement | null>,
 ) {
   let draggingItemId: null | TreeItemId = null;
-
-  function setParent(childId: TreeItemId, parentId: Notebook['id']) {
-    const parent = treeViewerService.itemsKV.getItem(parentId, Notebook);
-    const child = treeViewerService.itemsKV.getItem<TreeItem>(childId);
-
-    if (child.parentId.value === parent.id) {
-      return;
-    }
-
-    child.setParent(parent);
-    treeViewerService.emit('itemUpdated', child);
-  }
 
   return {
     handleDragstart: ({ node, event }: TreeDragEvent) => {
@@ -49,11 +32,14 @@ export function useDraggable(
         return;
       }
 
-      setParent(dragNode.eventKey, node.eventKey);
+      treeViewerService.setParent(dragNode.eventKey, node.eventKey);
     },
     handleRootDrop: () => {
       if (draggingItemId && treeViewerService.root.value?.id) {
-        setParent(draggingItemId, treeViewerService.root.value.id);
+        treeViewerService.setParent(
+          draggingItemId,
+          treeViewerService.root.value.id,
+        );
       }
     },
     handleDragend: () => {

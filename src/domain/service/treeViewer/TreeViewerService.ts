@@ -16,7 +16,7 @@ export type TreeItem = Notebook | Note;
 @singleton()
 export class TreeViewerService extends EventEmitter {
   readonly root: Ref<Notebook | null> = shallowRef(null);
-  readonly itemsKV = new KvStorage();
+  private readonly itemsKV = new KvStorage();
   readonly selectedIds: Ref<(Notebook['id'] | Note['id'])[]> = ref([]);
   get selectedItem(): Notebook | Note | null {
     const firstSelectedItemId = this.selectedIds.value[0];
@@ -31,6 +31,9 @@ export class TreeViewerService extends EventEmitter {
   }
   async init() {
     this.on('itemUpdated', this.syncItem);
+    this.on('itemUpdated', (item) => {
+      this.selectedIds.value = [item.id];
+    });
 
     notebookRepository.addListener(
       'itemFetched',
@@ -94,5 +97,17 @@ export class TreeViewerService extends EventEmitter {
       this.expandedIds.value.push(notebookId);
       this.expandedIds.value = [...this.expandedIds.value];
     }
+  }
+
+  setParent(childId: TreeItemId, parentId: Notebook['id']) {
+    const parent = this.itemsKV.getItem(parentId, Notebook);
+    const child = this.itemsKV.getItem<TreeItem>(childId);
+
+    if (child.parentId.value === parent.id) {
+      return;
+    }
+
+    child.setParent(parent);
+    this.emit('itemUpdated', child);
   }
 }
