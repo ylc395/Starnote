@@ -1,5 +1,8 @@
 import type { TreeDragEvent, DropEvent } from 'ant-design-vue/lib/tree/Tree';
-import type { TreeItemId, TreeViewerService } from 'domain/service/treeViewer';
+import type {
+  TreeItemId,
+  TreeViewerService,
+} from 'domain/service/TreeViewerService';
 import { Ref } from 'vue';
 
 interface Icons {

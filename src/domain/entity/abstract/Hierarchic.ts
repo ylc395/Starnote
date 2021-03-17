@@ -20,11 +20,11 @@ export abstract class Hierarchic<P extends WithChildren> extends Entity {
     this.parent.value = newParent;
     this.parentId.value = newParent.id;
 
-    newParent.children?.value;
     if (!newParent.children.value) {
       newParent.children.value = [];
     }
 
     newParent.children.value.push(this);
+    newParent.children.value = [...newParent.children.value];
   }
 }

@@ -1,4 +1,4 @@
-import type { TreeViewerService } from 'domain/service/treeViewer';
+import type { TreeViewerService } from 'domain/service/TreeViewerService';
 import type { ExpendEvent, TreeDataItem } from 'ant-design-vue/lib/tree/Tree';
 import { computed } from 'vue';
 import { Notebook } from 'domain/entity';

@@ -1,5 +1,5 @@
 import { NotebookRepository, NoteRepository } from 'domain/repository';
-import { container, singleton } from 'tsyringe';
+import { container } from 'tsyringe';
 import { shallowRef, ref } from '@vue/reactivity';
 import type { Ref } from '@vue/reactivity';
 import { Note, Notebook } from 'domain/entity';
@@ -13,7 +13,6 @@ const noteRepository = container.resolve(NoteRepository);
 export type TreeItemId = Notebook['id'] | Note['id'];
 export type TreeItem = Notebook | Note;
 
-@singleton()
 export class TreeViewerService extends EventEmitter {
   readonly root: Ref<Notebook | null> = shallowRef(null);
   private readonly itemsKV = new KvStorage();
@@ -31,16 +30,16 @@ export class TreeViewerService extends EventEmitter {
   }
   async init() {
     this.on('itemUpdated', this.syncItem);
-    this.on('itemUpdated', (item) => {
-      this.selectedIds.value = [item.id];
-    });
+    this.on('itemUpdated', this.setSelectedItem, this);
 
-    notebookRepository.addListener(
-      'itemFetched',
-      this.putTreeItemsInCache,
-      this,
-    );
+    notebookRepository.on('itemFetched', this.putTreeItemsInCache, this);
+    notebookRepository.on('notebookCreated', this.putTreeItemsInCache, this);
+
     this.root.value = await notebookRepository.queryOrCreateRootNotebook();
+  }
+
+  setSelectedItem(item: TreeItem) {
+    this.selectedIds.value = [item.id];
   }
   private syncItem(item: Note | Notebook) {
     if (item instanceof Note) {
@@ -80,8 +79,23 @@ export class TreeViewerService extends EventEmitter {
     this.expandedIds.value = without(this.expandedIds.value, notebookId);
   }
 
-  async expandNotebook(notebookId: Notebook['id'], expandParent = true) {
-    const notebook = this.itemsKV.getItem(notebookId, Notebook);
+  async expandNotebook(
+    notebookId: Notebook['id'] | Notebook | null,
+    expandParent = true,
+  ) {
+    if (!notebookId) {
+      throw new Error('no notebook to expand');
+    }
+
+    const notebook =
+      notebookId instanceof Notebook
+        ? notebookId
+        : this.itemsKV.getItem(notebookId, Notebook);
+
+    if (notebook.isRoot) {
+      return;
+    }
+
     const hasParent =
       notebook.parentId.value &&
       notebook.parentId.value !== this.root.value?.id;
@@ -93,8 +107,8 @@ export class TreeViewerService extends EventEmitter {
       await this.expandNotebook(notebook.parentId.value!, true);
     }
 
-    if (!this.expandedIds.value.includes(notebookId)) {
-      this.expandedIds.value.push(notebookId);
+    if (!this.expandedIds.value.includes(notebook.id)) {
+      this.expandedIds.value.push(notebook.id);
       this.expandedIds.value = [...this.expandedIds.value];
     }
   }

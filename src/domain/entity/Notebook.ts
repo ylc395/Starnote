@@ -80,6 +80,9 @@ export class Notebook
 
   //   return copy;
   // });
+  get isRoot() {
+    return this.id === ROOT_NOTEBOOK_ID;
+  }
 
   static createRootNotebook() {
     return this.from({
@@ -91,6 +94,10 @@ export class Notebook
 
   static from(dataObject: NotebookDo, parent?: Notebook) {
     const notebook = dataObjectToInstance(this, dataObject);
+
+    if (dataObject.id !== ROOT_NOTEBOOK_ID && !parent) {
+      throw new Error('no parent book!');
+    }
 
     if (parent) {
       if (parent.id !== notebook.parentId.value) {

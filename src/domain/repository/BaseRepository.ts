@@ -1,9 +1,9 @@
-import type { Entity,  Do, ObjectWithId } from 'domain/entity/abstract/Entity';
+import type { Entity, Do, ObjectWithId } from 'domain/entity/abstract/Entity';
 import EventEmitter from 'eventemitter3';
 
 export type Query<T> = {
-  [K in keyof T] ?: string | number | (string | number)[];
-}
+  [K in keyof T]?: string | number | (string | number)[];
+};
 
 export interface Dao<T extends Entity> {
   one(query: Query<T>): Promise<Do<T> | null>;
@@ -23,16 +23,16 @@ export interface Dao<T extends Entity> {
   deleteById(id: string): Promise<void>;
 }
 
-export abstract class Repository extends EventEmitter { }
+export abstract class Repository extends EventEmitter {}
 
 export function emit(succeedEventName: string, failedEventName?: string) {
-  return function(
-    target: unknown,
+  return function (
+    target: EventEmitter,
     propertyKey: string,
     descriptor: PropertyDescriptor,
   ) {
     const original = descriptor.value;
-    descriptor.value = function(this: Repository, ...args: unknown[]) {
+    descriptor.value = function (this: Repository, ...args: unknown[]) {
       const promise = original.apply(this, args);
 
       if (!(promise instanceof Promise)) {

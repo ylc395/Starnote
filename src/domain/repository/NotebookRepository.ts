@@ -62,12 +62,14 @@ export class NotebookRepository extends Repository {
   }
 
   @emit('notebookCreated')
-  createNotebook(notebook: Notebook) {
-    return this.notebookDao!.create(notebook.toDo());
+  async createNotebook(notebook: Notebook) {
+    await this.notebookDao!.create(notebook.toDo());
+    return notebook;
   }
 
   @emit('notebookUpdated')
-  updateNotebook(notebook: Notebook) {
-    return this.notebookDao!.update(notebook.toDo());
+  async updateNotebook(notebook: Notebook) {
+    await this.notebookDao!.update(notebook.toDo());
+    return notebook;
   }
 }

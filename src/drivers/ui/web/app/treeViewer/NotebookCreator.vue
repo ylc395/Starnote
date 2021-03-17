@@ -1,19 +1,17 @@
 <script lang="ts">
 import { defineComponent, inject } from 'vue';
-import { NotebookCreatingService } from 'domain/service/treeViewer';
+import { token } from './useNotebookCreate';
 import { Input, Button, Modal } from 'ant-design-vue';
 
 export default defineComponent({
   components: { Input, Button, Modal },
   setup() {
-    const creatingService = inject<NotebookCreatingService>(
-      NotebookCreatingService.token,
-    )!;
+    const { title, isCreating, stopCreating } = inject(token)!;
 
     return {
-      title: creatingService.title,
-      isCreating: creatingService.isCreating,
-      stopCreating: creatingService.stopCreating.bind(creatingService),
+      title,
+      isCreating,
+      stopCreating,
     };
   },
 });

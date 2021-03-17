@@ -6,14 +6,14 @@ import {
   FileOutlined,
   PlusOutlined,
 } from '@ant-design/icons-vue';
-import { container } from 'tsyringe';
-import {
-  TreeViewerService,
-  NotebookCreatingService,
-} from 'domain/service/treeViewer';
-import NotebookCreating from './NotebookCreating.vue';
+import { TreeViewerService } from 'domain/service/TreeViewerService';
+import NotebookCreating from './NotebookCreator.vue';
 import { useDraggable } from './useDraggable';
 import { useTreeData } from './useTreeData';
+import {
+  useNotebookCreate,
+  token as NotebookCreateToken,
+} from './useNotebookCreate';
 
 export default defineComponent({
   components: {
@@ -24,16 +24,10 @@ export default defineComponent({
     NotebookCreating,
   },
   setup() {
-    const treeViewerService = container.resolve(TreeViewerService);
-    const notebookCreatingService = new NotebookCreatingService(
-      treeViewerService,
-    );
+    const treeViewerService = new TreeViewerService();
+    const notebookCreatingService = useNotebookCreate(treeViewerService);
 
-    provide(NotebookCreatingService.token, notebookCreatingService);
-
-    const startCreating = (isInRoot: boolean) => {
-      notebookCreatingService.startCreating(isInRoot);
-    };
+    provide(NotebookCreateToken, notebookCreatingService);
 
     const notebookIconRef: Ref<null | HTMLElement> = ref(null);
     const noteIconRef: Ref<null | HTMLElement> = ref(null);
@@ -58,7 +52,7 @@ export default defineComponent({
       handleExpand,
       expandedKeys: treeViewerService.expandedIds,
       selectedKeys: treeViewerService.selectedIds,
-      startCreating,
+      startCreating: notebookCreatingService.startCreating,
       handleDragstart,
       handleDragenter,
       handleDrop,
@@ -81,7 +75,7 @@ export default defineComponent({
       </h1>
       <div>
         <button
-          @click="startCreating(true)"
+          @click="startCreating()"
           class="bg-transparent border-none cursor-pointer focus:outline-none"
         >
           <PlusOutlined />
