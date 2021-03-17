@@ -3,7 +3,7 @@ import { defineComponent, computed, provide, ref, Ref } from 'vue';
 import { Tree } from 'ant-design-vue';
 import {
   FolderOutlined,
-  AimOutlined,
+  FileOutlined,
   PlusOutlined,
 } from '@ant-design/icons-vue';
 import type { ExpendEvent, TreeDataItem } from 'ant-design-vue/lib/tree/Tree';
@@ -19,9 +19,9 @@ import { useDraggable } from './useDraggable';
 export default defineComponent({
   components: {
     Tree: Tree.DirectoryTree,
-    AimOutlined,
     PlusOutlined,
     FolderOutlined,
+    FileOutlined,
     NotebookCreating,
   },
   setup() {
@@ -68,17 +68,23 @@ export default defineComponent({
       notebookCreatingService.startCreating(isInRoot);
     };
 
-    const aimIconRef: Ref<null | HTMLElement> = ref(null);
+    const notebookIconRef: Ref<null | HTMLElement> = ref(null);
+    const noteIconRef: Ref<null | HTMLElement> = ref(null);
+
     const {
       handleDragstart,
       handleDragenter,
       handleRootDrop,
       handleDragend,
       handleDrop,
-    } = useDraggable(treeViewerService, aimIconRef);
+    } = useDraggable(treeViewerService, {
+      notebookIconRef,
+      noteIconRef,
+    });
 
     return {
-      aimIconRef,
+      notebookIconRef,
+      noteIconRef,
       treeData,
       expandedKeys: treeViewerService.expandedIds,
       selectedKeys: treeViewerService.selectedIds,
@@ -101,7 +107,7 @@ export default defineComponent({
         @dragover.prevent
         @drop="handleRootDrop"
       >
-        <FolderOutlined class="mr-1" />
+        <FolderOutlined class="mr-1" ref="notebookIconRef" />
         Notebooks
       </h1>
       <div>
@@ -128,8 +134,9 @@ export default defineComponent({
       @dragend="handleDragend"
     />
     <NotebookCreating />
-    <div class="-ml-96 text-green-600">
-      <AimOutlined ref="aimIconRef" />
+    <div class="-ml-96 text-gray-400">
+      <FileOutlined ref="noteIconRef" />
+      <FolderOutlined ref="notebookIconRef" />
     </div>
   </div>
 </template>

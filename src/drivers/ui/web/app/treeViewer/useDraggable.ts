@@ -2,17 +2,25 @@ import type { TreeDragEvent, DropEvent } from 'ant-design-vue/lib/tree/Tree';
 import type { TreeItemId, TreeViewerService } from 'domain/service/treeViewer';
 import { Ref } from 'vue';
 
+interface Icons {
+  notebookIconRef: Ref<HTMLElement | null>;
+  noteIconRef: Ref<HTMLElement | null>;
+}
+
 export function useDraggable(
   treeViewerService: TreeViewerService,
-  dragIcon: Ref<HTMLElement | null>,
+  { notebookIconRef, noteIconRef }: Icons,
 ) {
   let draggingItemId: null | TreeItemId = null;
 
   return {
     handleDragstart: ({ node, event }: TreeDragEvent) => {
       draggingItemId = node.dataRef.key;
+      const isNotebook = !node.dataRef.isLeaf;
+      const icon = isNotebook ? notebookIconRef.value! : noteIconRef.value!;
+
       treeViewerService.foldNotebook(draggingItemId!);
-      event.dataTransfer!.setDragImage(dragIcon.value!, 30, 30);
+      event.dataTransfer!.setDragImage(icon, 30, 30);
       event.dataTransfer!.effectAllowed = 'move';
     },
     handleDragenter: ({ node }: TreeDragEvent) => {
