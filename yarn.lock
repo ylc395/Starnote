@@ -1733,11 +1733,6 @@
   optionalDependencies:
     prettier "^1.18.2"
 
-"@vue/devtools-api@^6.0.0-beta.3":
-  version "6.0.0-beta.7"
-  resolved "https://registry.npmjs.org/@vue/devtools-api/-/devtools-api-6.0.0-beta.7.tgz#1d306613c93b9a837a3776b1b9255502662f850f"
-  integrity sha512-mIfqX8ZF6s2ulelIzfxGk9sFoigpoeK/2/DlWrtBGWfvwaK3kR1P2bxNkZ0LbJeuKHfcRP6hGZtGist7nxUN9A==
-
 "@vue/eslint-config-typescript@^5.0.2":
   version "5.1.0"
   resolved "http://r.npm.sankuai.com/@vue/eslint-config-typescript/download/@vue/eslint-config-typescript-5.1.0.tgz#17eb1af64f63e231fcceca5603859bdfb4f5d4e0"
@@ -10779,13 +10774,6 @@ vue-cli-plugin-tailwind@~2.0.6:
   version "2.0.6"
   resolved "http://r.npm.sankuai.com/vue-cli-plugin-tailwind/download/vue-cli-plugin-tailwind-2.0.6.tgz#c68d5f00aaae49896cf88d5dd341bcbdc900ee0a"
   integrity sha1-xo1fAKquSYls+I1d00G8vckA7go=
-
-vue-composable@^1.0.0-beta.20:
-  version "1.0.0-beta.20"
-  resolved "https://registry.npmjs.org/vue-composable/-/vue-composable-1.0.0-beta.20.tgz#cb9498b4e60da8281587a4fdb6f417b2160ff84e"
-  integrity sha512-qTBVGhNP1h5W64eePayza5mrjCNaRZQMipSkJd3AKNbtr3/JtDRpdICCC6tuA6pie4FzhoLyyfQIojsVhKpPOg==
-  dependencies:
-    "@vue/devtools-api" "^6.0.0-beta.3"
 
 vue-eslint-parser@^7.0.0, vue-eslint-parser@^7.5.0:
   version "7.5.0"

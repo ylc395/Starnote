@@ -36,8 +36,7 @@
     "tree-model": "^1.0.7",
     "tsyringe": "^4.4.0",
     "uuid": "^8.3.2",
-    "vue": "^3.0.0",
-    "vue-composable": "^1.0.0-beta.20"
+    "vue": "^3.0.0"
   },
   "devDependencies": {
     "@types/electron-devtools-installer": "^2.2.0",
