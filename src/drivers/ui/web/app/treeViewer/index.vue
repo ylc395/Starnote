@@ -1,20 +1,19 @@
 <script lang="ts">
-import { defineComponent, computed, provide, ref, Ref } from 'vue';
+import { defineComponent, provide, ref, Ref } from 'vue';
 import { Tree } from 'ant-design-vue';
 import {
   FolderOutlined,
   FileOutlined,
   PlusOutlined,
 } from '@ant-design/icons-vue';
-import type { ExpendEvent, TreeDataItem } from 'ant-design-vue/lib/tree/Tree';
 import { container } from 'tsyringe';
 import {
   TreeViewerService,
   NotebookCreatingService,
 } from 'domain/service/treeViewer';
-import { Notebook } from 'domain/entity';
 import NotebookCreating from './NotebookCreating.vue';
 import { useDraggable } from './useDraggable';
+import { useTreeData } from './useTreeData';
 
 export default defineComponent({
   components: {
@@ -31,38 +30,6 @@ export default defineComponent({
     );
 
     provide(NotebookCreatingService.token, notebookCreatingService);
-
-    const treeData = computed<TreeDataItem>(() => {
-      const root = treeViewerService.root.value;
-
-      if (!root || !root.children.value) {
-        return [];
-      }
-
-      return root.children.value.map(function mapper(item): TreeDataItem {
-        const isNotebook = item instanceof Notebook;
-
-        return {
-          key: item.id,
-          title: item.title.value,
-          isLeaf: !isNotebook,
-          children: isNotebook
-            ? (item as Notebook).children.value?.map(mapper) ?? undefined
-            : undefined,
-        };
-      });
-    });
-
-    const handleExpand = (
-      ids: Notebook['id'],
-      { expanded, node }: ExpendEvent,
-    ) => {
-      const { key } = node.dataRef;
-
-      if (expanded) {
-        treeViewerService.expandNotebook(key);
-      }
-    };
 
     const startCreating = (isInRoot: boolean) => {
       notebookCreatingService.startCreating(isInRoot);
@@ -82,14 +49,16 @@ export default defineComponent({
       noteIconRef,
     });
 
+    const { treeData, handleExpand } = useTreeData(treeViewerService);
+
     return {
       notebookIconRef,
       noteIconRef,
       treeData,
+      handleExpand,
       expandedKeys: treeViewerService.expandedIds,
       selectedKeys: treeViewerService.selectedIds,
       startCreating,
-      handleExpand,
       handleDragstart,
       handleDragenter,
       handleDrop,
