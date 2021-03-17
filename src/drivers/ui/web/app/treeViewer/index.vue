@@ -1,13 +1,13 @@
 <script lang="ts">
 import { defineComponent, provide, ref, Ref } from 'vue';
-import { Tree } from 'ant-design-vue';
+import { Tree, Modal } from 'ant-design-vue';
 import {
   FolderOutlined,
   FileOutlined,
   PlusOutlined,
 } from '@ant-design/icons-vue';
 import { TreeViewerService } from 'domain/service/TreeViewerService';
-import NotebookCreating from './NotebookCreator.vue';
+import NotebookCreator from './NotebookCreator.vue';
 import { useDraggable } from './useDraggable';
 import { useTreeData } from './useTreeData';
 import {
@@ -18,10 +18,11 @@ import {
 export default defineComponent({
   components: {
     Tree: Tree.DirectoryTree,
+    Modal,
     PlusOutlined,
     FolderOutlined,
     FileOutlined,
-    NotebookCreating,
+    NotebookCreator,
   },
   setup() {
     const treeViewerService = new TreeViewerService();
@@ -50,9 +51,10 @@ export default defineComponent({
       noteIconRef,
       treeData,
       handleExpand,
+      isCreating: notebookCreatingService.isCreating,
+      startCreating: notebookCreatingService.startCreating,
       expandedKeys: treeViewerService.expandedIds,
       selectedKeys: treeViewerService.selectedIds,
-      startCreating: notebookCreatingService.startCreating,
       handleDragstart,
       handleDragenter,
       handleDrop,
@@ -63,7 +65,7 @@ export default defineComponent({
 });
 </script>
 <template>
-  <div class="notebook-tree-viewer select-none h-screen">
+  <div class="notebook-tree-viewer h-screen">
     <div class="text-white flex justify-between items-center p-2">
       <h1
         class="text-inherit text-sm uppercase my-0"
@@ -96,7 +98,15 @@ export default defineComponent({
       @drop="handleDrop"
       @dragend="handleDragend"
     />
-    <NotebookCreating />
+    <Modal
+      :visible="isCreating"
+      :footer="null"
+      :closable="false"
+      :width="400"
+      :destroyOnClose="true"
+    >
+      <NotebookCreator />
+    </Modal>
     <div class="-ml-96 text-gray-400">
       <FileOutlined ref="noteIconRef" />
       <FolderOutlined ref="notebookIconRef" />
