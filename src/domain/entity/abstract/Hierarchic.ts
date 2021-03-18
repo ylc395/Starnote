@@ -3,18 +3,17 @@ import { without } from 'lodash';
 import type { Ref } from '@vue/reactivity';
 
 export interface WithChildren extends Entity {
-  readonly children: Ref<unknown[] | null>;
+  readonly children: Ref<Entity[] | null>;
 }
 
 export abstract class Hierarchic<P extends WithChildren> extends Entity {
   abstract readonly parentId: Ref<P['id'] | null>;
   protected abstract readonly parent: Ref<P | null>;
   setParent(newParent: P) {
-    if (this.parent.value?.children?.value) {
-      this.parent.value.children.value = without(
-        this.parent.value.children.value,
-        this,
-      );
+    const oldParent = this.parent.value;
+
+    if (oldParent?.children?.value) {
+      oldParent.children.value = without(oldParent.children.value, this);
     }
 
     this.parent.value = newParent;
@@ -24,7 +23,10 @@ export abstract class Hierarchic<P extends WithChildren> extends Entity {
       newParent.children.value = [];
     }
 
-    newParent.children.value.push(this);
-    newParent.children.value = [...newParent.children.value];
+    const childrenOfNewParent = newParent.children.value.filter(
+      (entity) => !entity.isEqual(this),
+    );
+    childrenOfNewParent.push(this);
+    newParent.children.value = [...childrenOfNewParent];
   }
 }

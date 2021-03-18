@@ -42,9 +42,7 @@ export class NotebookRepository extends Repository {
     }
 
     const result = await this.queryChildrenOf(notebook);
-    notebook.children.value = notebookOnly
-      ? result[0]
-      : [...result[0], ...result[1]];
+    notebook.children.value = notebookOnly ? result[0] : result.flat();
   }
 
   @emit('itemFetched')

@@ -36,6 +36,10 @@ export abstract class Entity {
   toDo() {
     return classToPlain(this) as ObjectWithId;
   }
+
+  isEqual(entity: Entity) {
+    return this.id === entity.id;
+  }
 }
 
 export const dataObjectToInstance = <T>(
