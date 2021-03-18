@@ -1,3 +1,5 @@
+const isProduction = process.env.NODE_ENV === 'production';
+
 module.exports = {
   root: true,
   env: {
@@ -13,9 +15,10 @@ module.exports = {
     ecmaVersion: 2020,
   },
   rules: {
-    'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
-    'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
+    'no-console': isProduction ? 'error' : 'warn',
+    'no-debugger': isProduction ? 'error' : 'warn',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
+    'vue/no-unused-components': isProduction ? 'error' : 'warn',
   },
   overrides: [
     {
