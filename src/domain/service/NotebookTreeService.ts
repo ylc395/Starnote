@@ -1,4 +1,8 @@
-import { NotebookRepository, NoteRepository } from 'domain/repository';
+import {
+  Children,
+  NotebookRepository,
+  NoteRepository,
+} from 'domain/repository';
 import { container } from 'tsyringe';
 import { shallowRef, ref, computed } from '@vue/reactivity';
 import type { Ref, ComputedRef } from '@vue/reactivity';
@@ -9,6 +13,7 @@ import EventEmitter from 'eventemitter3';
 
 const notebookRepository = container.resolve(NotebookRepository);
 const noteRepository = container.resolve(NoteRepository);
+const NOTEBOOK_ONLY = true;
 
 export type TreeItemId = Notebook['id'] | Note['id'];
 export type TreeItem = Notebook | Note;
@@ -28,14 +33,16 @@ export class NotebookTreeService extends EventEmitter {
     super();
     this.init();
   }
-  async init() {
+  private async init() {
     this.on('itemUpdated', this.syncItem);
     this.on('itemUpdated', this.setSelectedItem, this);
 
     notebookRepository.on('itemFetched', this.putTreeItemsInCache, this);
     notebookRepository.on('notebookCreated', this.putTreeItemsInCache, this);
 
-    this.root.value = await notebookRepository.queryOrCreateRootNotebook(true);
+    this.root.value = await notebookRepository.queryOrCreateRootNotebook(
+      NOTEBOOK_ONLY,
+    );
   }
 
   setSelectedItem(item: TreeItem | TreeItemId) {
@@ -51,13 +58,13 @@ export class NotebookTreeService extends EventEmitter {
     }
   }
 
-  putTreeItemsInCache(items: TreeItem | [Notebook[], Note[]]) {
-    if (Array.isArray(items)) {
-      items.flat().forEach((item) => {
+  putTreeItemsInCache(items: TreeItem | Children) {
+    if ('id' in items) {
+      this.itemsKV.setItem(items.id, items);
+    } else {
+      [...items.notebooks, ...items.notes].forEach((item) => {
         this.itemsKV.setItem(item.id, item);
       });
-    } else {
-      this.itemsKV.setItem(items.id, items);
     }
   }
 
@@ -82,7 +89,7 @@ export class NotebookTreeService extends EventEmitter {
       return;
     }
 
-    await notebookRepository.loadChildren(notebook, true);
+    await notebookRepository.loadChildren(notebook, NOTEBOOK_ONLY);
 
     const hasParent =
       notebook.parentId.value &&

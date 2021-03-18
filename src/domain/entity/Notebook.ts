@@ -88,6 +88,10 @@ export class Notebook
     return this.parent.value;
   }
 
+  static isA(instance: unknown): instance is Notebook {
+    return instance instanceof Notebook;
+  }
+
   static createRootNotebook() {
     return this.from({
       id: ROOT_NOTEBOOK_ID,
@@ -99,17 +103,15 @@ export class Notebook
   static from(dataObject: NotebookDo, parent?: Notebook) {
     const notebook = dataObjectToInstance(this, dataObject);
 
-    if (dataObject.id !== ROOT_NOTEBOOK_ID && !parent) {
-      throw new Error('no parent book!');
+    if (!parent) {
+      return notebook;
     }
 
-    if (parent) {
-      if (parent.id !== notebook.parentId.value) {
-        throw new Error('wrong parent, since two ids are not equal');
-      }
-
-      notebook.setParent(parent);
+    if (parent.id !== notebook.parentId.value) {
+      throw new Error('wrong parent, since two ids are not equal');
     }
+
+    notebook.setParent(parent);
 
     return notebook;
   }

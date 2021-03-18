@@ -3,6 +3,17 @@ import { emit, Repository } from './BaseRepository';
 import type { Dao } from './BaseRepository';
 import { NOTEBOOK_DAO_TOKEN, NOTE_DAO_TOKEN } from './daoTokens';
 import { singleton, inject } from 'tsyringe';
+
+export enum QueryEntityTypes {
+  Notebook = 'NOTEBOOK',
+  Note = 'NOTE',
+  All = 'All',
+}
+
+export interface Children {
+  notes: Note[];
+  notebooks: Notebook[];
+}
 @singleton()
 export class NotebookRepository extends Repository {
   constructor(
@@ -13,26 +24,42 @@ export class NotebookRepository extends Repository {
   }
 
   @emit('itemFetched')
-  queryChildrenOf(notebook: Notebook): Promise<[Notebook[], Note[]]> {
-    return Promise.all([
-      this.notebookDao!.all({ parentId: notebook.id }),
-      this.noteDao!.all({ parentId: notebook.id }, [
-        'id',
-        'title',
-        'sortOrder',
-        'userCreatedAt',
-        'userModifiedAt',
-        'parentId',
-      ]),
-    ]).then(([notebooks, notes]) => {
-      const childrenNotebooks = notebooks.map((notebookDo) => {
-        return Notebook.from(notebookDo, notebook);
-      });
-      const childrenNotes = notes.map((note) => {
-        return Note.from(note, notebook);
-      });
+  queryChildrenOf(
+    notebook: Notebook | Notebook['id'],
+    type: QueryEntityTypes,
+  ): Promise<Children> {
+    const notebookId = Notebook.isA(notebook) ? notebook.id : notebook;
 
-      return [childrenNotebooks, childrenNotes];
+    const notebooks =
+      type === QueryEntityTypes.Note
+        ? Promise.resolve([])
+        : this.notebookDao!.all({ parentId: notebookId });
+
+    const notes =
+      type === QueryEntityTypes.Notebook
+        ? Promise.resolve([])
+        : this.noteDao!.all({ parentId: notebookId }, [
+            'id',
+            'title',
+            'sortOrder',
+            'userCreatedAt',
+            'userModifiedAt',
+            'parentId',
+          ]);
+
+    return Promise.all([notebooks, notes]).then(([notebooks, notes]) => {
+      return {
+        notes: notes.map((note) => {
+          return Notebook.isA(notebook)
+            ? Note.from(note, notebook)
+            : Note.from(note);
+        }),
+        notebooks: notebooks.map((notebookDo) => {
+          return Notebook.isA(notebook)
+            ? Notebook.from(notebookDo, notebook)
+            : Notebook.from(notebookDo);
+        }),
+      };
     });
   }
 
@@ -41,8 +68,13 @@ export class NotebookRepository extends Repository {
       return;
     }
 
-    const result = await this.queryChildrenOf(notebook);
-    notebook.children.value = notebookOnly ? result[0] : result.flat();
+    const { notebooks, notes } = await this.queryChildrenOf(
+      notebook,
+      notebookOnly ? QueryEntityTypes.Notebook : QueryEntityTypes.All,
+    );
+    notebook.children.value = notebookOnly
+      ? notebooks
+      : [...notebooks, ...notes];
   }
 
   @emit('itemFetched')

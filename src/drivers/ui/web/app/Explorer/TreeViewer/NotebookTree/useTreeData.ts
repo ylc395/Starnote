@@ -15,14 +15,12 @@ export function useTreeData() {
       }
 
       return root.children.value.map(function mapper(item): TreeDataItem {
-        const isNotebook = item instanceof Notebook;
-
         return {
           key: item.id,
           title: item.title.value,
-          isLeaf: !isNotebook,
-          children: isNotebook
-            ? (item as Notebook).children.value?.map(mapper) ?? undefined
+          isLeaf: !Notebook.isA(item),
+          children: Notebook.isA(item)
+            ? item.children.value?.map(mapper) ?? undefined
             : undefined,
         };
       });

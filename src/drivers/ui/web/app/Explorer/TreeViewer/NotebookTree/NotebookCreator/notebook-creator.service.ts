@@ -22,7 +22,7 @@ export class NotebookCreatorService {
   startCreating(isRoot = false) {
     const selectedItem = this.notebookTree.selectedItem.value;
 
-    if (!isRoot && !(selectedItem instanceof Notebook)) {
+    if (!isRoot && !Notebook.isA(selectedItem)) {
       throw new Error('no target notebook!');
     }
 

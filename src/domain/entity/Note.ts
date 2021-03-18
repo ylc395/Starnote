@@ -42,13 +42,16 @@ export class Note extends Hierarchic<Notebook> implements Sortable {
   static from(dataObject: NoteDo, parent?: Notebook) {
     const note = dataObjectToInstance(this, dataObject);
 
-    if (parent) {
-      if (parent.id !== note.parentId.value) {
-        throw new Error('wrong parent, since two ids are not equal');
-      }
-
-      note.setParent(parent);
+    if (!parent) {
+      return note;
     }
+
+    if (parent.id !== note.parentId.value) {
+      throw new Error('wrong parent, since two ids are not equal');
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    note.setParent(parent);
 
     return note;
   }

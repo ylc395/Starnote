@@ -32,14 +32,16 @@ export function emit(succeedEventName: string, failedEventName?: string) {
     descriptor: PropertyDescriptor,
   ) {
     const original = descriptor.value;
-    descriptor.value = function (this: Repository, ...args: unknown[]) {
+    descriptor.value = function (this: EventEmitter, ...args: unknown[]) {
       const promise = original.apply(this, args);
 
       if (!(promise instanceof Promise)) {
         this.emit(succeedEventName);
         return promise;
       }
-      promise.then((result: unknown) => this.emit(succeedEventName, result));
+      promise.then((result: unknown) => {
+        this.emit(succeedEventName, result);
+      });
 
       if (failedEventName) {
         return promise.catch((err: unknown) => {
