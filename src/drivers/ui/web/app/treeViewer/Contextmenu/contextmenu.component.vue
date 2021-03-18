@@ -1,8 +1,8 @@
 <script lang="ts">
 import { defineComponent, inject } from 'vue';
-import CommonContextmenu from 'drivers/ui/web/components/Contextmenu/index.vue';
+import CommonContextmenu from 'drivers/ui/web/components/Contextmenu/contextmenu.component.vue';
 import { Menu } from 'ant-design-vue';
-import { token } from './useContextmenu';
+import { NotebookCreatorService } from '../NotebookCreator/notebook-creator.service';
 
 export default defineComponent({
   components: {
@@ -11,13 +11,13 @@ export default defineComponent({
     CommonContextmenu,
   },
   setup() {
-    const contextmenuService = inject(token)!;
+    const { startCreating } = inject(NotebookCreatorService.token)!;
 
     return {
       handleClick({ key }: { key: string }) {
         switch (key) {
           case 'createNotebook':
-            contextmenuService.createNotebook();
+            startCreating();
             break;
           default:
             break;

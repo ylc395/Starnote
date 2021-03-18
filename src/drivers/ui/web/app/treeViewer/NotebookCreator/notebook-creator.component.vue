@@ -1,6 +1,6 @@
 <script lang="ts">
 import { defineComponent, inject, onMounted, Ref, ref, computed } from 'vue';
-import { token } from './useNotebookCreate';
+import { NotebookCreatorService } from './notebook-creator.service';
 import { Input, Button, Breadcrumb } from 'ant-design-vue';
 import { FolderOpenOutlined } from '@ant-design/icons-vue';
 import type { Notebook } from 'domain/entity';
@@ -14,7 +14,9 @@ export default defineComponent({
     FolderOpenOutlined,
   },
   setup() {
-    const { title, isCreating, stopCreating, parent } = inject(token)!;
+    const { title, isCreating, parent, stopCreating } = inject(
+      NotebookCreatorService.token,
+    )!;
     const inputRef: Ref<null | HTMLInputElement> = ref(null);
     const handleEnter = () => {
       if (!title.value) {

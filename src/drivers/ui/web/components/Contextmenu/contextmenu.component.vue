@@ -9,7 +9,7 @@ import {
   computed,
   ComponentPublicInstance,
 } from 'vue';
-import { ContextmenuService } from './useContextmenu';
+import { ContextmenuService } from './contextmenu.service';
 import { Menu } from 'ant-design-vue';
 
 export default defineComponent({

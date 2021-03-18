@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent, provide, ref, Ref } from 'vue';
+import { defineComponent, ref, Ref } from 'vue';
 import { Tree, Modal } from 'ant-design-vue';
 import {
   FolderOutlined,
@@ -7,15 +7,12 @@ import {
   PlusOutlined,
 } from '@ant-design/icons-vue';
 import { TreeViewerService } from 'domain/service/TreeViewerService';
-import NotebookCreator from './NotebookCreator.vue';
-import Contextmenu from './Contextmenu.vue';
+import NotebookCreator from './NotebookCreator/notebook-creator.component.vue';
+import { NotebookCreatorService } from './NotebookCreator/notebook-creator.service';
+import Contextmenu from './Contextmenu/contextmenu.component.vue';
+import { ContextmenuService } from './Contextmenu/contextmenu.service';
 import { useDraggable } from './useDraggable';
 import { useTreeData } from './useTreeData';
-import { useContextmenu, token as CONTEXTMENU_TOKEN } from './useContextmenu';
-import {
-  useNotebookCreate,
-  token as NOTEBOOK_CREATING_TOKEN,
-} from './useNotebookCreate';
 
 export default defineComponent({
   components: {
@@ -32,12 +29,11 @@ export default defineComponent({
     const noteIconRef: Ref<null | HTMLElement> = ref(null);
 
     const treeViewerService = new TreeViewerService();
-    const notebookCreatingService = useNotebookCreate(treeViewerService);
-    const { treeData, handleExpand } = useTreeData(treeViewerService);
-    const contextmenuService = useContextmenu(
+    const { isCreating, startCreating } = NotebookCreatorService.setup(
       treeViewerService,
-      notebookCreatingService,
     );
+    const { treeData, handleExpand } = useTreeData(treeViewerService);
+    const { openContextmenu } = ContextmenuService.setup(treeViewerService);
     const {
       handleDragstart,
       handleDragenter,
@@ -49,24 +45,21 @@ export default defineComponent({
       noteIconRef,
     });
 
-    provide(NOTEBOOK_CREATING_TOKEN, notebookCreatingService);
-    provide(CONTEXTMENU_TOKEN, contextmenuService);
-
     return {
       notebookIconRef,
       noteIconRef,
-      treeData,
       handleExpand,
-      isCreating: notebookCreatingService.isCreating,
-      startCreating: notebookCreatingService.startCreating,
-      expandedKeys: treeViewerService.expandedIds,
-      selectedKeys: treeViewerService.selectedIds,
+      isCreating,
+      startCreating,
       handleDragstart,
       handleDragenter,
       handleDrop,
       handleDragend,
       handleRootDrop,
-      openContextmenu: contextmenuService.openContextmenu,
+      openContextmenu,
+      treeData,
+      expandedKeys: treeViewerService.expandedIds,
+      selectedKeys: treeViewerService.selectedIds,
     };
   },
 });

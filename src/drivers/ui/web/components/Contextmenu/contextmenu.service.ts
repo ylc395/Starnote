@@ -4,9 +4,6 @@ export class ContextmenuService {
   static token: InjectionKey<ContextmenuService> = Symbol();
   readonly visible = ref(false);
   readonly position = ref({ x: 0, y: 0 });
-  constructor() {
-    provide(ContextmenuService.token, this);
-  }
   open(mousePosition: UnwrapRef<ContextmenuService['position']>) {
     setTimeout(() => {
       this.visible.value = true;
@@ -15,5 +12,11 @@ export class ContextmenuService {
   }
   close() {
     this.visible.value = false;
+  }
+
+  static setup() {
+    const service = new this();
+    provide(ContextmenuService.token, service);
+    return service;
   }
 }
