@@ -15,11 +15,14 @@ module.exports = {
   rules: {
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
+    '@typescript-eslint/explicit-module-boundary-types': 'off',
   },
   overrides: [
     {
       files: ['*.js', '*.jsx'],
-      rules: { '@typescript-eslint/no-var-requires': 'off' },
+      rules: {
+        '@typescript-eslint/no-var-requires': 'off',
+      },
     },
   ],
 };
