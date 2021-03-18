@@ -63,18 +63,6 @@ export class TreeViewerService extends EventEmitter {
     }
   }
 
-  getSelectedNotebook() {
-    if (!this.selectedItem) {
-      return null;
-    }
-
-    if (this.selectedItem instanceof Notebook) {
-      return this.selectedItem;
-    }
-
-    return this.itemsKV.getItem(this.selectedItem.parentId.value, Notebook);
-  }
-
   foldNotebook(notebookId: Notebook['id']) {
     this.expandedIds.value = without(this.expandedIds.value, notebookId);
   }

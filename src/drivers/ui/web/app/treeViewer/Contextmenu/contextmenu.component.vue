@@ -28,7 +28,7 @@ export default defineComponent({
 });
 </script>
 <template>
-  <CommonContextmenu @click="handleClick" selectable>
+  <CommonContextmenu @click="handleClick">
     <MenuItem key="createNotebook">新建笔记本</MenuItem>
     <MenuItem key="createNote">新建笔记</MenuItem>
     <MenuItem key="remove">删除</MenuItem>
