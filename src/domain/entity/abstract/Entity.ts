@@ -12,12 +12,14 @@ dayjs.extend(customParseFormat);
 
 type DataPropertyNames<T> = {
   [K in keyof T]: K extends string
-    ? T[K] extends Function | ComputedRef
+    ? // eslint-disable-next-line @typescript-eslint/ban-types
+      T[K] extends Function | ComputedRef
       ? never
       : K
     : never;
 }[keyof T];
 
+// eslint-disable-next-line @typescript-eslint/ban-types
 type Unwrap<T> = T extends Dayjs ? string : T extends object ? Do<T> : T;
 export type Do<T> = {
   readonly [P in DataPropertyNames<T>]?: T[P] extends Ref

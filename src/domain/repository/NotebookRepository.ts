@@ -3,7 +3,6 @@ import { emit, Repository } from './BaseRepository';
 import type { Dao } from './BaseRepository';
 import { NOTEBOOK_DAO_TOKEN, NOTE_DAO_TOKEN } from './daoTokens';
 import { singleton, inject } from 'tsyringe';
-
 @singleton()
 export class NotebookRepository extends Repository {
   constructor(
@@ -14,7 +13,7 @@ export class NotebookRepository extends Repository {
   }
 
   @emit('itemFetched')
-  queryChildrenOf(notebook: Notebook): Promise<(Notebook | Note)[]> {
+  queryChildrenOf(notebook: Notebook): Promise<[Notebook[], Note[]]> {
     return Promise.all([
       this.notebookDao!.all({ parentId: notebook.id }),
       this.noteDao!.all({ parentId: notebook.id }, [
@@ -33,20 +32,23 @@ export class NotebookRepository extends Repository {
         return Note.from(note, notebook);
       });
 
-      return [...childrenNotebooks, ...childrenNotes];
+      return [childrenNotebooks, childrenNotes];
     });
   }
 
-  async loadChildren(notebook: Notebook, force = false) {
+  async loadChildren(notebook: Notebook, notebookOnly: boolean, force = false) {
     if (notebook.children.value && !force) {
       return;
     }
 
-    notebook.children.value = await this.queryChildrenOf(notebook);
+    const result = await this.queryChildrenOf(notebook);
+    notebook.children.value = notebookOnly
+      ? result[0]
+      : [...result[0], ...result[1]];
   }
 
   @emit('itemFetched')
-  async queryOrCreateRootNotebook() {
+  async queryOrCreateRootNotebook(notebookChildrenOnly: boolean) {
     const root = await this.notebookDao!.one({ id: ROOT_NOTEBOOK_ID });
     const rootNotebook = root
       ? Notebook.from(root)
@@ -56,7 +58,7 @@ export class NotebookRepository extends Repository {
       await this.createNotebook(rootNotebook);
     }
 
-    rootNotebook.children.value = await this.queryChildrenOf(rootNotebook);
+    this.loadChildren(rootNotebook, notebookChildrenOnly);
 
     return rootNotebook;
   }

@@ -1,11 +1,13 @@
 <script lang="ts">
 import { defineComponent } from '@vue/runtime-core';
-import TreeViewer from './app/TreeViewer/NotebookTree/index.vue';
+import Explorer from './app/Explorer/index.vue';
 
 export default defineComponent({
-  components: { TreeViewer },
+  components: { Explorer },
 });
 </script>
 <template>
-  <TreeViewer />
+  <main>
+    <Explorer />
+  </main>
 </template>

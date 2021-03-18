@@ -1,6 +1,6 @@
 import { singleton, inject } from 'tsyringe';
 import { Note, Notebook } from 'domain/entity';
-import { emit, Repository } from './BaseRepository';
+import { Repository } from './BaseRepository';
 import type { Dao } from './BaseRepository';
 import { NOTE_DAO_TOKEN, NOTEBOOK_DAO_TOKEN } from './daoTokens';
 import { TIME_FORMAT } from 'domain/constant';
@@ -19,7 +19,6 @@ export class NoteRepository extends Repository {
     );
   }
 
-  @emit('noteCreated')
   createNote(note: Note) {
     this.notebookDao!.update({
       id: note.parentId.value,
@@ -28,7 +27,6 @@ export class NoteRepository extends Repository {
     return this.noteDao!.create(note.toDo());
   }
 
-  @emit('noteUpdated')
   updateNote(note: Note) {
     this.notebookDao!.update({
       id: note.parentId.value,

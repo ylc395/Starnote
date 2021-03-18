@@ -1,19 +1,18 @@
 import type { TreeDragEvent, DropEvent } from 'ant-design-vue/lib/tree/Tree';
-import type {
+import {
   TreeItemId,
-  TreeViewerService,
-} from 'domain/service/TreeViewerService';
-import { Ref } from 'vue';
+  NotebookTreeService,
+  token,
+} from 'domain/service/NotebookTreeService';
+import { Ref, inject } from 'vue';
 
 interface Icons {
   notebookIconRef: Ref<HTMLElement | null>;
   noteIconRef: Ref<HTMLElement | null>;
 }
 
-export function useDraggable(
-  treeViewerService: TreeViewerService,
-  { notebookIconRef, noteIconRef }: Icons,
-) {
+export function useDraggable({ notebookIconRef, noteIconRef }: Icons) {
+  const notebookTreeService = inject<NotebookTreeService>(token)!;
   let draggingItemId: null | TreeItemId = null;
 
   return {
@@ -22,7 +21,7 @@ export function useDraggable(
       const isNotebook = !node.dataRef.isLeaf;
       const icon = isNotebook ? notebookIconRef.value! : noteIconRef.value!;
 
-      treeViewerService.foldNotebook(draggingItemId!);
+      notebookTreeService.foldNotebook(draggingItemId!);
       event.dataTransfer!.setDragImage(icon, 30, 30);
       event.dataTransfer!.effectAllowed = 'move';
     },
@@ -31,7 +30,7 @@ export function useDraggable(
       const isNotebook = !node.dataRef.isLeaf;
 
       if (id !== draggingItemId && isNotebook) {
-        treeViewerService.expandNotebook(id);
+        notebookTreeService.expandNotebook(id);
       }
     },
     handleDrop: ({ node, dragNode, dropToGap }: DropEvent) => {
@@ -43,13 +42,13 @@ export function useDraggable(
         return;
       }
 
-      treeViewerService.setParent(dragNode.eventKey, node.eventKey);
+      notebookTreeService.setParent(dragNode.eventKey, node.eventKey);
     },
     handleRootDrop: () => {
-      if (draggingItemId && treeViewerService.root.value?.id) {
-        treeViewerService.setParent(
+      if (draggingItemId && notebookTreeService.root.value?.id) {
+        notebookTreeService.setParent(
           draggingItemId,
-          treeViewerService.root.value.id,
+          notebookTreeService.root.value.id,
         );
       }
     },

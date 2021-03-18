@@ -1,16 +1,16 @@
 <script lang="ts">
-import { defineComponent, ref, Ref } from 'vue';
+import { defineComponent, ref, Ref, inject } from 'vue';
 import { Tree, Modal } from 'ant-design-vue';
 import {
   FolderOutlined,
   FileOutlined,
   PlusOutlined,
 } from '@ant-design/icons-vue';
-import { TreeViewerService } from 'domain/service/TreeViewerService';
-import NotebookCreator from '../NotebookCreator/notebook-creator.component.vue';
-import { NotebookCreatorService } from '../NotebookCreator/notebook-creator.service';
-import Contextmenu from '../Contextmenu/contextmenu.component.vue';
-import { ContextmenuService } from '../Contextmenu/contextmenu.service';
+import { NotebookTreeService, token } from 'domain/service/NotebookTreeService';
+import NotebookCreator from './NotebookCreator/notebook-creator.component.vue';
+import { NotebookCreatorService } from './NotebookCreator/notebook-creator.service';
+import Contextmenu from './Contextmenu/contextmenu.component.vue';
+import { ContextmenuService } from './Contextmenu/contextmenu.service';
 import { useDraggable } from './useDraggable';
 import { useTreeData } from './useTreeData';
 
@@ -28,19 +28,17 @@ export default defineComponent({
     const notebookIconRef: Ref<null | HTMLElement> = ref(null);
     const noteIconRef: Ref<null | HTMLElement> = ref(null);
 
-    const treeViewerService = new TreeViewerService();
-    const { isCreating, startCreating } = NotebookCreatorService.setup(
-      treeViewerService,
-    );
-    const { treeData, handleExpand } = useTreeData(treeViewerService);
-    const { openContextmenu } = ContextmenuService.setup(treeViewerService);
+    const { expandedIds, selectedIds } = inject<NotebookTreeService>(token)!;
+    const { isCreating, startCreating } = NotebookCreatorService.setup();
+    const { openContextmenu } = ContextmenuService.setup();
+    const { treeData, handleExpand } = useTreeData();
     const {
       handleDragstart,
       handleDragenter,
       handleRootDrop,
       handleDragend,
       handleDrop,
-    } = useDraggable(treeViewerService, {
+    } = useDraggable({
       notebookIconRef,
       noteIconRef,
     });
@@ -58,14 +56,14 @@ export default defineComponent({
       handleRootDrop,
       openContextmenu,
       treeData,
-      expandedKeys: treeViewerService.expandedIds,
-      selectedKeys: treeViewerService.selectedIds,
+      expandedKeys: expandedIds,
+      selectedKeys: selectedIds,
     };
   },
 });
 </script>
 <template>
-  <div class="notebook-tree-viewer min-h-screen">
+  <div>
     <div class="text-white flex justify-between items-center p-2">
       <h1
         class="text-inherit text-sm uppercase my-0"
@@ -116,10 +114,6 @@ export default defineComponent({
   </div>
 </template>
 <style scoped>
-.notebook-tree-viewer {
-  background-color: rgba(55, 65, 81);
-}
-
 .ant-tree :deep(li) {
   padding-top: 0;
   padding-bottom: 0;
