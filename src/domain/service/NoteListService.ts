@@ -26,7 +26,11 @@ export class NoteListService {
   });
 
   private init() {
-    noteRepository.on('noteCreated', this.loadNotes, this);
+    noteRepository.on('noteCreated', (note: Note) => {
+      if (note.parentId.value === this.notebook.value?.id) {
+        this.notes.value = [...this.notes.value, note];
+      }
+    });
     effect(this.loadNotes.bind(this));
   }
 

@@ -15,7 +15,7 @@ import {
   EditorService,
   token as editorToken,
 } from 'domain/service/EditorService';
-import { NoteService } from 'domain/service/NoteService';
+import { partial } from 'lodash';
 
 export default defineComponent({
   components: {
@@ -29,24 +29,21 @@ export default defineComponent({
   },
   setup() {
     const notebookTreeService = inject<NotebookTreeService>(notebookTreeToken)!;
+    const noteListService = new NoteListService(notebookTreeService);
+
     const { historyBack, isEmptyHistory } = notebookTreeService;
-    const { openNewEditor } = inject<EditorService>(editorToken)!;
-    const { newNoteDisabled, notes, notebook } = new NoteListService(
-      notebookTreeService,
-    );
+    const { openEditor, createAndOpenEditor } = inject<EditorService>(
+      editorToken,
+    )!;
+    const { newNoteDisabled, notes } = noteListService;
 
     return {
       notes,
       historyBack,
       newNoteDisabled,
       isEmptyHistory,
-      async createNote() {
-        if (!newNoteDisabled.value) {
-          const note = await NoteService.createEmptyNote(notebook.value!);
-          openNewEditor(note);
-        }
-      },
-      openNewEditor,
+      openEditor,
+      createAndOpenEditor: partial(createAndOpenEditor, noteListService, false),
     };
   },
 });
@@ -69,7 +66,7 @@ export default defineComponent({
         type="primary"
         :disabled="newNoteDisabled"
         size="small"
-        @click="createNote"
+        @click="createAndOpenEditor"
         class="rounded-md mr-2"
       >
         <template #icon>
@@ -83,7 +80,7 @@ export default defineComponent({
     <List :dataSource="notes" class="border-none px-2">
       <template #renderItem="{ item }">
         <listItem
-          @click="openNewEditor(item)"
+          @click="openEditor(item)"
           class="border-b-2 border-gray-200 px-3 hover:bg-gray-200"
         >
           {{ item.title.value }}

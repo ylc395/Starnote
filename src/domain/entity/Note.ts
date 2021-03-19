@@ -46,7 +46,7 @@ export class Note extends Hierarchic<Notebook> implements Sortable {
       return note;
     }
 
-    if (parent.id !== note.parentId.value) {
+    if (dataObject.parentId && dataObject.parentId !== parent.id) {
       throw new Error('wrong parent, since two ids are not equal');
     }
 

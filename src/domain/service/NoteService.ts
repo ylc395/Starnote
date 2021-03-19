@@ -5,12 +5,15 @@ import { container } from 'tsyringe';
 const noteRepository = container.resolve(NoteRepository);
 
 export class NoteService {
-  static createEmptyNote(parent: Notebook) {
-    const newNote = Note.from({
-      parentId: parent.id,
-      title: 'untitled note',
-      content: '',
-    });
+  static createEmptyNote(parent: Notebook, parentSynced: boolean) {
+    const newNote = Note.from(
+      {
+        title: 'untitled note',
+        content: '',
+        ...(parentSynced ? null : { parentId: parent.id }),
+      },
+      parentSynced ? parent : undefined,
+    );
     return noteRepository.createNote(newNote);
   }
 }

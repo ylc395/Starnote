@@ -38,7 +38,7 @@ export class Editor extends EventEmitter {
     this._note.value.title.value = this.title.value;
     this._note.value.content.value = this.content.value;
     this._note.value.userModifiedAt.value = dayjs();
-    this.emit('sync', this._note.value);
+    this.emit('saved', this._note.value);
   }
 
   activate() {
