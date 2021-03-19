@@ -1,12 +1,21 @@
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, inject } from 'vue';
 import { List, Button, Input } from 'ant-design-vue';
+import { NoteListService } from 'domain/service/NoteListService';
+import {
+  NotebookTreeService,
+  token as notebookTreeToken,
+} from 'domain/service/NotebookTreeService';
 import {
   FileAddOutlined,
   SearchOutlined,
   ArrowLeftOutlined,
 } from '@ant-design/icons-vue';
-import { useNoteList } from './useNoteList';
+import {
+  EditorService,
+  token as editorToken,
+} from 'domain/service/EditorService';
+import { NoteService } from 'domain/service/NoteService';
 
 export default defineComponent({
   components: {
@@ -19,15 +28,26 @@ export default defineComponent({
     ListItem: List.Item,
   },
   setup() {
-    const {
-      notes,
-      goBack,
-      disabledNewNote,
-      disabledGoBack,
-      createNote,
-    } = useNoteList();
+    const notebookTreeService = inject<NotebookTreeService>(notebookTreeToken)!;
+    const { historyBack, isEmptyHistory } = notebookTreeService;
+    const { openNewEditor } = inject<EditorService>(editorToken)!;
+    const { newNoteDisabled, notes, notebook } = new NoteListService(
+      notebookTreeService,
+    );
 
-    return { notes, goBack, disabledNewNote, disabledGoBack, createNote };
+    return {
+      notes,
+      historyBack,
+      newNoteDisabled,
+      isEmptyHistory,
+      async createNote() {
+        if (!newNoteDisabled.value) {
+          const note = await NoteService.createEmptyNote(notebook.value!);
+          openNewEditor(note);
+        }
+      },
+      openNewEditor,
+    };
   },
 });
 </script>
@@ -35,8 +55,8 @@ export default defineComponent({
   <div class="min-h-screen bg-gray-100 w-60">
     <div class="p-2">
       <Button
-        @click="goBack"
-        :disabled="disabledGoBack"
+        @click="historyBack"
+        :disabled="isEmptyHistory"
         type="primary"
         size="small"
         class="rounded-md mr-2"
@@ -47,7 +67,7 @@ export default defineComponent({
       </Button>
       <Button
         type="primary"
-        :disabled="disabledNewNote"
+        :disabled="newNoteDisabled"
         size="small"
         @click="createNote"
         class="rounded-md mr-2"
@@ -62,7 +82,10 @@ export default defineComponent({
     </div>
     <List :dataSource="notes" class="border-none px-2">
       <template #renderItem="{ item }">
-        <listItem class="border-b-2 border-gray-200 px-3 hover:bg-gray-200">
+        <listItem
+          @click="openNewEditor(item)"
+          class="border-b-2 border-gray-200 px-3 hover:bg-gray-200"
+        >
           {{ item.title.value }}
         </listItem>
       </template>

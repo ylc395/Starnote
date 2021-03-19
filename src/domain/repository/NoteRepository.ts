@@ -31,6 +31,14 @@ export class NoteRepository extends Repository {
     return note;
   }
 
+  async loadContent(note: Note) {
+    if (note.content.value !== null) {
+      return;
+    }
+    const noteDo = await this.noteDao!.one({ id: note.id });
+    note.content.value = noteDo?.content ?? '';
+  }
+
   updateNote(note: Note) {
     this.notebookDao!.update({
       id: note.parentId.value,

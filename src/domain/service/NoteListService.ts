@@ -21,6 +21,9 @@ export class NoteListService {
     const selected = this.notebookTree.selectedItem.value;
     return selected instanceof Notebook ? selected : null;
   });
+  readonly newNoteDisabled = computed(() => {
+    return this.notebook.value?.isRoot ?? true;
+  });
 
   private init() {
     noteRepository.on('noteCreated', this.loadNotes, this);
