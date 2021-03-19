@@ -4,11 +4,18 @@ import {
   NoteRepository,
 } from 'domain/repository';
 import { container } from 'tsyringe';
-import { shallowRef, ref, computed } from '@vue/reactivity';
+import {
+  shallowRef,
+  ref,
+  computed,
+  effect,
+  shallowReactive,
+  stop,
+} from '@vue/reactivity';
 import type { Ref, ComputedRef } from '@vue/reactivity';
 import { Note, Notebook } from 'domain/entity';
 import { KvStorage } from 'utils/kvStorage';
-import { without } from 'lodash';
+import { last, without } from 'lodash';
 import EventEmitter from 'eventemitter3';
 
 const notebookRepository = container.resolve(NotebookRepository);
@@ -21,6 +28,8 @@ export const token = Symbol();
 export class NotebookTreeService extends EventEmitter {
   readonly root: Ref<Notebook | null> = shallowRef(null);
   private readonly itemsKV = new KvStorage();
+  private historyMaintainer: ReturnType<typeof effect> | null = null;
+  private readonly history: Notebook[] = shallowReactive([]);
   readonly selectedIds: Ref<(Notebook['id'] | Note['id'])[]> = ref([]);
   readonly selectedItem: ComputedRef<Notebook | Note | null> = computed(() => {
     const firstSelectedItemId = this.selectedIds.value[0];
@@ -34,6 +43,7 @@ export class NotebookTreeService extends EventEmitter {
     this.init();
   }
   private async init() {
+    this.maintainHistory();
     this.on('itemUpdated', this.syncItem);
     this.on('itemUpdated', this.setSelectedItem, this);
 
@@ -45,9 +55,22 @@ export class NotebookTreeService extends EventEmitter {
     );
   }
 
-  setSelectedItem(item: TreeItem | TreeItemId) {
-    this.selectedIds.value = [typeof item === 'object' ? item.id : item];
+  setSelectedItem(item?: TreeItem | TreeItemId) {
+    this.selectedIds.value = item
+      ? [typeof item === 'object' ? item.id : item]
+      : [];
   }
+
+  private maintainHistory() {
+    this.historyMaintainer = effect(() => {
+      const selected = this.selectedItem.value;
+
+      if (Notebook.isA(selected) && last(this.history) !== selected) {
+        this.history.push(selected);
+      }
+    });
+  }
+
   private syncItem(item: Note | Notebook) {
     if (item instanceof Note) {
       noteRepository.updateNote(item);
@@ -56,6 +79,17 @@ export class NotebookTreeService extends EventEmitter {
     if (item instanceof Notebook) {
       notebookRepository.updateNotebook(item);
     }
+  }
+
+  historyBack() {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    stop(this.historyMaintainer!);
+    this.history.pop();
+
+    const lastNotebook = this.history.pop();
+    this.setSelectedItem(lastNotebook);
+
+    this.maintainHistory();
   }
 
   putTreeItemsInCache(items: TreeItem | Children) {
