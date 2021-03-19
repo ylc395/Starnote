@@ -1,5 +1,7 @@
-import { InjectionKey, provide, inject } from '@vue/runtime-core';
-import { NotebookTreeService, token } from 'domain/service/NotebookTreeService';
+import { computed, provide, shallowRef } from 'vue';
+import type { InjectionKey, Ref } from 'vue';
+import { isTreeItem } from 'domain/service/NotebookTreeService';
+import type { TreeItem } from 'domain/service/NotebookTreeService';
 import { ContextmenuService as CommonContextmenuService } from 'drivers/ui/web/components/Contextmenu/contextmenu.service';
 import { selfish } from 'utils/index';
 
@@ -12,16 +14,24 @@ export class ContextmenuService {
     return service;
   }
   private readonly contextmenu = CommonContextmenuService.setup();
-  private readonly notebookTree = inject<NotebookTreeService>(token)!;
+  private readonly _context: Ref<TreeItem | null> = shallowRef(null);
+  readonly context = computed(() => {
+    return this._context.value;
+  });
 
   openContextmenu({
     event,
     node,
   }: {
     event: MouseEvent;
-    node: Record<string, never>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    node: Record<string, any>;
   }) {
+    if (!isTreeItem(node.dataRef.item)) {
+      return;
+    }
+
     this.contextmenu.open({ x: event.clientX, y: event.clientY });
-    this.notebookTree.setSelectedItem(node.eventKey);
+    this._context.value = node.dataRef.item;
   }
 }

@@ -151,4 +151,10 @@ export class NotebookTreeService extends EventEmitter {
     child.setParent(parent);
     this.emit('itemUpdated', child);
   }
+
+  static isTreeItem(instance: unknown): instance is TreeItem {
+    return instance instanceof Notebook || instance instanceof Note;
+  }
 }
+
+export const isTreeItem = NotebookTreeService.isTreeItem;

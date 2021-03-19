@@ -16,6 +16,8 @@ export function useTreeData() {
 
       return root.children.value.map(function mapper(item): TreeDataItem {
         return {
+          item,
+          class: '', // set class property to make rt reactive
           key: item.id,
           title: item.title.value,
           isLeaf: !Notebook.isA(item),

@@ -14,7 +14,7 @@ export default defineComponent({
     FolderOpenOutlined,
   },
   setup() {
-    const { title, isCreating, parent, stopCreating } = inject(
+    const { title, isCreating, target, stopCreating } = inject(
       NotebookCreatorService.token,
     )!;
     const inputRef: Ref<null | HTMLInputElement> = ref(null);
@@ -35,7 +35,7 @@ export default defineComponent({
       stopCreating,
       inputRef,
       path: computed(() => {
-        let node: Notebook | null = parent.value;
+        let node: Notebook | null = target.value;
         const path = [];
         while (node) {
           if (!node.isRoot) {

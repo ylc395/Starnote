@@ -17,29 +17,37 @@ export class NotebookCreatorService {
   private readonly notebookService = new NotebookService();
   readonly isCreating = ref(false);
   readonly title = ref('');
-  readonly parent: Ref<Notebook | null> = shallowRef(null);
+  readonly target: Ref<Notebook | null> = shallowRef(null);
 
-  startCreating(isRoot = false) {
-    const selectedItem = this.notebookTree.selectedItem.value;
+  startCreating(target: Notebook): void;
+  startCreating(isRoot: boolean): void;
+  startCreating(target: Notebook | boolean = false) {
+    if (Notebook.isA(target)) {
+      this.target.value = target;
+    } else {
+      const selectedItem = this.notebookTree.selectedItem.value;
 
-    if (!isRoot && !Notebook.isA(selectedItem)) {
-      throw new Error('no target notebook!');
+      if (!target && !Notebook.isA(selectedItem)) {
+        throw new Error('no target notebook!');
+      }
+
+      this.target.value = target
+        ? this.notebookTree.root.value
+        : (selectedItem as Notebook);
     }
 
-    this.parent.value = isRoot
-      ? this.notebookTree.root.value
-      : (selectedItem as Notebook);
     this.isCreating.value = true;
   }
+
   async stopCreating(isConfirmed: boolean) {
     if (isConfirmed) {
-      if (!this.parent.value) {
+      if (!this.target.value) {
         throw new Error('no target notebook when stop creating');
       }
 
-      await this.notebookTree.expandNotebook(this.parent.value.id);
+      await this.notebookTree.expandNotebook(this.target.value.id);
       const newNotebook = await this.notebookService.create(
-        this.parent.value,
+        this.target.value,
         this.title.value,
       );
 
