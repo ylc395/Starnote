@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { singleton, inject } from 'tsyringe';
 import { Note, Notebook } from 'domain/entity';
 import { Repository, emit } from './BaseRepository';

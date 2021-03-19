@@ -1,3 +1,4 @@
+/* eslint-env node */
 module.exports = {
   rules: {
     'no-restricted-imports': [
@@ -7,5 +8,13 @@ module.exports = {
         patterns: ['*ant-design*'],
       },
     ],
+  },
+  globals: {
+    setInterval: 'readonly',
+    clearInterval: 'readonly',
+  },
+  env: {
+    browser: false,
+    node: false,
   },
 };

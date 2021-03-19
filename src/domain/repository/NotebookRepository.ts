@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Notebook, Note, ROOT_NOTEBOOK_ID } from 'domain/entity';
 import { emit, Repository } from './BaseRepository';
 import type { Dao } from './BaseRepository';

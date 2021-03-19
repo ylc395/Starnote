@@ -15,6 +15,7 @@ module.exports = {
     ecmaVersion: 2020,
   },
   rules: {
+    'no-undef': 'error',
     'no-console': isProduction ? 'error' : 'warn',
     'no-debugger': isProduction ? 'error' : 'warn',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
