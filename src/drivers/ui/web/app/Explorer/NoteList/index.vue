@@ -41,7 +41,7 @@ export default defineComponent({
 });
 </script>
 <template>
-  <div class="min-h-screen bg-gray-100">
+  <div class="min-h-screen bg-gray-100 w-60">
     <div class="p-2">
       <Button
         @click="goBack"

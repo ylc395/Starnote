@@ -7,7 +7,7 @@ export default defineComponent({
 });
 </script>
 <template>
-  <div class="tree-viewer min-h-screen">
+  <div class="tree-viewer min-h-screen w-60">
     <NotebookTree />
   </div>
 </template>
