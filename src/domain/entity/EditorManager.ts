@@ -6,7 +6,7 @@ import {
   computed,
   shallowReadonly,
 } from '@vue/reactivity';
-import { remove, without } from 'lodash';
+import { isEmpty, remove, without } from 'lodash';
 import { Editor } from './Editor';
 import type { Note } from './Note';
 
@@ -26,7 +26,7 @@ export class EditorManager {
     const result = this._editors.find((editor) => editor.id === id);
 
     if (!result) {
-      throw new Error('wrong editor id!');
+      throw new Error(`wrong editor id ${id}`);
     }
 
     return result;
@@ -86,6 +86,9 @@ export class EditorManager {
     const [removed] = remove(this._editors, byId);
 
     removed.destroy();
-    this.setActiveEditor(this._editors[index] || this._editors[index - 1]);
+
+    if (!isEmpty(this._editors)) {
+      this.setActiveEditor(this._editors[index] || this._editors[index - 1]);
+    }
   }
 }

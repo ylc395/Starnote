@@ -32,7 +32,7 @@ export class Editor extends EventEmitter {
 
   saveNote() {
     if (!this._note.value) {
-      throw new Error('no note to save!');
+      return;
     }
 
     this._note.value.title.value = this.title.value;
@@ -59,7 +59,7 @@ export class Editor extends EventEmitter {
     }
   }
 
-  destroy(needSave = false) {
+  destroy(needSave = true) {
     this.inactivate();
     this.removeAllListeners();
 
