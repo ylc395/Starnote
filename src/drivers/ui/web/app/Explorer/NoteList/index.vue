@@ -62,7 +62,7 @@ export default defineComponent({
     </div>
     <List :dataSource="notes" class="border-none px-2">
       <template #renderItem="{ item }">
-        <listItem class="border-b-2 border-gray-200 px-3">
+        <listItem class="border-b-2 border-gray-200 px-3 hover:bg-gray-200">
           {{ item.title.value }}
         </listItem>
       </template>
