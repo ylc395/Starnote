@@ -30,6 +30,9 @@ export class NotebookTreeService extends EventEmitter {
   private readonly itemsKV = new KvStorage();
   private historyMaintainer: ReturnType<typeof effect> | null = null;
   private readonly history: Notebook[] = shallowReactive([]);
+  isEmptyHistory = computed(() => {
+    return this.history.length <= 1;
+  });
   readonly selectedIds: Ref<(Notebook['id'] | Note['id'])[]> = ref([]);
   readonly selectedItem: ComputedRef<Notebook | Note | null> = computed(() => {
     const firstSelectedItemId = this.selectedIds.value[0];

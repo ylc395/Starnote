@@ -14,7 +14,6 @@ export class NotebookCreatorService {
   }
 
   private readonly notebookTree = inject<NotebookTreeService>(token)!;
-  private readonly notebookService = new NotebookService();
   readonly isCreating = ref(false);
   readonly title = ref('');
   readonly target: Ref<Notebook | null> = shallowRef(null);
@@ -46,7 +45,8 @@ export class NotebookCreatorService {
       }
 
       await this.notebookTree.expandNotebook(this.target.value.id);
-      const newNotebook = await this.notebookService.create(
+
+      const newNotebook = await NotebookService.create(
         this.target.value,
         this.title.value,
       );

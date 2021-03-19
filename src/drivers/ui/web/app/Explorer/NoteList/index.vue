@@ -1,14 +1,12 @@
 <script lang="ts">
-import { defineComponent, inject } from 'vue';
-import { NotebookTreeService, token } from 'domain/service/NotebookTreeService';
-import { NoteListService } from 'domain/service/NoteListService';
-import { NoteService } from 'domain/service/NoteService';
+import { defineComponent } from 'vue';
 import { List, Button, Input } from 'ant-design-vue';
 import {
   FileAddOutlined,
   SearchOutlined,
   ArrowLeftOutlined,
 } from '@ant-design/icons-vue';
+import { useNoteList } from './useNoteList';
 
 export default defineComponent({
   components: {
@@ -21,22 +19,15 @@ export default defineComponent({
     ListItem: List.Item,
   },
   setup() {
-    const notebookTreeService = inject<NotebookTreeService>(token)!;
-    const noteListService = new NoteListService(notebookTreeService);
+    const {
+      notes,
+      goBack,
+      disabledNewNote,
+      disabledGoBack,
+      createNote,
+    } = useNoteList();
 
-    const noteService = new NoteService();
-
-    return {
-      notes: noteListService.notes,
-      goBack: notebookTreeService.historyBack,
-      createNote: () => {
-        const notebook = noteListService.notebook.value;
-
-        if (notebook && !notebook.isRoot) {
-          noteService.createEmptyNote(notebook);
-        }
-      },
-    };
+    return { notes, goBack, disabledNewNote, disabledGoBack, createNote };
   },
 });
 </script>
@@ -45,6 +36,7 @@ export default defineComponent({
     <div class="p-2">
       <Button
         @click="goBack"
+        :disabled="disabledGoBack"
         type="primary"
         size="small"
         class="rounded-md mr-2"
@@ -55,6 +47,7 @@ export default defineComponent({
       </Button>
       <Button
         type="primary"
+        :disabled="disabledNewNote"
         size="small"
         @click="createNote"
         class="rounded-md mr-2"

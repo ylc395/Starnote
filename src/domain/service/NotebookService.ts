@@ -5,7 +5,7 @@ import { container } from 'tsyringe';
 const notebookRepository = container.resolve(NotebookRepository);
 
 export class NotebookService {
-  async create(parent: Notebook, title: string) {
+  static create(parent: Notebook, title: string) {
     const newNotebook = Notebook.from(
       {
         parentId: parent.id,
