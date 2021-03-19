@@ -54,13 +54,23 @@ export class EditorManager {
     activeEditor.activate();
   }
 
-  async openNewEditor(note: Note) {
+  async openEditor(note: Note) {
+    const openedEditor = this._editors.find(
+      (editor) => editor.note.value === note,
+    );
+
+    if (openedEditor) {
+      this.setActiveEditor(openedEditor);
+      return;
+    }
+
     if (this._editors.length >= this.maxEditorCount.value) {
       const lastEditor = this._editors.shift();
       lastEditor?.destroy();
     }
 
     const newEditor = new Editor(note);
+
     this._editors.push(newEditor);
     this.setActiveEditor(newEditor);
   }

@@ -36,19 +36,22 @@ export class EditorService {
     parentSynced: boolean,
   ) {
     const { newNoteDisabled, notebook } = noteListService;
-    if (!newNoteDisabled.value) {
-      const note = await NoteService.createEmptyNote(
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        notebook.value!,
-        parentSynced,
-      );
 
-      this.openEditor(note);
+    if (newNoteDisabled.value) {
+      return;
     }
+
+    const note = await NoteService.createEmptyNote(
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      notebook.value!,
+      parentSynced,
+    );
+
+    this.openEditor(note);
   }
 
   async openEditor(note: Note) {
     await noteRepository.loadContent(note);
-    this.editorManager.openNewEditor(note);
+    this.editorManager.openEditor(note);
   }
 }
