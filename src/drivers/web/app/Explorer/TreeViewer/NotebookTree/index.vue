@@ -9,8 +9,8 @@ import {
 import { NotebookTreeService, token } from 'domain/service/NotebookTreeService';
 import NotebookCreator from './NotebookCreator/notebook-creator.component.vue';
 import { NotebookCreatorService } from './NotebookCreator/notebook-creator.service';
-import Contextmenu from './Contextmenu/contextmenu.component.vue';
-import { ContextmenuService } from './Contextmenu/contextmenu.service';
+import Contextmenu from '../../Contextmenu/contextmenu.component.vue';
+import { ContextmenuService } from '../../Contextmenu/contextmenu.service';
 import { useDraggable } from './useDraggable';
 import { useTreeData } from './useTreeData';
 
@@ -30,7 +30,7 @@ export default defineComponent({
 
     const { expandedIds, selectedIds } = inject<NotebookTreeService>(token)!;
     const { isCreating, startCreating } = NotebookCreatorService.setup();
-    const { openContextmenu } = ContextmenuService.setup();
+    const { openContextmenu } = inject(ContextmenuService.token)!;
     const { treeData, handleExpand } = useTreeData();
     const {
       handleDragstart,
