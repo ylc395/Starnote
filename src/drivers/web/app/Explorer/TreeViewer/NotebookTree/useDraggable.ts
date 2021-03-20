@@ -4,15 +4,13 @@ import {
   NotebookTreeService,
   token,
 } from 'domain/service/NotebookTreeService';
-import { Ref, inject } from 'vue';
+import { inject } from 'vue';
+import { token as dragIconToken } from '../../useDragIcon';
 
-interface Icons {
-  notebookIconRef: Ref<HTMLElement | null>;
-  noteIconRef: Ref<HTMLElement | null>;
-}
-
-export function useDraggable({ notebookIconRef, noteIconRef }: Icons) {
+export function useDraggable() {
   const notebookTreeService = inject<NotebookTreeService>(token)!;
+  const { noteIconRef, notebookIconRef } = inject(dragIconToken)!;
+
   let draggingItemId: null | TreeItemId = null;
 
   return {

@@ -1,11 +1,7 @@
 <script lang="ts">
-import { defineComponent, ref, Ref, inject } from 'vue';
+import { defineComponent, inject } from 'vue';
 import { Tree, Modal } from 'ant-design-vue';
-import {
-  FolderOutlined,
-  FileOutlined,
-  PlusOutlined,
-} from '@ant-design/icons-vue';
+import { FolderOutlined, PlusOutlined } from '@ant-design/icons-vue';
 import {
   NotebookTreeService,
   token,
@@ -24,14 +20,10 @@ export default defineComponent({
     Modal,
     PlusOutlined,
     FolderOutlined,
-    FileOutlined,
     NotebookCreator,
     Contextmenu,
   },
   setup() {
-    const notebookIconRef: Ref<null | HTMLElement> = ref(null);
-    const noteIconRef: Ref<null | HTMLElement> = ref(null);
-
     const { expandedIds, selectedIds } = inject<NotebookTreeService>(token)!;
     const { isCreating, startCreating } = useNotebookCreator();
     const { open: openContextmenu } = useContextmenu<TreeItem>();
@@ -43,14 +35,9 @@ export default defineComponent({
       handleRootDrop,
       handleDragend,
       handleDrop,
-    } = useDraggable({
-      notebookIconRef,
-      noteIconRef,
-    });
+    } = useDraggable();
 
     return {
-      notebookIconRef,
-      noteIconRef,
       handleExpand,
       isCreating,
       startCreating,
@@ -112,10 +99,6 @@ export default defineComponent({
       <NotebookCreator />
     </Modal>
     <Contextmenu />
-    <div class="absolute -left-96 text-gray-400">
-      <FileOutlined ref="noteIconRef" />
-      <FolderOutlined ref="notebookIconRef" />
-    </div>
   </div>
 </template>
 <style scoped>
