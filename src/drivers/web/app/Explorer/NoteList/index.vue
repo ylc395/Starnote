@@ -4,7 +4,7 @@ import { List, Button, Input } from 'ant-design-vue';
 import { NoteListService } from 'domain/service/NoteListService';
 import { EMPTY_TITLE } from 'domain/constant';
 import Contextmenu from '../Contextmenu.vue';
-import { ContextmenuService } from 'drivers/web/components/Contextmenu/contextmenu.service';
+import { useContextmenu } from 'drivers/web/components/Contextmenu/useContextmenu';
 import {
   NotebookTreeService,
   token as notebookTreeToken,
@@ -19,6 +19,7 @@ import {
   token as editorToken,
 } from 'domain/service/EditorService';
 import { partial } from 'lodash';
+import { Note } from 'domain/entity';
 
 export default defineComponent({
   components: {
@@ -34,10 +35,7 @@ export default defineComponent({
   setup() {
     const notebookTreeService = inject<NotebookTreeService>(notebookTreeToken)!;
     const noteListService = new NoteListService(notebookTreeService);
-    const {
-      open: openContextmenu,
-      token: contextmenuToken,
-    } = ContextmenuService.setup();
+    const { open: openContextmenu } = useContextmenu<Note>();
 
     const { historyBack, isEmptyHistory } = notebookTreeService;
     const {
@@ -55,7 +53,6 @@ export default defineComponent({
       isEmptyHistory,
       openInEditor,
       isEditing,
-      contextmenuToken,
       openContextmenu,
       createAndOpenInEditor: partial(
         createAndOpenInEditor,
@@ -110,6 +107,6 @@ export default defineComponent({
         </listItem>
       </template>
     </List>
-    <Contextmenu :token="contextmenuToken" />
+    <Contextmenu />
   </div>
 </template>

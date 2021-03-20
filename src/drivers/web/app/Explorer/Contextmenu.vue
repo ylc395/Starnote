@@ -1,11 +1,13 @@
 <script lang="ts">
 import { computed, defineComponent, inject } from 'vue';
 import { Menu } from 'ant-design-vue';
-import CommonContextmenu from 'drivers/web/components/Contextmenu/contextmenu.component.vue';
-import { ContextmenuService } from 'drivers/web/components/Contextmenu/contextmenu.service';
+import CommonContextmenu from 'drivers/web/components/Contextmenu/index.vue';
+import {
+  useContextmenu,
+  token,
+} from 'drivers/web/components/Contextmenu/useContextmenu';
 import { token as notebookCreatorToken } from './TreeViewer/NotebookTree/NotebookCreator/useNotebookCreator';
 import { Notebook } from 'domain/entity';
-import { TreeItem } from 'domain/service/NotebookTreeService';
 
 export default defineComponent({
   components: {
@@ -13,14 +15,8 @@ export default defineComponent({
     SubMenu: Menu.SubMenu,
     CommonContextmenu,
   },
-  props: {
-    token: {
-      type: Symbol,
-      required: true,
-    },
-  },
-  setup(props: { token: ContextmenuService<TreeItem>['token'] }) {
-    const { context } = inject(props.token)!;
+  setup() {
+    const { context } = inject<ReturnType<typeof useContextmenu>>(token)!;
     const notebookCreator = inject(notebookCreatorToken, null);
 
     const handleNotebook = (notebook: Notebook, key: string) => {
@@ -34,7 +30,6 @@ export default defineComponent({
     };
 
     return {
-      contextmenuToken: props.token,
       type: computed(() => {
         if (Notebook.isA(context.value)) {
           return 'notebook';
@@ -52,7 +47,7 @@ export default defineComponent({
 });
 </script>
 <template>
-  <CommonContextmenu @click="handleClick" :token="contextmenuToken">
+  <CommonContextmenu @click="handleClick">
     <template v-if="type === 'notebook'">
       <MenuItem key="createNotebook">新建笔记本</MenuItem>
       <MenuItem key="createNote">新建笔记</MenuItem>

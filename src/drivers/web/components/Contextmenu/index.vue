@@ -1,21 +1,16 @@
 <script lang="ts">
 import { defineComponent, inject, computed } from 'vue';
-import { ContextmenuService } from './contextmenu.service';
 import { Menu } from 'ant-design-vue';
+import { useContextmenu, token } from './useContextmenu';
 
 export default defineComponent({
   components: { Menu },
-  props: {
-    token: {
-      type: Symbol,
-      required: true,
-    },
-  },
-  setup(props: { token: ContextmenuService['token'] }) {
-    const { visible, position, context } = inject(props.token)!;
+  setup() {
+    const { visible, position } = inject<ReturnType<typeof useContextmenu>>(
+      token,
+    )!;
 
     return {
-      context,
       visible,
       position: computed(() => {
         return {

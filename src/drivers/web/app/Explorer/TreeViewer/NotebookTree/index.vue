@@ -14,7 +14,7 @@ import {
 import NotebookCreator from './NotebookCreator/index.vue';
 import { useNotebookCreator } from './NotebookCreator/useNotebookCreator';
 import Contextmenu from '../../Contextmenu.vue';
-import { ContextmenuService } from 'drivers/web/components/Contextmenu/contextmenu.service';
+import { useContextmenu } from 'drivers/web/components/Contextmenu/useContextmenu';
 import { useDraggable } from './useDraggable';
 import { useTreeData } from './useTreeData';
 
@@ -34,10 +34,7 @@ export default defineComponent({
 
     const { expandedIds, selectedIds } = inject<NotebookTreeService>(token)!;
     const { isCreating, startCreating } = useNotebookCreator();
-    const {
-      open: openContextmenu,
-      token: contextmenuToken,
-    } = ContextmenuService.setup<TreeItem>();
+    const { open: openContextmenu } = useContextmenu<TreeItem>();
 
     const { treeData, handleExpand } = useTreeData();
     const {
@@ -62,7 +59,6 @@ export default defineComponent({
       handleDrop,
       handleDragend,
       handleRootDrop,
-      contextmenuToken,
       openContextmenu,
       treeData,
       expandedKeys: expandedIds,
@@ -115,7 +111,7 @@ export default defineComponent({
     >
       <NotebookCreator />
     </Modal>
-    <Contextmenu :token="contextmenuToken" />
+    <Contextmenu />
     <div class="absolute -left-96 text-gray-400">
       <FileOutlined ref="noteIconRef" />
       <FolderOutlined ref="notebookIconRef" />
