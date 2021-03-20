@@ -1,9 +1,9 @@
 <script lang="ts">
-import { defineComponent, inject, onMounted, Ref, ref, computed } from 'vue';
-import { NotebookCreatorService } from './notebook-creator.service';
+import { defineComponent, inject, ref, onMounted } from 'vue';
+import type { Ref } from 'vue';
+import { token } from './useNotebookCreator';
 import { Input, Button, Breadcrumb } from 'ant-design-vue';
 import { FolderOpenOutlined } from '@ant-design/icons-vue';
-import type { Notebook } from 'domain/entity';
 
 export default defineComponent({
   components: {
@@ -14,16 +14,10 @@ export default defineComponent({
     FolderOpenOutlined,
   },
   setup() {
-    const { title, isCreating, target, stopCreating } = inject(
-      NotebookCreatorService.token,
-    )!;
     const inputRef: Ref<null | HTMLInputElement> = ref(null);
-    const handleEnter = () => {
-      if (!title.value) {
-        return;
-      }
-      stopCreating(true);
-    };
+    const { title, isCreating, stopCreating, path, handleEnter } = inject(
+      token,
+    )!;
 
     onMounted(() => {
       inputRef.value!.focus();
@@ -34,18 +28,7 @@ export default defineComponent({
       isCreating,
       stopCreating,
       inputRef,
-      path: computed(() => {
-        let node: Notebook | null = target.value;
-        const path = [];
-        while (node) {
-          if (!node.isRoot) {
-            path.push(node.title.value);
-          }
-          node = node.getParent();
-        }
-
-        return path.reverse();
-      }),
+      path,
       handleEnter,
     };
   },

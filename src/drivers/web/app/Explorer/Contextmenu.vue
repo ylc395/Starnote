@@ -3,7 +3,7 @@ import { computed, defineComponent, inject } from 'vue';
 import { Menu } from 'ant-design-vue';
 import CommonContextmenu from 'drivers/web/components/Contextmenu/contextmenu.component.vue';
 import { ContextmenuService } from 'drivers/web/components/Contextmenu/contextmenu.service';
-import { NotebookCreatorService } from './TreeViewer/NotebookTree/NotebookCreator/notebook-creator.service';
+import { token as notebookCreatorToken } from './TreeViewer/NotebookTree/NotebookCreator/useNotebookCreator';
 import { Notebook } from 'domain/entity';
 import { TreeItem } from 'domain/service/NotebookTreeService';
 
@@ -20,8 +20,8 @@ export default defineComponent({
     },
   },
   setup(props: { token: ContextmenuService<TreeItem>['token'] }) {
-    const notebookCreator = inject(NotebookCreatorService.token, null);
     const { context } = inject(props.token)!;
+    const notebookCreator = inject(notebookCreatorToken, null);
 
     const handleNotebook = (notebook: Notebook, key: string) => {
       switch (key) {
