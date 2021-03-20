@@ -19,7 +19,7 @@ export default defineComponent({
     },
   },
   setup(props: { token: ContextmenuService['token'] }) {
-    const notebookCreator = inject(NotebookCreatorService.token);
+    const notebookCreator = inject(NotebookCreatorService.token, null);
     const { context } = inject(props.token)!;
     const handleNotebook = (notebook: Notebook, key: string) => {
       switch (key) {

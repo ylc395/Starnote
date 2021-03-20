@@ -2,6 +2,9 @@
 import { defineComponent, inject } from 'vue';
 import { List, Button, Input } from 'ant-design-vue';
 import { NoteListService } from 'domain/service/NoteListService';
+import { EMPTY_TITLE } from 'domain/constant';
+import Contextmenu from '../Contextmenu/contextmenu.component.vue';
+import { ContextmenuService } from '../Contextmenu/contextmenu.service';
 import {
   NotebookTreeService,
   token as notebookTreeToken,
@@ -26,10 +29,15 @@ export default defineComponent({
     List,
     AInput: Input,
     ListItem: List.Item,
+    Contextmenu,
   },
   setup() {
     const notebookTreeService = inject<NotebookTreeService>(notebookTreeToken)!;
     const noteListService = new NoteListService(notebookTreeService);
+    const {
+      openContextmenu,
+      token: contextmenuToken,
+    } = ContextmenuService.setup();
 
     const { historyBack, isEmptyHistory } = notebookTreeService;
     const {
@@ -40,12 +48,15 @@ export default defineComponent({
     const { newNoteDisabled, notes } = noteListService;
 
     return {
+      EMPTY_TITLE,
       notes,
       historyBack,
       newNoteDisabled,
       isEmptyHistory,
       openEditor,
       isEditing,
+      contextmenuToken,
+      openContextmenu,
       createAndOpenEditor: partial(createAndOpenEditor, noteListService, false),
     };
   },
@@ -84,12 +95,14 @@ export default defineComponent({
       <template #renderItem="{ item }">
         <listItem
           @click="openEditor(item)"
+          @contextmenu="openContextmenu({ event: $event, item })"
           class="border-b-2 border-gray-200 px-3 hover:bg-blue-100"
           :class="{ 'bg-gray-200': isEditing(item.id).value }"
         >
-          {{ item.title.value || '(empty title)' }}
+          {{ item.title.value || EMPTY_TITLE }}
         </listItem>
       </template>
     </List>
+    <Contextmenu :token="contextmenuToken" />
   </div>
 </template>

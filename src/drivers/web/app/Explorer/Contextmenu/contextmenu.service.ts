@@ -20,8 +20,6 @@ export class ContextmenuService {
   });
 
   openContextmenu({ event, item }: { event: MouseEvent; item: TreeItem }) {
-    console.log(111);
-
     if (!isTreeItem(item)) {
       return;
     }

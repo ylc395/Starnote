@@ -58,14 +58,7 @@ export default defineComponent({
       handleDragend,
       handleRootDrop,
       contextmenuToken,
-      openContextmenu: ({
-        event,
-        node,
-      }: {
-        event: MouseEvent;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        node: Record<string, any>;
-      }) => openContextmenu({ event, item: node.dataRef.item }),
+      openContextmenu,
       treeData,
       expandedKeys: expandedIds,
       selectedKeys: selectedIds,
@@ -106,7 +99,12 @@ export default defineComponent({
       @dragenter="handleDragenter"
       @drop="handleDrop"
       @dragend="handleDragend"
-      @rightClick="openContextmenu"
+      @rightClick="
+        openContextmenu({
+          event: $event.event,
+          item: $event.node.dataRef.item,
+        })
+      "
     />
     <Modal
       :visible="isCreating"
