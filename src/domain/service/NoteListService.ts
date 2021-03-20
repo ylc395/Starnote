@@ -7,18 +7,18 @@ import {
   QueryEntityTypes,
 } from 'domain/repository';
 import { container } from 'tsyringe';
-import { NotebookTreeService } from './NotebookTreeService';
+import { ItemTreeService } from './ItemTreeService';
 
 const notebookRepository = container.resolve(NotebookRepository);
 const noteRepository = container.resolve(NoteRepository);
 
 export class NoteListService {
-  constructor(private readonly notebookTree: NotebookTreeService) {
+  constructor(private readonly notebookTree: ItemTreeService) {
     this.init();
   }
   readonly notes: Ref<Note[]> = shallowRef([]);
   readonly notebook = computed(() => {
-    const selected = this.notebookTree.selectedItem.value;
+    const selected = this.notebookTree.itemTree.selectedItem.value;
     return selected instanceof Notebook ? selected : null;
   });
   readonly newNoteDisabled = computed(() => {

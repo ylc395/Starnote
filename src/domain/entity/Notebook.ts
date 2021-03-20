@@ -92,6 +92,10 @@ export class Notebook
     return this.parent.value;
   }
 
+  hasParent() {
+    return super.hasParent() && this.parentId.value !== ROOT_NOTEBOOK_ID;
+  }
+
   static isA(instance: unknown): instance is Notebook {
     return instance instanceof Notebook;
   }

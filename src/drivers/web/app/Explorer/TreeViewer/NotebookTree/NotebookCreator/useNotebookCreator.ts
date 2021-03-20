@@ -1,9 +1,9 @@
 import { NotebookService } from 'domain/service/NotebookService';
 import { Notebook } from 'domain/entity/Notebook';
 import {
-  NotebookTreeService,
+  ItemTreeService,
   token as notebookTreeToken,
-} from 'domain/service/NotebookTreeService';
+} from 'domain/service/ItemTreeService';
 import { inject, ref, provide, computed, shallowRef } from 'vue';
 import type { InjectionKey, Ref } from 'vue';
 
@@ -13,7 +13,7 @@ export const token: InjectionKey<
 
 export function useNotebookCreator() {
   const notebookService: Ref<NotebookService | null> = shallowRef(null);
-  const notebookTreeService = inject<NotebookTreeService>(notebookTreeToken)!;
+  const itemTreeService = inject<ItemTreeService>(notebookTreeToken)!;
   const isCreating = ref(false);
   const title = ref('');
   const path = computed(() => {
@@ -38,7 +38,7 @@ export function useNotebookCreator() {
   function startCreating(target: Notebook): void;
   function startCreating(isRoot: boolean): void;
   function startCreating(target: Notebook | boolean = false) {
-    notebookService.value = new NotebookService(notebookTreeService, target);
+    notebookService.value = new NotebookService(itemTreeService, target);
     isCreating.value = true;
   }
 

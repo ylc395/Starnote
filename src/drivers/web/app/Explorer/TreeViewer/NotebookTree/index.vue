@@ -2,11 +2,8 @@
 import { defineComponent, inject } from 'vue';
 import { Tree, Modal } from 'ant-design-vue';
 import { FolderOutlined, PlusOutlined } from '@ant-design/icons-vue';
-import {
-  NotebookTreeService,
-  token,
-  TreeItem,
-} from 'domain/service/NotebookTreeService';
+import { ItemTreeService, token } from 'domain/service/ItemTreeService';
+import { TreeItem } from 'domain/entity';
 import NotebookCreator from './NotebookCreator/index.vue';
 import { useNotebookCreator } from './NotebookCreator/useNotebookCreator';
 import Contextmenu from '../../Contextmenu.vue';
@@ -24,7 +21,9 @@ export default defineComponent({
     Contextmenu,
   },
   setup() {
-    const { expandedIds, selectedIds } = inject<NotebookTreeService>(token)!;
+    const {
+      itemTree: { expandedIds, selectedIds },
+    } = inject<ItemTreeService>(token)!;
     const { isCreating, startCreating } = useNotebookCreator();
     const { open: openContextmenu } = useContextmenu<TreeItem>();
 

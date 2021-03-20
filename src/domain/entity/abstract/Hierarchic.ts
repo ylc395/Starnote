@@ -29,4 +29,8 @@ export abstract class Hierarchic<P extends WithChildren> extends Entity {
     childrenOfNewParent.push(this);
     newParent.children.value = [...childrenOfNewParent];
   }
+
+  hasParent() {
+    return !!this.parentId.value;
+  }
 }

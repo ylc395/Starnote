@@ -1,14 +1,14 @@
-import { NotebookTreeService, token } from 'domain/service/NotebookTreeService';
+import { ItemTreeService, token } from 'domain/service/ItemTreeService';
 import type { ExpendEvent, TreeDataItem } from 'ant-design-vue/lib/tree/Tree';
 import { computed, inject } from 'vue';
 import { Notebook } from 'domain/entity';
 
 export function useTreeData() {
-  const notebookTreeService = inject<NotebookTreeService>(token)!;
+  const { itemTree, expandNotebook } = inject<ItemTreeService>(token)!;
 
   return {
     treeData: computed<TreeDataItem>(() => {
-      const root = notebookTreeService.root.value;
+      const root = itemTree.root.value;
 
       if (!root || !root.children.value) {
         return [];
@@ -32,7 +32,7 @@ export function useTreeData() {
       const { key } = node.dataRef;
 
       if (expanded) {
-        notebookTreeService.expandNotebook(key);
+        expandNotebook(key);
       }
     },
   };

@@ -1,14 +1,14 @@
-import type { TreeDragEvent, DropEvent } from 'ant-design-vue/lib/tree/Tree';
-import {
-  TreeItemId,
-  NotebookTreeService,
-  token,
-} from 'domain/service/NotebookTreeService';
 import { inject } from 'vue';
+import type { TreeDragEvent, DropEvent } from 'ant-design-vue/lib/tree/Tree';
+import type { TreeItemId } from 'domain/entity';
+import { ItemTreeService, token } from 'domain/service/ItemTreeService';
 import { token as dragIconToken } from '../../DragIcon/useDragIcon';
 
 export function useDraggable() {
-  const notebookTreeService = inject<NotebookTreeService>(token)!;
+  const {
+    expandNotebook,
+    itemTree: { foldNotebook, setParent, setRootAsParent },
+  } = inject<ItemTreeService>(token)!;
   const { noteIconRef, notebookIconRef } = inject(dragIconToken)!;
 
   let draggingItemId: null | TreeItemId = null;
@@ -19,7 +19,7 @@ export function useDraggable() {
       const isNotebook = !node.dataRef.isLeaf;
       const icon = isNotebook ? notebookIconRef.value! : noteIconRef.value!;
 
-      notebookTreeService.foldNotebook(draggingItemId!);
+      foldNotebook(draggingItemId!);
       event.dataTransfer!.setDragImage(icon, 30, 30);
       event.dataTransfer!.effectAllowed = 'move';
     },
@@ -28,7 +28,7 @@ export function useDraggable() {
       const isNotebook = !node.dataRef.isLeaf;
 
       if (id !== draggingItemId && isNotebook) {
-        notebookTreeService.expandNotebook(id);
+        expandNotebook(id);
       }
     },
     handleDrop: ({ node, dragNode, dropToGap }: DropEvent) => {
@@ -40,11 +40,11 @@ export function useDraggable() {
         return;
       }
 
-      notebookTreeService.setParent(dragNode.eventKey, node.eventKey);
+      setParent(dragNode.eventKey, node.eventKey);
     },
     handleRootDrop: () => {
       if (draggingItemId) {
-        notebookTreeService.setRootAsParent(draggingItemId);
+        setRootAsParent(draggingItemId);
       }
     },
     handleDragend: () => {

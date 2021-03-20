@@ -1,24 +1,24 @@
 import { Notebook } from 'domain/entity';
 import { NotebookRepository } from 'domain/repository';
 import { container } from 'tsyringe';
-import { NotebookTreeService } from './NotebookTreeService';
+import { ItemTreeService } from './ItemTreeService';
 
 const notebookRepository = container.resolve(NotebookRepository);
 
 export class NotebookService {
   readonly notebook: Notebook | null;
   constructor(
-    private readonly notebookTree: NotebookTreeService,
+    private readonly notebookTree: ItemTreeService,
     notebook: Notebook | boolean,
   ) {
     this.notebook = Notebook.isA(notebook)
       ? notebook
-      : this.notebookTree.root.value;
+      : this.notebookTree.itemTree.root.value;
   }
 
   async createSubNotebook(title: string) {
     const targetNotebook =
-      this.notebook || this.notebookTree.selectedItem.value;
+      this.notebook || this.notebookTree.itemTree.selectedItem.value;
 
     if (!targetNotebook || !Notebook.isA(targetNotebook)) {
       throw new Error('no target notebook!');
@@ -27,7 +27,7 @@ export class NotebookService {
     await this.notebookTree.expandNotebook(targetNotebook.id);
     const newNotebook = await NotebookService.create(targetNotebook, title);
 
-    this.notebookTree.setSelectedItem(newNotebook);
+    this.notebookTree.itemTree.setSelectedItem(newNotebook);
   }
 
   static create(parent: Notebook, title: string) {

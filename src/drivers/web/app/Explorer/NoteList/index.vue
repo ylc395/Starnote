@@ -1,25 +1,27 @@
 <script lang="ts">
+import { partial } from 'lodash';
 import { defineComponent, inject } from 'vue';
 import { List, Button, Input } from 'ant-design-vue';
-import { NoteListService } from 'domain/service/NoteListService';
-import { EMPTY_TITLE } from 'domain/constant';
-import Contextmenu from '../Contextmenu.vue';
-import { useContextmenu } from 'drivers/web/components/Contextmenu/useContextmenu';
-import {
-  NotebookTreeService,
-  token as notebookTreeToken,
-} from 'domain/service/NotebookTreeService';
 import {
   FileAddOutlined,
   SearchOutlined,
   ArrowLeftOutlined,
 } from '@ant-design/icons-vue';
+
+import type { Note } from 'domain/entity';
+import { EMPTY_TITLE } from 'domain/constant';
+import { NoteListService } from 'domain/service/NoteListService';
+import {
+  ItemTreeService,
+  token as notebookTreeToken,
+} from 'domain/service/ItemTreeService';
 import {
   EditorService,
   token as editorToken,
 } from 'domain/service/EditorService';
-import { partial } from 'lodash';
-import { Note } from 'domain/entity';
+
+import Contextmenu from '../Contextmenu.vue';
+import { useContextmenu } from 'drivers/web/components/Contextmenu/useContextmenu';
 
 export default defineComponent({
   components: {
@@ -33,11 +35,13 @@ export default defineComponent({
     Contextmenu,
   },
   setup() {
-    const notebookTreeService = inject<NotebookTreeService>(notebookTreeToken)!;
-    const noteListService = new NoteListService(notebookTreeService);
+    const itemTreeService = inject<ItemTreeService>(notebookTreeToken)!;
+    const noteListService = new NoteListService(itemTreeService);
     const { open: openContextmenu } = useContextmenu<Note>();
 
-    const { historyBack, isEmptyHistory } = notebookTreeService;
+    const {
+      itemTree: { historyBack, isEmptyHistory },
+    } = itemTreeService;
     const {
       openInEditor,
       createAndOpenInEditor,
