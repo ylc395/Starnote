@@ -31,9 +31,9 @@ export class EditorService {
     });
   }
 
-  isEditing(note: Note) {
+  isEditing(noteId: Note['id']) {
     return computed(() => {
-      return this.editorManager.activeEditor.value?.note.value === note;
+      return this.editorManager.activeEditor.value?.note.value?.id === noteId;
     });
   }
 

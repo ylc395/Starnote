@@ -37,7 +37,7 @@ export abstract class Entity {
     return classToPlain(this) as ObjectWithId;
   }
 
-  isEqual(entity: Entity | null) {
+  isEqual(entity: Entity | null | undefined) {
     return this.id === entity?.id;
   }
 }

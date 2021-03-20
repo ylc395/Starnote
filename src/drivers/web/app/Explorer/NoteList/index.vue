@@ -85,7 +85,7 @@ export default defineComponent({
         <listItem
           @click="openEditor(item)"
           class="border-b-2 border-gray-200 px-3 hover:bg-blue-100"
-          :class="{ 'bg-gray-200': isEditing(item).value }"
+          :class="{ 'bg-gray-200': isEditing(item.id).value }"
         >
           {{ item.title.value || '(empty title)' }}
         </listItem>
