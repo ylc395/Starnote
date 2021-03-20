@@ -8,42 +8,39 @@ import {
 } from 'domain/repository';
 import { container } from 'tsyringe';
 import { ItemTreeService } from './ItemTreeService';
+import { NoteList } from 'domain/entity/NoteList';
 
 const notebookRepository = container.resolve(NotebookRepository);
 const noteRepository = container.resolve(NoteRepository);
 
 export class NoteListService {
-  constructor(private readonly notebookTree: ItemTreeService) {
+  readonly noteList: Ref<NoteList | null> = shallowRef(null);
+  constructor(private readonly itemTreeService: ItemTreeService) {
     this.init();
   }
-  readonly notes: Ref<Note[]> = shallowRef([]);
-  readonly notebook = computed(() => {
-    const selected = this.notebookTree.itemTree.selectedItem.value;
-    return selected instanceof Notebook ? selected : null;
-  });
-  readonly newNoteDisabled = computed(() => {
-    return this.notebook.value?.isRoot ?? true;
-  });
 
   private init() {
     noteRepository.on('noteCreated', (note: Note) => {
-      if (note.parentId.value === this.notebook.value?.id) {
-        this.notes.value = [...this.notes.value, note];
-      }
+      this.noteList.value?.add(note);
     });
-    effect(this.loadNotes.bind(this));
+
+    effect(this.refreshNoteList.bind(this));
   }
 
-  async loadNotes() {
-    if (!this.notebook.value) {
-      this.notes.value = [];
+  async refreshNoteList() {
+    const selected = this.itemTreeService.itemTree.selectedItem.value;
+
+    if (!Notebook.isA(selected)) {
       return;
     }
 
+    const noteList = new NoteList(selected);
     const { notes } = await notebookRepository.queryChildrenOf(
-      this.notebook.value.id,
+      selected.id,
       QueryEntityTypes.Note,
     );
-    this.notes.value = notes;
+
+    noteList.notes.value = notes;
+    this.noteList.value = noteList;
   }
 }

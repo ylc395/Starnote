@@ -1,6 +1,6 @@
 <script lang="ts">
 import { partial } from 'lodash';
-import { defineComponent, inject } from 'vue';
+import { defineComponent, inject, computed } from 'vue';
 import { List, Button, Input } from 'ant-design-vue';
 import {
   FileAddOutlined,
@@ -47,13 +47,15 @@ export default defineComponent({
       createAndOpenInEditor,
       isEditing,
     } = inject<EditorService>(editorToken)!;
-    const { newNoteDisabled, notes } = noteListService;
+    const { noteList } = noteListService;
 
     return {
       EMPTY_TITLE,
-      notes,
+      notes: computed(() => noteList.value?.notes.value ?? []),
       historyBack,
-      newNoteDisabled,
+      newNoteDisabled: computed(
+        () => noteList.value?.newNoteDisabled.value ?? true,
+      ),
       isEmptyHistory,
       openInEditor,
       isEditing,

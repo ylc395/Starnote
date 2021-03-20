@@ -41,15 +41,19 @@ export class EditorService {
     noteListService: NoteListService,
     parentSynced: boolean,
   ) {
-    const { newNoteDisabled, notebook } = noteListService;
+    const { noteList } = noteListService;
 
-    if (newNoteDisabled.value) {
+    if (!noteList.value) {
+      throw new Error('no noteList!');
+    }
+
+    if (noteList.value.newNoteDisabled.value) {
       return;
     }
 
     const note = await NoteService.createEmptyNote(
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      notebook.value!,
+      noteList.value.notebook,
       parentSynced,
     );
 
