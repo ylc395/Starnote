@@ -2,7 +2,7 @@ import { Ref, ref, shallowRef, effect, stop, computed } from '@vue/reactivity';
 import { Note } from './Note';
 import dayjs from 'dayjs';
 import EventEmitter from 'eventemitter3';
-import { uniqueId } from 'lodash';
+import { after, uniqueId } from 'lodash';
 
 export class Editor extends EventEmitter {
   readonly id = uniqueId();
@@ -13,6 +13,10 @@ export class Editor extends EventEmitter {
   private readonly _note: Ref<Note | null> = shallowRef(null);
   readonly note = computed(() => this._note.value);
   private saveRunner?: ReturnType<typeof effect>;
+  // only emit after activating
+  private readonly emitSaved = after(2, () => {
+    this.emit('saved', this._note.value);
+  });
   constructor(note: Note | null = null) {
     super();
 
@@ -38,7 +42,7 @@ export class Editor extends EventEmitter {
     this._note.value.title.value = this.title.value;
     this._note.value.content.value = this.content.value;
     this._note.value.userModifiedAt.value = dayjs();
-    this.emit('saved', this._note.value);
+    this.emitSaved();
   }
 
   activate() {
