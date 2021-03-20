@@ -35,8 +35,8 @@ export class ContextmenuService<T = unknown> {
           : mousePosition;
       this.openTimer = null;
 
-      if (isWithContextmenu(this.context)) {
-        this.context.withContextmenu.value = true;
+      if (isWithContextmenu(this.context.value)) {
+        this.context.value.withContextmenu.value = true;
       }
     }, delay);
   }
@@ -49,8 +49,8 @@ export class ContextmenuService<T = unknown> {
     document.removeEventListener('click', this.close);
     document.removeEventListener('contextmenu', this.close);
 
-    if (isWithContextmenu(this.context)) {
-      this.context.withContextmenu.value = false;
+    if (isWithContextmenu(this.context.value)) {
+      this.context.value.withContextmenu.value = false;
     }
 
     this.context.value = null;
