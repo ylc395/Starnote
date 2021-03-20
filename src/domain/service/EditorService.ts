@@ -1,5 +1,5 @@
 import { NoteRepository } from 'domain/repository';
-import { effect } from '@vue/reactivity';
+import { computed, effect } from '@vue/reactivity';
 import { container } from 'tsyringe';
 import { EditorManager, Note } from 'domain/entity';
 import { selfish } from 'utils/index';
@@ -28,6 +28,12 @@ export class EditorService {
         'saved',
         debounce(noteRepository.updateNote.bind(noteRepository), 500),
       );
+    });
+  }
+
+  isEditing(note: Note) {
+    return computed(() => {
+      return this.editorManager.activeEditor.value?.note.value === note;
     });
   }
 

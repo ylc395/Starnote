@@ -32,9 +32,11 @@ export default defineComponent({
     const noteListService = new NoteListService(notebookTreeService);
 
     const { historyBack, isEmptyHistory } = notebookTreeService;
-    const { openEditor, createAndOpenEditor } = inject<EditorService>(
-      editorToken,
-    )!;
+    const {
+      openEditor,
+      createAndOpenEditor,
+      isEditing,
+    } = inject<EditorService>(editorToken)!;
     const { newNoteDisabled, notes } = noteListService;
 
     return {
@@ -43,6 +45,7 @@ export default defineComponent({
       newNoteDisabled,
       isEmptyHistory,
       openEditor,
+      isEditing,
       createAndOpenEditor: partial(createAndOpenEditor, noteListService, false),
     };
   },
@@ -81,7 +84,8 @@ export default defineComponent({
       <template #renderItem="{ item }">
         <listItem
           @click="openEditor(item)"
-          class="border-b-2 border-gray-200 px-3 hover:bg-gray-200"
+          class="border-b-2 border-gray-200 px-3 hover:bg-blue-100"
+          :class="{ 'bg-gray-200': isEditing(item).value }"
         >
           {{ item.title.value }}
         </listItem>
