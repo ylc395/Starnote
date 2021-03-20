@@ -87,7 +87,7 @@ export default defineComponent({
           class="border-b-2 border-gray-200 px-3 hover:bg-blue-100"
           :class="{ 'bg-gray-200': isEditing(item).value }"
         >
-          {{ item.title.value }}
+          {{ item.title.value || '(empty title)' }}
         </listItem>
       </template>
     </List>

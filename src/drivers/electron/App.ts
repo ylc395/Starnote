@@ -1,6 +1,7 @@
 import { app, protocol, BrowserWindow } from 'electron';
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
 import path from 'path';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import installExtension from 'electron-devtools-installer';
 import {
   IS_DEVELOPMENT,
@@ -20,7 +21,7 @@ export class App {
     // Exit cleanly on request from parent process in development mode.
     if (IS_DEVELOPMENT) {
       if (OS_PLATFORM === 'win32') {
-        process.on('message', data => {
+        process.on('message', (data) => {
           if (data === 'graceful-exit') {
             this.electronApp.quit();
           }

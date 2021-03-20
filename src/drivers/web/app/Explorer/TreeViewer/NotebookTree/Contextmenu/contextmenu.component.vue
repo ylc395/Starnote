@@ -1,6 +1,6 @@
 <script lang="ts">
 import { computed, defineComponent, inject } from 'vue';
-import CommonContextmenu from 'drivers/ui/web/components/Contextmenu/contextmenu.component.vue';
+import CommonContextmenu from 'drivers/web/components/Contextmenu/contextmenu.component.vue';
 import { Menu } from 'ant-design-vue';
 import { NotebookCreatorService } from '../NotebookCreator/notebook-creator.service';
 import { ContextmenuService } from './contextmenu.service';

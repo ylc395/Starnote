@@ -2,7 +2,7 @@ import { computed, provide, shallowRef } from 'vue';
 import type { InjectionKey, Ref } from 'vue';
 import { isTreeItem } from 'domain/service/NotebookTreeService';
 import type { TreeItem } from 'domain/service/NotebookTreeService';
-import { ContextmenuService as CommonContextmenuService } from 'drivers/ui/web/components/Contextmenu/contextmenu.service';
+import { ContextmenuService as CommonContextmenuService } from 'drivers/web/components/Contextmenu/contextmenu.service';
 import { selfish } from 'utils/index';
 
 export class ContextmenuService {
