@@ -5,7 +5,7 @@ import {
   token,
 } from 'domain/service/NotebookTreeService';
 import { inject } from 'vue';
-import { token as dragIconToken } from '../../useDragIcon';
+import { token as dragIconToken } from '../../DragIcon/useDragIcon';
 
 export function useDraggable() {
   const notebookTreeService = inject<NotebookTreeService>(token)!;
