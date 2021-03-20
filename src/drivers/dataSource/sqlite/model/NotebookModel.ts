@@ -1,6 +1,7 @@
 import { db } from '../db';
 import { DataTypes, UUIDV4, NOW } from 'sequelize';
-import { ROOT_NOTEBOOK_ID, SortByEnums, SortDirectEnums } from 'domain/entity';
+import { ROOT_NOTEBOOK_ID } from 'domain/entity';
+import { SortByEnums, SortDirectEnums } from 'domain/constant';
 
 export const NotebookModel = db.define('Notebook', {
   id: {
