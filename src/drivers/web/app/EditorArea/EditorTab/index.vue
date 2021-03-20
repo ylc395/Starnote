@@ -2,6 +2,7 @@
 import { defineComponent, inject } from 'vue';
 import { Tabs } from 'ant-design-vue';
 import { token, EditorService } from 'domain/service/EditorService';
+import { EMPTY_TITLE } from 'domain/constant';
 
 export default defineComponent({
   components: { Tabs, TabPane: Tabs.TabPane },
@@ -20,6 +21,7 @@ export default defineComponent({
       activeEditor,
       closeEditorById,
       setActiveEditor,
+      EMPTY_TITLE,
     };
   },
 });
@@ -36,7 +38,7 @@ export default defineComponent({
       v-for="editor of editors"
       :key="editor.id"
       :closable="true"
-      :tab="editor.title.value || '(empty title)'"
+      :tab="editor.title.value || EMPTY_TITLE"
     />
   </Tabs>
 </template>
