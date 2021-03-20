@@ -26,10 +26,12 @@ export default defineComponent({
 
     onMounted(() => {
       document.addEventListener('click', close);
+      document.addEventListener('contextmenu', close);
     });
 
     onUnmounted(() => {
       document.removeEventListener('click', close);
+      document.removeEventListener('contextmenu', close);
     });
 
     return {
