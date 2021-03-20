@@ -163,6 +163,10 @@ export default defineComponent({
   transition-duration: 0s !important;
 }
 
+:deep(.with-contextmenu > .ant-tree-node-content-wrapper::before) {
+  background-color: #252525 !important;
+}
+
 :deep(.ant-tree-node-content-wrapper.ant-tree-node-selected::before) {
   background-color: #131313 !important;
 }

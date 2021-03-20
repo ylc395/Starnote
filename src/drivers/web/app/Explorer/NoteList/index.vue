@@ -100,8 +100,11 @@ export default defineComponent({
         <listItem
           @click="openInEditor(item)"
           @contextmenu="openContextmenu($event, item)"
+          :class="{
+            'bg-gray-200': isEditing(item.id).value,
+            'bg-blue-50': item.withContextmenu.value,
+          }"
           class="border-b-2 border-gray-200 px-3 hover:bg-blue-100"
-          :class="{ 'bg-gray-200': isEditing(item.id).value }"
         >
           {{ item.title.value || EMPTY_TITLE }}
         </listItem>
