@@ -110,13 +110,9 @@ export class NotebookTreeService extends EventEmitter {
   }
 
   async expandNotebook(
-    notebookId: Notebook['id'] | Notebook | null,
+    notebookId: Notebook['id'] | Notebook,
     expandParent = true,
   ) {
-    if (!notebookId) {
-      throw new Error('no notebook to expand');
-    }
-
     const notebook =
       notebookId instanceof Notebook
         ? notebookId
@@ -153,6 +149,13 @@ export class NotebookTreeService extends EventEmitter {
 
     child.setParent(parent);
     this.emit('itemUpdated', child);
+  }
+
+  setRootAsParent(childId: TreeItemId) {
+    if (!this.root.value) {
+      throw new Error('no root notebook');
+    }
+    this.setParent(childId, this.root.value.id);
   }
 
   static isTreeItem(instance: unknown): instance is TreeItem {

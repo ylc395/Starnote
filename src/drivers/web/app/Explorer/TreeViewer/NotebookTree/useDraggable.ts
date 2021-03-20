@@ -43,11 +43,8 @@ export function useDraggable() {
       notebookTreeService.setParent(dragNode.eventKey, node.eventKey);
     },
     handleRootDrop: () => {
-      if (draggingItemId && notebookTreeService.root.value?.id) {
-        notebookTreeService.setParent(
-          draggingItemId,
-          notebookTreeService.root.value.id,
-        );
+      if (draggingItemId) {
+        notebookTreeService.setRootAsParent(draggingItemId);
       }
     },
     handleDragend: () => {
