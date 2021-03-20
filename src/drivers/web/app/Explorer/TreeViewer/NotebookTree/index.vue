@@ -6,11 +6,15 @@ import {
   FileOutlined,
   PlusOutlined,
 } from '@ant-design/icons-vue';
-import { NotebookTreeService, token } from 'domain/service/NotebookTreeService';
+import {
+  NotebookTreeService,
+  token,
+  TreeItem,
+} from 'domain/service/NotebookTreeService';
 import NotebookCreator from './NotebookCreator/notebook-creator.component.vue';
 import { NotebookCreatorService } from './NotebookCreator/notebook-creator.service';
-import Contextmenu from '../../Contextmenu/contextmenu.component.vue';
-import { ContextmenuService } from '../../Contextmenu/contextmenu.service';
+import Contextmenu from '../../Contextmenu.vue';
+import { ContextmenuService } from 'drivers/web/components/Contextmenu/contextmenu.service';
 import { useDraggable } from './useDraggable';
 import { useTreeData } from './useTreeData';
 
@@ -31,9 +35,10 @@ export default defineComponent({
     const { expandedIds, selectedIds } = inject<NotebookTreeService>(token)!;
     const { isCreating, startCreating } = NotebookCreatorService.setup();
     const {
-      openContextmenu,
+      open: openContextmenu,
       token: contextmenuToken,
-    } = ContextmenuService.setup();
+    } = ContextmenuService.setup<TreeItem>();
+
     const { treeData, handleExpand } = useTreeData();
     const {
       handleDragstart,
@@ -99,12 +104,7 @@ export default defineComponent({
       @dragenter="handleDragenter"
       @drop="handleDrop"
       @dragend="handleDragend"
-      @rightClick="
-        openContextmenu({
-          event: $event.event,
-          item: $event.node.dataRef.item,
-        })
-      "
+      @rightClick="openContextmenu($event.event, $event.node.dataRef.item)"
     />
     <Modal
       :visible="isCreating"

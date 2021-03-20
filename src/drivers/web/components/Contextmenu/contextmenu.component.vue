@@ -1,46 +1,26 @@
 <script lang="ts">
-import {
-  defineComponent,
-  onMounted,
-  onUnmounted,
-  Ref,
-  ref,
-  inject,
-  computed,
-  ComponentPublicInstance,
-} from 'vue';
+import { defineComponent, inject, computed } from 'vue';
 import { ContextmenuService } from './contextmenu.service';
 import { Menu } from 'ant-design-vue';
 
 export default defineComponent({
   components: { Menu },
-  setup() {
-    const contextmenuService = inject(ContextmenuService.token)!;
-    const elRef: Ref<ComponentPublicInstance | null> = ref(null);
-    const close = () => {
-      if (!contextmenuService.visible.value) {
-        return;
-      }
-      contextmenuService.close();
-    };
-
-    onMounted(() => {
-      document.addEventListener('click', close);
-      document.addEventListener('contextmenu', close);
-    });
-
-    onUnmounted(() => {
-      document.removeEventListener('click', close);
-      document.removeEventListener('contextmenu', close);
-    });
+  props: {
+    token: {
+      type: Symbol,
+      required: true,
+    },
+  },
+  setup(props: { token: ContextmenuService['token'] }) {
+    const { visible, position, context } = inject(props.token)!;
 
     return {
-      elRef,
-      visible: contextmenuService.visible,
+      context,
+      visible,
       position: computed(() => {
         return {
-          left: contextmenuService.position.value.x + 'px',
-          top: contextmenuService.position.value.y + 'px',
+          left: position.value.x + 'px',
+          top: position.value.y + 'px',
         };
       }),
     };
@@ -48,13 +28,7 @@ export default defineComponent({
 });
 </script>
 <template>
-  <Menu
-    v-bind="$attrs"
-    v-if="visible"
-    ref="elRef"
-    :style="position"
-    class="fixed z-50"
-  >
+  <Menu v-bind="$attrs" v-if="visible" :style="position" class="fixed z-50">
     <slot></slot>
   </Menu>
 </template>

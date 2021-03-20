@@ -3,8 +3,8 @@ import { defineComponent, inject } from 'vue';
 import { List, Button, Input } from 'ant-design-vue';
 import { NoteListService } from 'domain/service/NoteListService';
 import { EMPTY_TITLE } from 'domain/constant';
-import Contextmenu from '../Contextmenu/contextmenu.component.vue';
-import { ContextmenuService } from '../Contextmenu/contextmenu.service';
+import Contextmenu from '../Contextmenu.vue';
+import { ContextmenuService } from 'drivers/web/components/Contextmenu/contextmenu.service';
 import {
   NotebookTreeService,
   token as notebookTreeToken,
@@ -35,7 +35,7 @@ export default defineComponent({
     const notebookTreeService = inject<NotebookTreeService>(notebookTreeToken)!;
     const noteListService = new NoteListService(notebookTreeService);
     const {
-      openContextmenu,
+      open: openContextmenu,
       token: contextmenuToken,
     } = ContextmenuService.setup();
 
@@ -95,7 +95,7 @@ export default defineComponent({
       <template #renderItem="{ item }">
         <listItem
           @click="openEditor(item)"
-          @contextmenu="openContextmenu({ event: $event, item })"
+          @contextmenu="openContextmenu($event, item)"
           class="border-b-2 border-gray-200 px-3 hover:bg-blue-100"
           :class="{ 'bg-gray-200': isEditing(item.id).value }"
         >
