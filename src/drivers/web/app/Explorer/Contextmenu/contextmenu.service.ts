@@ -6,10 +6,10 @@ import { ContextmenuService as CommonContextmenuService } from 'drivers/web/comp
 import { selfish } from 'utils/index';
 
 export class ContextmenuService {
-  static token: InjectionKey<ContextmenuService> = Symbol();
+  readonly token: InjectionKey<ContextmenuService> = Symbol();
   static setup() {
     const service = selfish(new this());
-    provide(this.token, service);
+    provide(service.token, service);
 
     return service;
   }
@@ -19,19 +19,14 @@ export class ContextmenuService {
     return this._context.value;
   });
 
-  openContextmenu({
-    event,
-    node,
-  }: {
-    event: MouseEvent;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    node: Record<string, any>;
-  }) {
-    if (!isTreeItem(node.dataRef.item)) {
+  openContextmenu({ event, item }: { event: MouseEvent; item: TreeItem }) {
+    console.log(111);
+
+    if (!isTreeItem(item)) {
       return;
     }
 
     this.contextmenu.open({ x: event.clientX, y: event.clientY });
-    this._context.value = node.dataRef.item;
+    this._context.value = item;
   }
 }

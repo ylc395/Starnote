@@ -12,14 +12,19 @@ export default defineComponent({
     SubMenu: Menu.SubMenu,
     CommonContextmenu,
   },
-  setup() {
-    const { startCreating } = inject(NotebookCreatorService.token)!;
-    const { context } = inject(ContextmenuService.token)!;
-
+  props: {
+    token: {
+      type: Symbol,
+      required: true,
+    },
+  },
+  setup(props: { token: ContextmenuService['token'] }) {
+    const notebookCreator = inject(NotebookCreatorService.token);
+    const { context } = inject(props.token)!;
     const handleNotebook = (notebook: Notebook, key: string) => {
       switch (key) {
         case 'createNotebook':
-          startCreating(notebook);
+          notebookCreator?.startCreating(notebook);
           break;
         default:
           break;

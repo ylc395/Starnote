@@ -30,7 +30,10 @@ export default defineComponent({
 
     const { expandedIds, selectedIds } = inject<NotebookTreeService>(token)!;
     const { isCreating, startCreating } = NotebookCreatorService.setup();
-    const { openContextmenu } = inject(ContextmenuService.token)!;
+    const {
+      openContextmenu,
+      token: contextmenuToken,
+    } = ContextmenuService.setup();
     const { treeData, handleExpand } = useTreeData();
     const {
       handleDragstart,
@@ -54,7 +57,15 @@ export default defineComponent({
       handleDrop,
       handleDragend,
       handleRootDrop,
-      openContextmenu,
+      contextmenuToken,
+      openContextmenu: ({
+        event,
+        node,
+      }: {
+        event: MouseEvent;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        node: Record<string, any>;
+      }) => openContextmenu({ event, item: node.dataRef.item }),
       treeData,
       expandedKeys: expandedIds,
       selectedKeys: selectedIds,
@@ -106,7 +117,7 @@ export default defineComponent({
     >
       <NotebookCreator />
     </Modal>
-    <Contextmenu />
+    <Contextmenu :token="contextmenuToken" />
     <div class="absolute -left-96 text-gray-400">
       <FileOutlined ref="noteIconRef" />
       <FolderOutlined ref="notebookIconRef" />
