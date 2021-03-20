@@ -41,8 +41,8 @@ export default defineComponent({
 
     const { historyBack, isEmptyHistory } = notebookTreeService;
     const {
-      openEditor,
-      createAndOpenEditor,
+      openInEditor,
+      createAndOpenInEditor,
       isEditing,
     } = inject<EditorService>(editorToken)!;
     const { newNoteDisabled, notes } = noteListService;
@@ -53,11 +53,15 @@ export default defineComponent({
       historyBack,
       newNoteDisabled,
       isEmptyHistory,
-      openEditor,
+      openInEditor,
       isEditing,
       contextmenuToken,
       openContextmenu,
-      createAndOpenEditor: partial(createAndOpenEditor, noteListService, false),
+      createAndOpenInEditor: partial(
+        createAndOpenInEditor,
+        noteListService,
+        false,
+      ),
     };
   },
 });
@@ -80,7 +84,7 @@ export default defineComponent({
         type="primary"
         :disabled="newNoteDisabled"
         size="small"
-        @click="createAndOpenEditor"
+        @click="createAndOpenInEditor"
         class="rounded-md mr-2"
       >
         <template #icon>
@@ -94,7 +98,7 @@ export default defineComponent({
     <List :dataSource="notes" class="border-none px-2">
       <template #renderItem="{ item }">
         <listItem
-          @click="openEditor(item)"
+          @click="openInEditor(item)"
           @contextmenu="openContextmenu($event, item)"
           class="border-b-2 border-gray-200 px-3 hover:bg-blue-100"
           :class="{ 'bg-gray-200': isEditing(item.id).value }"

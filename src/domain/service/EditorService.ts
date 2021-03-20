@@ -37,7 +37,7 @@ export class EditorService {
     });
   }
 
-  async createAndOpenEditor(
+  async createAndOpenInEditor(
     noteListService: NoteListService,
     parentSynced: boolean,
   ) {
@@ -53,14 +53,14 @@ export class EditorService {
       parentSynced,
     );
 
-    this.openEditor(note, true);
+    this.openInEditor(note, true);
   }
 
-  async openEditor(note: Note, isNew = false) {
+  async openInEditor(note: Note, isNew = false) {
     if (!isNew) {
       await noteRepository.loadContent(note);
     }
 
-    this.editorManager.openEditor(note);
+    this.editorManager.openInEditor(note);
   }
 }

@@ -59,7 +59,7 @@ export class EditorManager {
     activeEditor.activate();
   }
 
-  async openEditor(note: Note) {
+  async openInEditor(note: Note) {
     const openedEditor = this._editors.find((editor) =>
       note.isEqual(editor.note.value),
     );
