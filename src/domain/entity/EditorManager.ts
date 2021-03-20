@@ -32,12 +32,17 @@ export class EditorManager {
     return result;
   }
 
-  setActiveEditor(editor: Editor | Editor['id']) {
+  setActiveEditor(editor: Editor | Editor['id'], noteToLoad?: Note) {
     const editorInstance = Editor.isA(editor)
       ? editor
       : this.getEditorById(editor);
 
     this._activeEditor.value = editorInstance;
+
+    if (noteToLoad) {
+      editorInstance.loadNote(noteToLoad);
+    }
+
     editorInstance.activate();
     without(this._editors, editorInstance).forEach((editor) =>
       editor.inactivate(),
@@ -55,12 +60,12 @@ export class EditorManager {
   }
 
   async openEditor(note: Note) {
-    const openedEditor = this._editors.find(
-      (editor) => editor.note.value === note,
+    const openedEditor = this._editors.find((editor) =>
+      note.isEqual(editor.note.value),
     );
 
     if (openedEditor) {
-      this.setActiveEditor(openedEditor);
+      this.setActiveEditor(openedEditor, note);
       return;
     }
 

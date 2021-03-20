@@ -28,10 +28,7 @@ export class Editor extends EventEmitter {
   loadNote(note: Note) {
     this._note.value = note;
     this.title.value = note.title.value;
-
-    if (note.content.value) {
-      this.content.value = note.content.value;
-    }
+    this.content.value = note.content.value ?? '';
   }
 
   saveNote() {

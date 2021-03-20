@@ -53,11 +53,14 @@ export class EditorService {
       parentSynced,
     );
 
-    this.openEditor(note);
+    this.openEditor(note, true);
   }
 
-  async openEditor(note: Note) {
-    await noteRepository.loadContent(note);
+  async openEditor(note: Note, isNew = false) {
+    if (!isNew) {
+      await noteRepository.loadContent(note);
+    }
+
     this.editorManager.openEditor(note);
   }
 }
