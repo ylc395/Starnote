@@ -3,8 +3,10 @@ import { Note } from './Note';
 import dayjs from 'dayjs';
 import EventEmitter from 'eventemitter3';
 import { after, uniqueId } from 'lodash';
+import { ListItem } from './abstract/ListItem';
 
-export class Editor extends EventEmitter {
+export class Editor extends EventEmitter implements ListItem {
+  readonly withContextmenu = ref(false);
   readonly id = uniqueId();
   readonly title = ref('');
   readonly content = ref('');

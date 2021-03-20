@@ -10,19 +10,23 @@ import {
 } from './abstract/Entity';
 import { Hierarchic, WithChildren } from './abstract/Hierarchic';
 import { Note } from './Note';
-import { SortByEnums, SortDirectEnums, Sortable } from './abstract/Sortable';
+import { SortByEnums, SortDirectEnums } from '../constant';
+import { ListItem } from './abstract/ListItem';
 import { Exclude, Expose } from 'class-transformer';
 
 export const ROOT_NOTEBOOK_ID: Notebook['id'] = NIL;
 
 export class Notebook
   extends Hierarchic<Notebook>
-  implements Sortable, WithChildren {
+  implements ListItem, WithChildren {
   @RefTransform
   readonly title: Ref<string> = ref('untitled notebook');
 
   @Exclude()
   protected readonly parent: Ref<Notebook | null> = shallowRef(null);
+
+  @Exclude()
+  readonly withContextmenu = ref(false);
 
   @Exclude()
   children: Ref<(Note | Notebook)[] | null> = shallowRef(null);

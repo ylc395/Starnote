@@ -11,13 +11,13 @@ import {
 } from 'domain/entity';
 import { Hierarchic } from './abstract/Hierarchic';
 import { Notebook, ROOT_NOTEBOOK_ID } from './Notebook';
-import { Sortable } from './abstract/Sortable';
+import { ListItem } from './abstract/ListItem';
 import { Optional } from 'utils/types';
 import { Exclude } from 'class-transformer';
 
 dayjs.extend(customParseFormat);
 
-export class Note extends Hierarchic<Notebook> implements Sortable {
+export class Note extends Hierarchic<Notebook> implements ListItem {
   @RefTransform
   title: Ref<string> = ref('untitled note');
 
@@ -33,11 +33,14 @@ export class Note extends Hierarchic<Notebook> implements Sortable {
   @RefTransform
   readonly parentId: Ref<Notebook['id']> = ref(ROOT_NOTEBOOK_ID);
 
-  @Exclude()
-  protected readonly parent: Ref<Notebook | null> = shallowRef(null);
-
   @RefTransform
   readonly sortOrder: Ref<number> = ref(0);
+
+  @Exclude()
+  readonly withContextmenu = ref(false);
+
+  @Exclude()
+  protected readonly parent: Ref<Notebook | null> = shallowRef(null);
 
   static from(dataObject: NoteDo, parent?: Notebook) {
     const note = dataObjectToInstance(this, dataObject);
