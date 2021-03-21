@@ -14,7 +14,7 @@ const notebookRepository = container.resolve(NotebookRepository);
 const noteRepository = container.resolve(NoteRepository);
 
 export class NoteListService {
-  readonly noteList: Ref<NoteList | null> = shallowRef(null);
+  readonly noteList: Ref<NoteList> = shallowRef(new NoteList());
   constructor(private readonly itemTreeService: ItemTreeService) {
     this.init();
   }

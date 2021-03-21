@@ -47,15 +47,13 @@ export default defineComponent({
       createAndOpenInEditor,
       isEditing,
     } = inject<EditorService>(editorToken)!;
-    const { noteList } = noteListService;
+    const { noteList } = new NoteListService(itemTreeService);
 
     return {
       EMPTY_TITLE,
-      notes: computed(() => noteList.value?.notes.value ?? []),
+      notes: computed(() => noteList.value.notes.value),
       historyBack,
-      newNoteDisabled: computed(
-        () => noteList.value?.newNoteDisabled.value ?? true,
-      ),
+      newNoteDisabled: computed(() => noteList.value.newNoteDisabled.value),
       isEmptyHistory,
       openInEditor,
       isEditing,

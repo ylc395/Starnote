@@ -43,8 +43,8 @@ export class EditorService {
   ) {
     const { noteList } = noteListService;
 
-    if (!noteList.value) {
-      throw new Error('no noteList!');
+    if (!noteList.value?.notebook) {
+      throw new Error('noteList is unavailable');
     }
 
     if (noteList.value.newNoteDisabled.value) {
