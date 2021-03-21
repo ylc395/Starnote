@@ -7,6 +7,7 @@ import { ref, shallowRef } from '@vue/reactivity';
 import type { ComputedRef, Ref, UnwrapRef } from '@vue/reactivity';
 import { Class } from 'utils/types';
 import { TIME_FORMAT } from 'domain/constant';
+import { hasIn } from 'lodash';
 
 dayjs.extend(customParseFormat);
 
@@ -29,6 +30,10 @@ export type Do<T> = {
 
 export interface ObjectWithId {
   id: string;
+}
+
+export function isWithId(obj: unknown): obj is ObjectWithId {
+  return hasIn(obj, 'id');
 }
 export abstract class Entity {
   readonly id: string = uuid();

@@ -1,4 +1,4 @@
-import { computed, effect, shallowRef } from '@vue/reactivity';
+import { effect, shallowRef } from '@vue/reactivity';
 import type { Ref } from '@vue/reactivity';
 import { Note, Notebook } from 'domain/entity';
 import {
@@ -13,6 +13,7 @@ import { NoteList } from 'domain/entity/NoteList';
 const notebookRepository = container.resolve(NotebookRepository);
 const noteRepository = container.resolve(NoteRepository);
 
+export const token = Symbol();
 export class NoteListService {
   readonly noteList: Ref<NoteList> = shallowRef(new NoteList());
   constructor(private readonly itemTreeService: ItemTreeService) {
@@ -20,11 +21,22 @@ export class NoteListService {
   }
 
   private init() {
-    noteRepository.on('noteCreated', (note: Note) => {
-      this.noteList.value?.add(note);
-    });
-
+    noteRepository.on('noteCreated', this.addNote, this);
     effect(this.refreshNoteList.bind(this));
+  }
+
+  addNote(note: Note) {
+    if (note.parentId.value === this.noteList.value.notebook?.id) {
+      this.noteList.value.add(note);
+    }
+  }
+
+  moveTo(noteId: Note['id'], notebook: Notebook) {
+    const note = this.noteList.value.getNoteById(noteId);
+
+    note.setParent(notebook, false);
+    this.noteList.value.removeNoteById(noteId);
+    noteRepository.updateNote(note);
   }
 
   async refreshNoteList() {
@@ -39,6 +51,9 @@ export class NoteListService {
       selected.id,
       QueryEntityTypes.Note,
     );
+
+    this.itemTreeService.itemTree.putItem(notes);
+    this.itemTreeService.itemTree.removeItem(this.noteList.value.notes.value);
 
     noteList.notes.value = notes;
     this.noteList.value = noteList;

@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { singleton, inject } from 'tsyringe';
-import { Note, Notebook } from 'domain/entity';
+import { Do, Note, Notebook, isWithId } from 'domain/entity';
 import { Repository, emit } from './BaseRepository';
 import type { Dao } from './BaseRepository';
 import { NOTE_DAO_TOKEN, NOTEBOOK_DAO_TOKEN } from './daoTokens';
 import { TIME_FORMAT } from 'domain/constant';
+import { isNil, omitBy } from 'lodash';
 
 @singleton()
 export class NoteRepository extends Repository {
@@ -42,10 +43,17 @@ export class NoteRepository extends Repository {
   }
 
   updateNote(note: Note) {
+    const noteDo = omitBy(note.toDo(), isNil) as Do<Note>;
+
+    if (!isWithId(noteDo)) {
+      throw new Error('no noteId when update');
+    }
+
     this.notebookDao!.update({
       id: note.parentId.value,
       userModifiedAt: note.userModifiedAt.value.format(TIME_FORMAT),
     });
-    return this.noteDao!.update(note.toDo());
+
+    return this.noteDao!.update(noteDo);
   }
 }

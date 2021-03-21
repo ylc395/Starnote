@@ -12,12 +12,13 @@ import { Notebook } from './Notebook';
 import { KvStorage } from 'utils/kvStorage';
 import { last, without } from 'lodash';
 import EventEmitter from 'eventemitter3';
+import { Class } from 'utils/types';
 
-export type TreeItemId = Notebook['id'] | Note['id'];
+type TreeItemId = Notebook['id'] | Note['id'];
 export type TreeItem = Notebook | Note;
 export class ItemTree extends EventEmitter {
   readonly root: Ref<Notebook | null> = shallowRef(null);
-  readonly itemsKV = new KvStorage();
+  private readonly itemsKV = new KvStorage();
   private historyMaintainer: ReturnType<typeof effect> | null = null;
   private readonly history: Notebook[] = shallowReactive([]);
   isEmptyHistory = computed(() => {
@@ -34,17 +35,14 @@ export class ItemTree extends EventEmitter {
   constructor() {
     super();
     this.maintainHistory();
-    this.on('itemUpdated', this.setSelectedItem, this);
   }
 
   loadRoot(notebook: Notebook) {
     this.root.value = notebook;
   }
 
-  setSelectedItem(item?: TreeItem | TreeItemId) {
-    this.selectedIds.value = item
-      ? [typeof item === 'object' ? item.id : item]
-      : [];
+  setSelectedItem(item: TreeItem) {
+    this.selectedIds.value = [item.id];
   }
 
   private maintainHistory() {
@@ -63,42 +61,49 @@ export class ItemTree extends EventEmitter {
     this.history.pop();
 
     const lastNotebook = this.history.pop();
-    this.setSelectedItem(lastNotebook);
+
+    if (lastNotebook) {
+      this.setSelectedItem(lastNotebook);
+    }
 
     this.maintainHistory();
   }
 
-  putTreeItemsInCache(items: TreeItem | TreeItem[]) {
+  getItem<T>(id: TreeItemId, aClass: Class<T>) {
+    return this.itemsKV.getItem(id, aClass);
+  }
+
+  putItem(items: TreeItem | TreeItem[]) {
     if (Array.isArray(items)) {
-      items.forEach((item) => {
-        this.itemsKV.setItem(item.id, item);
-      });
+      this.itemsKV.setItems(items);
     } else {
       this.itemsKV.setItem(items.id, items);
     }
+  }
+
+  removeItem(items: TreeItem | TreeItem[]) {
+    this.itemsKV.remove(items);
   }
 
   foldNotebook(notebookId: Notebook['id']) {
     this.expandedIds.value = without(this.expandedIds.value, notebookId);
   }
 
-  setParent(childId: TreeItemId, parentId: Notebook['id']) {
-    const parent = this.itemsKV.getItem(parentId, Notebook);
-    const child = this.itemsKV.getItem<TreeItem>(childId);
-
+  moveTo(child: TreeItem, parent: Notebook) {
     if (child.parentId.value === parent.id) {
       return;
     }
 
     child.setParent(parent);
-    this.emit('itemUpdated', child);
+    this.setSelectedItem(child);
+    this.emit('sync', child);
   }
 
-  setRootAsParent(childId: TreeItemId) {
+  moveToRoot(child: TreeItem) {
     if (!this.root.value) {
       throw new Error('no root notebook');
     }
-    this.setParent(childId, this.root.value.id);
+    this.moveTo(child, this.root.value);
   }
 
   static isTreeItem(instance: unknown): instance is TreeItem {

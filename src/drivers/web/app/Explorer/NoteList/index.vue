@@ -10,7 +10,10 @@ import {
 
 import type { Note } from 'domain/entity';
 import { EMPTY_TITLE } from 'domain/constant';
-import { NoteListService } from 'domain/service/NoteListService';
+import {
+  NoteListService,
+  token as noteListToken,
+} from 'domain/service/NoteListService';
 import {
   ItemTreeService,
   token as notebookTreeToken,
@@ -22,6 +25,7 @@ import {
 
 import Contextmenu from '../Contextmenu.vue';
 import { useContextmenu } from 'drivers/web/components/Contextmenu/useContextmenu';
+import { useDraggable } from './useDraggable';
 
 export default defineComponent({
   components: {
@@ -36,18 +40,19 @@ export default defineComponent({
   },
   setup() {
     const itemTreeService = inject<ItemTreeService>(notebookTreeToken)!;
-    const noteListService = new NoteListService(itemTreeService);
-    const { open: openContextmenu } = useContextmenu<Note>();
-
-    const {
-      itemTree: { historyBack, isEmptyHistory },
-    } = itemTreeService;
+    const noteListService = inject<NoteListService>(noteListToken)!;
     const {
       openInEditor,
       createAndOpenInEditor,
       isEditing,
     } = inject<EditorService>(editorToken)!;
-    const { noteList } = new NoteListService(itemTreeService);
+
+    const { noteList } = noteListService;
+    const { open: openContextmenu } = useContextmenu<Note>();
+    const { handleDragstart } = useDraggable();
+    const {
+      itemTree: { historyBack, isEmptyHistory },
+    } = itemTreeService;
 
     return {
       EMPTY_TITLE,
@@ -58,6 +63,7 @@ export default defineComponent({
       openInEditor,
       isEditing,
       openContextmenu,
+      handleDragstart,
       createAndOpenInEditor: partial(
         createAndOpenInEditor,
         noteListService,
@@ -99,6 +105,8 @@ export default defineComponent({
     <List :dataSource="notes" class="border-none px-2">
       <template #renderItem="{ item }">
         <listItem
+          draggable="true"
+          @dragstart="handleDragstart($event, item)"
           @click="openInEditor(item)"
           @contextmenu="openContextmenu($event, item)"
           :class="{

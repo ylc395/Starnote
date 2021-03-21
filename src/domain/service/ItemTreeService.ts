@@ -14,22 +14,21 @@ const NOTEBOOK_ONLY = true;
 export const token = Symbol();
 export class ItemTreeService {
   readonly itemTree = selfish(new ItemTree());
-
   constructor() {
     this.init();
   }
   private async init() {
-    this.itemTree.on('itemUpdated', this.syncItem);
+    this.itemTree.on('sync', this.syncItem);
 
     notebookRepository.on('itemFetched', (items: TreeItem | Children) => {
-      this.itemTree.putTreeItemsInCache(
+      this.itemTree.putItem(
         'id' in items ? items : [...items.notebooks, ...items.notes],
       );
     });
 
     notebookRepository.on(
       'notebookCreated',
-      this.itemTree.putTreeItemsInCache,
+      this.itemTree.putItem,
       this.itemTree,
     );
 
@@ -56,7 +55,7 @@ export class ItemTreeService {
     const notebook =
       notebookId instanceof Notebook
         ? notebookId
-        : this.itemTree.itemsKV.getItem(notebookId, Notebook);
+        : this.itemTree.getItem(notebookId, Notebook);
 
     if (notebook.isRoot) {
       return;
