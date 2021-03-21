@@ -1,4 +1,4 @@
-import type { Ref, UnwrapRef } from "@vue/reactivity";
+import type { Ref, UnwrapRef } from '@vue/reactivity';
 export type Unpacked<T> = T extends (infer U)[]
   ? U
   : T extends (...args: never[]) => infer U
@@ -8,10 +8,9 @@ export type Unpacked<T> = T extends (infer U)[]
   : T;
 
 export type UnwrapAllRefs<T> = {
-   [K in keyof T]: T[K] extends Ref
-    ? UnwrapRef<T[K]>
-    : T[K]
+  [K in keyof T]: T[K] extends Ref ? UnwrapRef<T[K]> : T[K];
 };
 
 export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<T>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Class<T> = new (...args: any[]) => T;
