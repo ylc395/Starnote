@@ -21,7 +21,7 @@
     "@types/sqlite3": "^3.1.7",
     "@types/uuid": "^8.3.0",
     "@vue/reactivity": "^3.0.6",
-    "ant-design-vue": "^2.0.1",
+    "ant-design-vue": "^2.1.0",
     "autoprefixer": "^9",
     "class-transformer": "^0.4.0",
     "core-js": "^3.6.5",
@@ -36,7 +36,7 @@
     "tree-model": "^1.0.7",
     "tsyringe": "^4.4.0",
     "uuid": "^8.3.2",
-    "vue": "^3.0.0"
+    "vue": "^3.0.7"
   },
   "devDependencies": {
     "@types/electron-devtools-installer": "^2.2.0",
