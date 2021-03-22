@@ -4,7 +4,15 @@ module.exports = {
     'no-restricted-imports': [
       'error',
       {
-        paths: ['vue', '@vue/runtime-core'],
+        paths: [
+          'vue',
+          '@vue/runtime-core',
+          {
+            name: '@vue/reactivity',
+            importNames: ['reactive'],
+            message: 'use ref',
+          },
+        ],
         patterns: ['*ant-design*'],
       },
     ],
