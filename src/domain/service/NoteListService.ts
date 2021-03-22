@@ -44,14 +44,13 @@ export class NoteListService {
       return;
     }
 
-    const noteList = new NoteList(selected);
+    this.noteList.value = new NoteList(selected);
 
     const { notes } = await notebookRepository.queryChildrenOf(
       selected.id,
       QueryEntityTypes.Note,
     );
 
-    noteList.notes.value = notes;
-    this.noteList.value = noteList;
+    notes.forEach(this.addNote.bind(this));
   }
 }
