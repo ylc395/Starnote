@@ -12,7 +12,6 @@ import {
 import { Hierarchic } from './abstract/Hierarchic';
 import { Notebook, ROOT_NOTEBOOK_ID } from './Notebook';
 import { ListItem } from './abstract/ListItem';
-import { Optional } from 'utils/types';
 import { Exclude } from 'class-transformer';
 
 dayjs.extend(customParseFormat);
@@ -59,4 +58,4 @@ export class Note extends Hierarchic<Notebook> implements ListItem {
     return note;
   }
 }
-export type NoteDo = Optional<Do<Note>, 'content'>;
+export type NoteDo = Do<Note>;
