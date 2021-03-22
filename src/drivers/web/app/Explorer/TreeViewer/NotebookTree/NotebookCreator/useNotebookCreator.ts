@@ -35,9 +35,8 @@ export function useNotebookCreator() {
     }
     stopCreating(true);
   };
-  function startCreating(target: Notebook): void;
-  function startCreating(isRoot: boolean): void;
-  function startCreating(target: Notebook | boolean = false) {
+
+  function startCreating(target?: Notebook) {
     notebookService.value = new NotebookService(itemTreeService, target);
     isCreating.value = true;
   }

@@ -9,7 +9,7 @@ export class NotebookService {
   readonly notebook: Notebook | null;
   constructor(
     private readonly notebookTree: ItemTreeService,
-    notebook: Notebook | boolean,
+    notebook?: Notebook,
   ) {
     this.notebook = Notebook.isA(notebook)
       ? notebook

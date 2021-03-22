@@ -71,7 +71,7 @@ export default defineComponent({
       </h1>
       <div>
         <button
-          @click="startCreating(true)"
+          @click="startCreating"
           class="bg-transparent border-none cursor-pointer focus:outline-none"
         >
           <PlusOutlined />
