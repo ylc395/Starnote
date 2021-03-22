@@ -9,7 +9,7 @@ import type { Ref } from '@vue/reactivity';
 import { Note } from './Note';
 import { Notebook } from './Notebook';
 import { KvStorage } from 'utils/kvStorage';
-import { last, without } from 'lodash';
+import { last, pull } from 'lodash';
 import EventEmitter from 'eventemitter3';
 import { Class } from 'utils/types';
 
@@ -24,7 +24,7 @@ export class ItemTree extends EventEmitter {
     return this.history.length <= 1;
   });
   readonly selectedItem: Ref<Notebook | Note | null> = shallowRef(null);
-  readonly expandedItems: Ref<Notebook[]> = shallowRef([]);
+  readonly expandedItems: Notebook[] = shallowReactive([]);
   constructor() {
     super();
     this.maintainHistory();
@@ -79,7 +79,7 @@ export class ItemTree extends EventEmitter {
   }
 
   foldNotebook(notebook: Notebook) {
-    this.expandedItems.value = without(this.expandedItems.value, notebook);
+    pull(this.expandedItems, notebook);
   }
 
   async expandNotebook(notebook: Notebook) {
@@ -87,7 +87,7 @@ export class ItemTree extends EventEmitter {
       throw new Error(`fail to expand notebook ${notebook.id}`);
     }
 
-    this.expandedItems.value = [...this.expandedItems.value, notebook];
+    this.expandedItems.push(notebook);
   }
 
   moveTo(child: TreeItem, parent: Notebook) {
@@ -114,7 +114,7 @@ export class ItemTree extends EventEmitter {
   isExpanded(notebook: Notebook) {
     const isEqual = notebook.isEqual.bind(notebook);
 
-    return this.expandedItems.value.findIndex(isEqual) >= 0;
+    return this.expandedItems.findIndex(isEqual) >= 0;
   }
 
   static isTreeItem(instance: unknown): instance is TreeItem {

@@ -43,7 +43,7 @@ export function useTreeData() {
     }),
 
     selectedKeys: computed(() => [selectedItem.value?.id]),
-    expandedKeys: computed(() => map(expandedItems.value, 'id')),
+    expandedKeys: computed(() => map(expandedItems, 'id')),
     handleSelect(_: never, { selected, node }: SelectEvent) {
       const { item } = node.dataRef;
 
