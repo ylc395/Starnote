@@ -3,7 +3,7 @@ import {
   useContextmenu as useCommonContextmenu,
   token,
 } from 'drivers/web/components/Contextmenu/useContextmenu';
-import { token as notebookCreatorToken } from '../TreeViewer/NotebookTree/NotebookCreator/useNotebookCreator';
+import { token as notebookCreatorToken } from '../TreeViewer/ItemTree/NotebookCreator/useNotebookCreator';
 import {
   EditorService,
   token as editorToken,

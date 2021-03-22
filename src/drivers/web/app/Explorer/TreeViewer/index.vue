@@ -1,14 +1,14 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import NotebookTree from './NotebookTree/index.vue';
+import ItemTree from './ItemTree/index.vue';
 
 export default defineComponent({
-  components: { NotebookTree },
+  components: { ItemTree },
 });
 </script>
 <template>
   <div class="tree-viewer min-h-screen w-60">
-    <NotebookTree />
+    <ItemTree />
   </div>
 </template>
 <style scoped>

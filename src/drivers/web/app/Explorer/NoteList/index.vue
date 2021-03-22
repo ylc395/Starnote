@@ -15,7 +15,7 @@ import {
 } from 'domain/service/NoteListService';
 import {
   ItemTreeService,
-  token as notebookTreeToken,
+  token as ItemTreeToken,
 } from 'domain/service/ItemTreeService';
 import {
   EditorService,
@@ -38,7 +38,7 @@ export default defineComponent({
     Contextmenu,
   },
   setup() {
-    const itemTreeService = inject<ItemTreeService>(notebookTreeToken)!;
+    const itemTreeService = inject<ItemTreeService>(ItemTreeToken)!;
     const noteListService = inject<NoteListService>(noteListToken)!;
     const {
       openInEditor,
