@@ -24,14 +24,15 @@ export function useDraggable() {
   let draggingItem: null | TreeItem = null;
 
   return {
-    handleDragstart: ({ node, event }: TreeDragEvent) => {
+    handleDragstart: ({ node, event: { dataTransfer } }: TreeDragEvent) => {
       draggingItem = node.dataRef.item as TreeItem;
       const isNotebook = !node.dataRef.isLeaf;
       const icon = isNotebook ? notebookIconRef.value! : noteIconRef.value!;
 
       foldNotebook(draggingItem.id!);
-      event.dataTransfer!.setDragImage(icon, 30, 30);
-      event.dataTransfer!.effectAllowed = 'move';
+      dataTransfer!.setDragImage(icon, 30, 30);
+      dataTransfer!.setData('treeItemId', draggingItem.id);
+      dataTransfer!.effectAllowed = 'move';
     },
 
     handleDragenter: ({ node }: TreeDragEvent) => {
@@ -70,10 +71,8 @@ export function useDraggable() {
       }
     },
 
-    handleRootDrop: () => {
-      if (draggingItem) {
-        moveToRoot(draggingItem);
-      }
+    handleRootDrop: ({ dataTransfer }: DragEvent) => {
+      moveToRoot(dataTransfer!.getData('treeItemId'));
     },
 
     handleDragend: () => {

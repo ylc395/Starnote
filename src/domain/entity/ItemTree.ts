@@ -69,7 +69,7 @@ export class ItemTree extends EventEmitter {
     this.maintainHistory();
   }
 
-  getItem<T>(id: TreeItemId, aClass: Class<T>) {
+  getItem<T>(id: TreeItemId, aClass?: Class<T>) {
     return this.itemsKV.getItem(id, aClass);
   }
 
@@ -95,11 +95,15 @@ export class ItemTree extends EventEmitter {
     this.emit('sync', child);
   }
 
-  moveToRoot(child: TreeItem) {
+  moveToRoot(child: TreeItem | TreeItemId) {
     if (!this.root.value) {
       throw new Error('no root notebook');
     }
-    this.moveTo(child, this.root.value);
+
+    this.moveTo(
+      isTreeItem(child) ? child : this.getItem(child),
+      this.root.value,
+    );
   }
 
   isExpanded(notebook: Notebook) {
