@@ -3,6 +3,7 @@ import type { Ref } from '@vue/reactivity';
 import { Note } from './Note';
 import { Notebook } from './Notebook';
 import EventEmitter from 'eventemitter3';
+import { without } from 'lodash';
 
 export class NoteList extends EventEmitter {
   constructor(readonly notebook?: Notebook) {
@@ -18,15 +19,14 @@ export class NoteList extends EventEmitter {
       throw new Error("note's parent is wrong");
     }
 
+    if (this.notes.value.find(note.isEqual.bind(note))) {
+      throw new Error(`note(${note.id}) already existed`);
+    }
+
     this.notes.value = [...this.notes.value, note];
   }
   moveTo(noteId: Note['id'], notebook: Notebook) {
-    const note = this.getNoteById(noteId);
-
-    note.setParent(notebook, false);
-    this.removeNoteById(noteId);
-
-    return note;
+    return this.removeNoteById(noteId).setParent(notebook, false);
   }
 
   getNoteById(id: Note['id']) {
@@ -39,6 +39,9 @@ export class NoteList extends EventEmitter {
   }
 
   removeNoteById(id: Note['id']) {
-    this.notes.value = this.notes.value.filter((note) => note.id !== id);
+    const note = this.getNoteById(id);
+    this.notes.value = without(this.notes.value, note);
+
+    return note;
   }
 }

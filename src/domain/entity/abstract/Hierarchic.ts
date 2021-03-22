@@ -20,7 +20,7 @@ export abstract class Hierarchic<P extends WithChildren> extends Entity {
     this.parentId.value = newParent.id;
 
     if (!bidirectional) {
-      return;
+      return this;
     }
 
     if (!newParent.children.value) {
@@ -32,6 +32,8 @@ export abstract class Hierarchic<P extends WithChildren> extends Entity {
     );
     childrenOfNewParent.push(this);
     newParent.children.value = [...childrenOfNewParent];
+
+    return this;
   }
 
   hasParent() {
