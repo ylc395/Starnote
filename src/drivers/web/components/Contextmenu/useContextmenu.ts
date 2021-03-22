@@ -39,8 +39,15 @@ export function useContextmenu<Context = unknown>() {
     }, delay);
   }
 
-  function close() {
+  function close(e?: MouseEvent) {
     if (!visible.value) {
+      return;
+    }
+
+    const submenuClassName =
+      '.ant-menu-submenu-title, .ant-menu-submenu-title *';
+
+    if ((e?.target as HTMLElement).matches(submenuClassName)) {
       return;
     }
 
