@@ -52,9 +52,6 @@ export class NoteListService {
       QueryEntityTypes.Note,
     );
 
-    this.itemTreeService.itemTree.putItem(notes);
-    this.itemTreeService.itemTree.removeItem(this.noteList.value.notes.value);
-
     noteList.notes.value = notes;
     this.noteList.value = noteList;
   }

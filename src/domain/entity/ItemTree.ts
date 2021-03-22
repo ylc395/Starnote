@@ -81,10 +81,6 @@ export class ItemTree extends EventEmitter {
     }
   }
 
-  removeItem(items: TreeItem | TreeItem[]) {
-    this.itemsKV.remove(items);
-  }
-
   foldNotebook(notebookId: Notebook['id']) {
     this.expandedIds.value = without(this.expandedIds.value, notebookId);
   }
