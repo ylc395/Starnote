@@ -33,6 +33,7 @@ export default defineComponent({
       handleDragenter,
       handleRootDrop,
       handleDragend,
+      handleDragleave,
       handleDrop,
     } = useDraggable();
 
@@ -44,6 +45,7 @@ export default defineComponent({
       handleDragenter,
       handleDrop,
       handleDragend,
+      handleDragleave,
       handleRootDrop,
       openContextmenu,
       treeData,
@@ -86,6 +88,7 @@ export default defineComponent({
       @dragenter="handleDragenter"
       @drop="handleDrop"
       @dragend="handleDragend"
+      @dragleave="handleDragleave"
       @rightClick="openContextmenu($event.event, $event.node.dataRef.item)"
     />
     <Modal

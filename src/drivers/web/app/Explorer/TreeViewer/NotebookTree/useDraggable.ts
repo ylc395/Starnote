@@ -10,6 +10,7 @@ import {
   token as itemTreeToken,
 } from 'domain/service/ItemTreeService';
 import { token as dragIconToken } from '../../DragIcon/useDragIcon';
+import { partial } from 'lodash';
 
 export function useDraggable() {
   const {
@@ -22,6 +23,7 @@ export function useDraggable() {
 
   // todo: 给 antdV 的 dragenter 事件对象加个 dragNode 成员就能不再使用这个变量了
   let draggingItem: null | TreeItem = null;
+  const timerMap = new Map();
 
   return {
     handleDragstart: ({ node, event: { dataTransfer } }: TreeDragEvent) => {
@@ -38,9 +40,11 @@ export function useDraggable() {
     handleDragenter: ({ node }: TreeDragEvent) => {
       const { item } = node.dataRef;
 
-      if (Notebook.isA(item) && item.id !== draggingItem?.id) {
-        expandNotebook(item);
+      if (!Notebook.isA(item) || item.id === draggingItem?.id) {
+        return;
       }
+
+      timerMap.set(item.id, setTimeout(partial(expandNotebook, item), 300));
     },
 
     handleDrop: ({ node, dragNode, dropToGap, event }: DropEvent) => {
@@ -56,6 +60,8 @@ export function useDraggable() {
         return;
       }
 
+      clearTimeout(timerMap.get(targetNotebook.id));
+
       // 当拖动的不是notebook时， dropToGap 的值不准确
       if (dropToGap && !noteId) {
         return;
@@ -69,6 +75,16 @@ export function useDraggable() {
       if (isTreeItem(dragging)) {
         moveTo(dragging, targetNotebook);
       }
+    },
+
+    handleDragleave: ({ node }: TreeDragEvent) => {
+      const targetNotebook = node.dataRef.item;
+
+      if (!Notebook.isA(targetNotebook)) {
+        return;
+      }
+
+      clearTimeout(timerMap.get(targetNotebook.id));
     },
 
     handleRootDrop: ({ dataTransfer }: DragEvent) => {
