@@ -6,7 +6,7 @@ import { TreeItem } from 'domain/entity';
 import NotebookCreator from './NotebookCreator/index.vue';
 import { useNotebookCreator } from './NotebookCreator/useNotebookCreator';
 import Contextmenu from '../../Contextmenu/index.vue';
-import { useContextmenu } from 'drivers/web/components/Contextmenu/useContextmenu';
+import { useContextmenu as useCommonContextmenu } from 'drivers/web/components/Contextmenu/useContextmenu';
 import { useDraggable } from './useDraggable';
 import { useTreeData } from './useTreeData';
 
@@ -21,7 +21,7 @@ export default defineComponent({
   },
   setup() {
     const { isCreating, startCreating } = useNotebookCreator();
-    const { open: openContextmenu } = useContextmenu<TreeItem>();
+    const { open: openContextmenu } = useCommonContextmenu<TreeItem>();
 
     const {
       treeData,

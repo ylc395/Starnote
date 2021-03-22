@@ -23,7 +23,7 @@ import {
 } from 'domain/service/EditorService';
 
 import Contextmenu from '../Contextmenu/index.vue';
-import { useContextmenu } from 'drivers/web/components/Contextmenu/useContextmenu';
+import { useContextmenu as useCommonContextmenu } from 'drivers/web/components/Contextmenu/useContextmenu';
 import { useDraggable } from './useDraggable';
 
 export default defineComponent({
@@ -47,7 +47,7 @@ export default defineComponent({
     } = inject<EditorService>(editorToken)!;
 
     const { noteList } = noteListService;
-    const { open: openContextmenu } = useContextmenu<Note>();
+    const { open: openContextmenu } = useCommonContextmenu<Note>();
     const { handleDragstart } = useDraggable();
     const {
       itemTree: { historyBack, isEmptyHistory },
