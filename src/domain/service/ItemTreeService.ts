@@ -53,18 +53,8 @@ export class ItemTreeService {
     }
   }
 
-  async expandNotebook(notebook: Notebook) {
-    if (notebook.isRoot) {
-      return;
-    }
-
-    await NotebookService.loadChildren(notebook, NOTEBOOK_ONLY);
-
-    if (!this.itemTree.isExpanded(notebook)) {
-      this.itemTree.expandedIds.value = [
-        ...this.itemTree.expandedIds.value,
-        notebook.id,
-      ];
-    }
+  expandNotebook(notebook: Notebook) {
+    this.itemTree.expandNotebook(notebook);
+    return NotebookService.loadChildren(notebook, NOTEBOOK_ONLY);
   }
 }

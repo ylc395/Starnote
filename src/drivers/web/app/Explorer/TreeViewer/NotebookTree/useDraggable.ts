@@ -31,7 +31,10 @@ export function useDraggable() {
       const isNotebook = !node.dataRef.isLeaf;
       const icon = isNotebook ? notebookIconRef.value! : noteIconRef.value!;
 
-      foldNotebook(draggingItem.id!);
+      if (Notebook.isA(draggingItem)) {
+        foldNotebook(draggingItem);
+      }
+
       dataTransfer!.setDragImage(icon, 30, 30);
       dataTransfer!.setData('treeItemId', draggingItem.id);
       dataTransfer!.effectAllowed = 'move';

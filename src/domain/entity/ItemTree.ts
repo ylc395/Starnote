@@ -1,16 +1,15 @@
 import {
   shallowRef,
-  ref,
   computed,
   effect,
   shallowReactive,
   stop,
 } from '@vue/reactivity';
-import type { Ref, ComputedRef } from '@vue/reactivity';
+import type { Ref } from '@vue/reactivity';
 import { Note } from './Note';
 import { Notebook } from './Notebook';
 import { KvStorage } from 'utils/kvStorage';
-import { isEqual, last, without } from 'lodash';
+import { last, without } from 'lodash';
 import EventEmitter from 'eventemitter3';
 import { Class } from 'utils/types';
 
@@ -24,14 +23,8 @@ export class ItemTree extends EventEmitter {
   isEmptyHistory = computed(() => {
     return this.history.length <= 1;
   });
-  readonly selectedIds: Ref<(Notebook['id'] | Note['id'])[]> = ref([]);
-  readonly selectedItem: ComputedRef<Notebook | Note | null> = computed(() => {
-    const firstSelectedItemId = this.selectedIds.value[0];
-    return firstSelectedItemId
-      ? this.itemsKV.getItem(firstSelectedItemId)
-      : null;
-  });
-  expandedIds: Ref<Notebook['id'][]> = ref([]);
+  readonly selectedItem: Ref<Notebook | Note | null> = shallowRef(null);
+  readonly expandedItems: Ref<Notebook[]> = shallowRef([]);
   constructor() {
     super();
     this.maintainHistory();
@@ -42,13 +35,11 @@ export class ItemTree extends EventEmitter {
   }
 
   setSelectedItem(item: TreeItem) {
-    const newSelectedItem = [item.id];
-
-    if (isEqual(newSelectedItem, this.selectedIds.value)) {
+    if (item.isEqual(this.selectedItem.value)) {
       return;
     }
 
-    this.selectedIds.value = newSelectedItem;
+    this.selectedItem.value = item;
   }
 
   private maintainHistory() {
@@ -87,8 +78,16 @@ export class ItemTree extends EventEmitter {
     }
   }
 
-  foldNotebook(notebookId: Notebook['id']) {
-    this.expandedIds.value = without(this.expandedIds.value, notebookId);
+  foldNotebook(notebook: Notebook) {
+    this.expandedItems.value = without(this.expandedItems.value, notebook);
+  }
+
+  async expandNotebook(notebook: Notebook) {
+    if (notebook.isRoot && this.isExpanded(notebook)) {
+      throw new Error(`fail to expand notebook ${notebook.id}`);
+    }
+
+    this.expandedItems.value = [...this.expandedItems.value, notebook];
   }
 
   moveTo(child: TreeItem, parent: Notebook) {
@@ -113,7 +112,9 @@ export class ItemTree extends EventEmitter {
   }
 
   isExpanded(notebook: Notebook) {
-    return this.expandedIds.value.includes(notebook.id);
+    const isEqual = notebook.isEqual.bind(notebook);
+
+    return this.expandedItems.value.findIndex(isEqual) >= 0;
   }
 
   static isTreeItem(instance: unknown): instance is TreeItem {

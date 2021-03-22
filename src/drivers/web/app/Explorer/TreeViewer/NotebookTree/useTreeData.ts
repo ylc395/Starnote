@@ -1,14 +1,28 @@
 import { ItemTreeService, token } from 'domain/service/ItemTreeService';
-import type { ExpendEvent, TreeDataItem } from 'ant-design-vue/lib/tree/Tree';
+import type {
+  ExpendEvent,
+  SelectEvent,
+  TreeDataItem,
+} from 'ant-design-vue/lib/tree/Tree';
 import { computed, inject } from 'vue';
-import { Notebook } from 'domain/entity';
+import { isTreeItem, Notebook } from 'domain/entity';
+import { map } from 'lodash';
 
 export function useTreeData() {
-  const { itemTree, expandNotebook } = inject<ItemTreeService>(token)!;
+  const {
+    itemTree: {
+      root: _root,
+      setSelectedItem,
+      selectedItem,
+      expandedItems,
+      foldNotebook,
+    },
+    expandNotebook,
+  } = inject<ItemTreeService>(token)!;
 
   return {
     treeData: computed<TreeDataItem>(() => {
-      const root = itemTree.root.value;
+      const root = _root.value;
 
       if (!root || !root.children.value) {
         return [];
@@ -28,11 +42,27 @@ export function useTreeData() {
       });
     }),
 
+    selectedKeys: computed(() => [selectedItem.value?.id]),
+    expandedKeys: computed(() => map(expandedItems.value, 'id')),
+    handleSelect(_: never, { selected, node }: SelectEvent) {
+      const { item } = node.dataRef;
+
+      if (selected && isTreeItem(item)) {
+        setSelectedItem(item);
+      }
+    },
+
     handleExpand(_: never, { expanded, node }: ExpendEvent) {
       const { item } = node.dataRef;
 
-      if (expanded && Notebook.isA(item)) {
+      if (!Notebook.isA(item)) {
+        return;
+      }
+
+      if (expanded) {
         expandNotebook(item);
+      } else {
+        foldNotebook(item);
       }
     },
   };

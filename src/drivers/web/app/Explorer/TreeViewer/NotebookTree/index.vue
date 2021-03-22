@@ -1,8 +1,7 @@
 <script lang="ts">
-import { defineComponent, inject } from 'vue';
+import { defineComponent } from 'vue';
 import { Tree, Modal } from 'ant-design-vue';
 import { FolderOutlined, PlusOutlined } from '@ant-design/icons-vue';
-import { ItemTreeService, token } from 'domain/service/ItemTreeService';
 import { TreeItem } from 'domain/entity';
 import NotebookCreator from './NotebookCreator/index.vue';
 import { useNotebookCreator } from './NotebookCreator/useNotebookCreator';
@@ -21,13 +20,16 @@ export default defineComponent({
     Contextmenu,
   },
   setup() {
-    const {
-      itemTree: { expandedIds, selectedIds },
-    } = inject<ItemTreeService>(token)!;
     const { isCreating, startCreating } = useNotebookCreator();
     const { open: openContextmenu } = useContextmenu<TreeItem>();
 
-    const { treeData, handleExpand } = useTreeData();
+    const {
+      treeData,
+      handleExpand,
+      handleSelect,
+      selectedKeys,
+      expandedKeys,
+    } = useTreeData();
     const {
       handleDragstart,
       handleDragenter,
@@ -39,6 +41,7 @@ export default defineComponent({
 
     return {
       handleExpand,
+      handleSelect,
       isCreating,
       startCreating,
       handleDragstart,
@@ -49,8 +52,8 @@ export default defineComponent({
       handleRootDrop,
       openContextmenu,
       treeData,
-      expandedKeys: expandedIds,
-      selectedKeys: selectedIds,
+      expandedKeys,
+      selectedKeys,
     };
   },
 });
@@ -81,9 +84,10 @@ export default defineComponent({
       :showIcon="false"
       openAnimation="none"
       expandAction="dblclick"
-      v-model:expandedKeys="expandedKeys"
-      v-model:selectedKeys="selectedKeys"
+      :expandedKeys="expandedKeys"
+      :selectedKeys="selectedKeys"
       @expand="handleExpand"
+      @select="handleSelect"
       @dragstart="handleDragstart"
       @dragenter="handleDragenter"
       @drop="handleDrop"
