@@ -83,7 +83,11 @@ export class ItemTree extends EventEmitter {
   }
 
   async expandNotebook(notebook: Notebook) {
-    if (notebook.isRoot && this.isExpanded(notebook)) {
+    if (notebook.isRoot) {
+      return;
+    }
+
+    if (this.isExpanded(notebook)) {
       throw new Error(`fail to expand notebook ${notebook.id}`);
     }
 
