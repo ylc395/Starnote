@@ -25,17 +25,15 @@ export class NoteListService {
     effect(this.refreshNoteList.bind(this));
   }
 
-  addNote(note: Note) {
+  private addNote(note: Note) {
     if (note.parentId.value === this.noteList.value.notebook?.id) {
       this.noteList.value.add(note);
     }
   }
 
   moveTo(noteId: Note['id'], notebook: Notebook) {
-    const note = this.noteList.value.getNoteById(noteId);
+    const note = this.noteList.value.moveTo(noteId, notebook);
 
-    note.setParent(notebook, false);
-    this.noteList.value.removeNoteById(noteId);
     noteRepository.updateNote(note);
   }
 
@@ -47,6 +45,7 @@ export class NoteListService {
     }
 
     const noteList = new NoteList(selected);
+
     const { notes } = await notebookRepository.queryChildrenOf(
       selected.id,
       QueryEntityTypes.Note,

@@ -2,9 +2,12 @@ import { computed, shallowRef } from '@vue/reactivity';
 import type { Ref } from '@vue/reactivity';
 import { Note } from './Note';
 import { Notebook } from './Notebook';
+import EventEmitter from 'eventemitter3';
 
-export class NoteList {
-  constructor(readonly notebook?: Notebook) {}
+export class NoteList extends EventEmitter {
+  constructor(readonly notebook?: Notebook) {
+    super();
+  }
   readonly notes: Ref<Note[]> = shallowRef([]);
   readonly newNoteDisabled = computed(() => {
     return this.notebook?.isRoot ?? true;
@@ -16,6 +19,14 @@ export class NoteList {
     }
 
     this.notes.value = [...this.notes.value, note];
+  }
+  moveTo(noteId: Note['id'], notebook: Notebook) {
+    const note = this.getNoteById(noteId);
+
+    note.setParent(notebook, false);
+    this.removeNoteById(noteId);
+
+    return note;
   }
 
   getNoteById(id: Note['id']) {
