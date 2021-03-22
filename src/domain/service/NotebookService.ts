@@ -7,24 +7,21 @@ const notebookRepository = container.resolve(NotebookRepository);
 
 export class NotebookService {
   readonly notebook: Notebook | null;
-  constructor(private readonly ItemTree: ItemTreeService, notebook?: Notebook) {
+  constructor(private readonly itemTree: ItemTreeService, notebook?: Notebook) {
     this.notebook = Notebook.isA(notebook)
       ? notebook
-      : this.ItemTree.itemTree.root.value;
+      : this.itemTree.itemTree.root.value;
   }
 
   async createSubNotebook(title: string) {
-    const targetNotebook =
-      this.notebook || this.ItemTree.itemTree.selectedItem.value;
-
-    if (!targetNotebook || !Notebook.isA(targetNotebook)) {
+    if (!Notebook.isA(this.notebook)) {
       throw new Error('no target notebook!');
     }
 
-    await this.ItemTree.expandNotebook(targetNotebook);
-    const newNotebook = await NotebookService.create(targetNotebook, title);
+    await this.itemTree.expandNotebook(this.notebook);
+    const newNotebook = await NotebookService.create(this.notebook, title);
 
-    this.ItemTree.itemTree.setSelectedItem(newNotebook);
+    this.itemTree.itemTree.setSelectedItem(newNotebook);
   }
 
   static create(parent: Notebook, title: string) {
