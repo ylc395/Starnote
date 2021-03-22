@@ -1,13 +1,8 @@
 <script lang="ts">
-import { computed, defineComponent, inject } from 'vue';
+import { defineComponent } from 'vue';
 import { Menu } from 'ant-design-vue';
 import CommonContextmenu from 'drivers/web/components/Contextmenu/index.vue';
-import {
-  useContextmenu,
-  token,
-} from 'drivers/web/components/Contextmenu/useContextmenu';
-import { token as notebookCreatorToken } from './TreeViewer/NotebookTree/NotebookCreator/useNotebookCreator';
-import { Notebook } from 'domain/entity';
+import { useContextmenu } from './useContextmenu';
 
 export default defineComponent({
   components: {
@@ -16,32 +11,11 @@ export default defineComponent({
     CommonContextmenu,
   },
   setup() {
-    const { context } = inject<ReturnType<typeof useContextmenu>>(token)!;
-    const notebookCreator = inject(notebookCreatorToken, null);
-
-    const handleNotebook = (notebook: Notebook, key: string) => {
-      switch (key) {
-        case 'createNotebook':
-          notebookCreator?.startCreating(notebook);
-          break;
-        default:
-          break;
-      }
-    };
+    const { type, handleClick } = useContextmenu();
 
     return {
-      type: computed(() => {
-        if (Notebook.isA(context.value)) {
-          return 'notebook';
-        }
-
-        return 'note';
-      }),
-      handleClick({ key }: { key: string }) {
-        if (Notebook.isA(context.value)) {
-          handleNotebook(context.value, key);
-        }
-      },
+      type,
+      handleClick,
     };
   },
 });

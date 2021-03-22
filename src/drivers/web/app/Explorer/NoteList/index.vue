@@ -1,5 +1,4 @@
 <script lang="ts">
-import { partial } from 'lodash';
 import { defineComponent, inject, computed } from 'vue';
 import { List, Button, Input } from 'ant-design-vue';
 import {
@@ -23,7 +22,7 @@ import {
   token as editorToken,
 } from 'domain/service/EditorService';
 
-import Contextmenu from '../Contextmenu.vue';
+import Contextmenu from '../Contextmenu/index.vue';
 import { useContextmenu } from 'drivers/web/components/Contextmenu/useContextmenu';
 import { useDraggable } from './useDraggable';
 
@@ -44,7 +43,7 @@ export default defineComponent({
     const {
       openInEditor,
       createAndOpenInEditor,
-      isEditing,
+      isActive,
     } = inject<EditorService>(editorToken)!;
 
     const { noteList } = noteListService;
@@ -61,14 +60,12 @@ export default defineComponent({
       newNoteDisabled: computed(() => noteList.value.newNoteDisabled.value),
       isEmptyHistory,
       openInEditor,
-      isEditing,
+      isActive,
       openContextmenu,
       handleDragstart,
-      createAndOpenInEditor: partial(
-        createAndOpenInEditor,
-        noteListService,
-        false,
-      ),
+      createAndOpenInEditor: () => {
+        createAndOpenInEditor(noteList.value.notebook!, false);
+      },
     };
   },
 });
@@ -110,7 +107,7 @@ export default defineComponent({
           @click="openInEditor(item)"
           @contextmenu="openContextmenu($event, item)"
           :class="{
-            'bg-gray-200': isEditing(item.id).value,
+            'bg-gray-200': isActive(item.id).value,
             'bg-blue-50': item.withContextmenu.value,
           }"
           class="border-b-2 border-gray-200 px-3 hover:bg-blue-100"

@@ -8,6 +8,7 @@ import {
 } from 'domain/repository';
 import { container } from 'tsyringe';
 import { ItemTreeService } from './ItemTreeService';
+import { EditorService } from './EditorService';
 import { NoteList } from 'domain/entity/NoteList';
 
 const notebookRepository = container.resolve(NotebookRepository);
@@ -16,7 +17,10 @@ const noteRepository = container.resolve(NoteRepository);
 export const token = Symbol();
 export class NoteListService {
   readonly noteList: Ref<NoteList> = shallowRef(new NoteList());
-  constructor(private readonly itemTreeService: ItemTreeService) {
+  constructor(
+    private readonly itemTreeService: ItemTreeService,
+    private readonly editorService: EditorService,
+  ) {
     this.init();
   }
 
@@ -26,9 +30,12 @@ export class NoteListService {
   }
 
   private addNote(note: Note) {
-    if (note.parentId.value === this.noteList.value.notebook?.id) {
-      this.noteList.value.add(note);
+    if (note.parentId.value !== this.noteList.value.notebook?.id) {
+      return;
     }
+    // todo: 目前是从 editors 里找 note，以确保 noteList 中的 note 和 editor 中的是同一个。再想想有没有更好的做法
+    const noteInEditor = this.editorService.editorManager.getNoteById(note.id);
+    this.noteList.value.add(noteInEditor || note);
   }
 
   moveTo(noteId: Note['id'], notebook: Notebook) {

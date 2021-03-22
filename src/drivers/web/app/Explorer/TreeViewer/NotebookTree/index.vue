@@ -6,7 +6,7 @@ import { ItemTreeService, token } from 'domain/service/ItemTreeService';
 import { TreeItem } from 'domain/entity';
 import NotebookCreator from './NotebookCreator/index.vue';
 import { useNotebookCreator } from './NotebookCreator/useNotebookCreator';
-import Contextmenu from '../../Contextmenu.vue';
+import Contextmenu from '../../Contextmenu/index.vue';
 import { useContextmenu } from 'drivers/web/components/Contextmenu/useContextmenu';
 import { useDraggable } from './useDraggable';
 import { useTreeData } from './useTreeData';

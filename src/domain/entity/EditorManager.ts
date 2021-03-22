@@ -32,6 +32,11 @@ export class EditorManager {
     return result;
   }
 
+  getNoteById(id: Note['id']) {
+    return this._editors.find((editor) => editor.note.value?.id === id)?.note
+      .value;
+  }
+
   setActiveEditor(editor: Editor | Editor['id'], noteToLoad?: Note) {
     const editorInstance = Editor.isA(editor)
       ? editor

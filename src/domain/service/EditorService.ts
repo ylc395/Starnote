@@ -1,18 +1,18 @@
-import { NoteRepository } from 'domain/repository';
 import { computed, effect } from '@vue/reactivity';
 import { container } from 'tsyringe';
-import { EditorManager, Note } from 'domain/entity';
+import { EditorManager, Note, Notebook } from 'domain/entity';
+import { NoteRepository } from 'domain/repository';
 import { selfish } from 'utils/index';
 import { debounce } from 'lodash';
-import { NoteListService } from './NoteListService';
 import { NoteService } from './NoteService';
+import { ItemTreeService } from './ItemTreeService';
 
 const noteRepository = container.resolve(NoteRepository);
 export const token = Symbol();
 
 export class EditorService {
   editorManager = selfish(new EditorManager());
-  constructor() {
+  constructor(private readonly itemTreeService: ItemTreeService) {
     this.keepActiveNoteSynced();
   }
 
@@ -31,33 +31,17 @@ export class EditorService {
     });
   }
 
-  isEditing(noteId: Note['id']) {
+  isActive(noteId: Note['id']) {
     return computed(() => {
       return this.editorManager.activeEditor.value?.note.value?.id === noteId;
     });
   }
 
-  async createAndOpenInEditor(
-    noteListService: NoteListService,
-    parentSynced: boolean,
-  ) {
-    const { noteList } = noteListService;
+  async createAndOpenInEditor(parent: Notebook, parentSynced: boolean) {
+    const note = await NoteService.createEmptyNote(parent, parentSynced);
 
-    if (!noteList.value?.notebook) {
-      throw new Error('noteList is unavailable');
-    }
-
-    if (noteList.value.newNoteDisabled.value) {
-      return;
-    }
-
-    const note = await NoteService.createEmptyNote(
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      noteList.value.notebook,
-      parentSynced,
-    );
-
-    this.openInEditor(note, true);
+    await this.openInEditor(note, true);
+    this.itemTreeService.itemTree.setSelectedItem(parent);
   }
 
   async openInEditor(note: Note, isNew = false) {

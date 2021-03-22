@@ -10,7 +10,7 @@ import type { Ref, ComputedRef } from '@vue/reactivity';
 import { Note } from './Note';
 import { Notebook } from './Notebook';
 import { KvStorage } from 'utils/kvStorage';
-import { last, without } from 'lodash';
+import { isEqual, last, without } from 'lodash';
 import EventEmitter from 'eventemitter3';
 import { Class } from 'utils/types';
 
@@ -42,7 +42,13 @@ export class ItemTree extends EventEmitter {
   }
 
   setSelectedItem(item: TreeItem) {
-    this.selectedIds.value = [item.id];
+    const newSelectedItem = [item.id];
+
+    if (isEqual(newSelectedItem, this.selectedIds.value)) {
+      return;
+    }
+
+    this.selectedIds.value = newSelectedItem;
   }
 
   private maintainHistory() {
