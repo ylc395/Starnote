@@ -64,22 +64,8 @@ export class NotebookRepository extends Repository {
     });
   }
 
-  async loadChildren(notebook: Notebook, notebookOnly: boolean, force = false) {
-    if (notebook.isChildrenLoaded && !force) {
-      return;
-    }
-
-    const { notebooks, notes } = await this.queryChildrenOf(
-      notebook,
-      notebookOnly ? QueryEntityTypes.Notebook : QueryEntityTypes.All,
-    );
-    notebook.children.value = notebookOnly
-      ? notebooks
-      : [...notebooks, ...notes];
-  }
-
   @emit('itemFetched')
-  async queryOrCreateRootNotebook(notebookChildrenOnly: boolean) {
+  async queryOrCreateRootNotebook() {
     const root = await this.notebookDao!.one({ id: ROOT_NOTEBOOK_ID });
     const rootNotebook = root
       ? Notebook.from(root)
@@ -88,8 +74,6 @@ export class NotebookRepository extends Repository {
     if (!root) {
       await this.createNotebook(rootNotebook);
     }
-
-    this.loadChildren(rootNotebook, notebookChildrenOnly);
 
     return rootNotebook;
   }

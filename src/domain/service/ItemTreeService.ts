@@ -6,6 +6,7 @@ import {
 } from 'domain/repository';
 import { Note, Notebook, ItemTree, TreeItem } from 'domain/entity';
 import { selfish } from 'utils/index';
+import { NotebookService } from './NotebookService';
 
 const notebookRepository = container.resolve(NotebookRepository);
 const noteRepository = container.resolve(NoteRepository);
@@ -32,9 +33,13 @@ export class ItemTreeService {
       this.itemTree,
     );
 
-    const rootNotebook = await notebookRepository.queryOrCreateRootNotebook(
-      NOTEBOOK_ONLY,
-    );
+    this.initRoot();
+  }
+
+  private async initRoot() {
+    const rootNotebook = await notebookRepository.queryOrCreateRootNotebook();
+
+    NotebookService.loadChildren(rootNotebook, NOTEBOOK_ONLY);
     this.itemTree.loadRoot(rootNotebook);
   }
 
@@ -53,7 +58,7 @@ export class ItemTreeService {
       return;
     }
 
-    await notebookRepository.loadChildren(notebook, NOTEBOOK_ONLY);
+    await NotebookService.loadChildren(notebook, NOTEBOOK_ONLY);
 
     if (!this.itemTree.isExpanded(notebook)) {
       this.itemTree.expandedIds.value = [
