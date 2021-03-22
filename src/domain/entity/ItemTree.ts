@@ -9,7 +9,7 @@ import type { Ref } from '@vue/reactivity';
 import { Note } from './Note';
 import { Notebook } from './Notebook';
 import { KvStorage } from 'utils/kvStorage';
-import { last, pull } from 'lodash';
+import { isString, last, pull } from 'lodash';
 import EventEmitter from 'eventemitter3';
 import { Class } from 'utils/types';
 
@@ -83,12 +83,8 @@ export class ItemTree extends EventEmitter {
   }
 
   async expandNotebook(notebook: Notebook) {
-    if (notebook.isRoot) {
+    if (notebook.isRoot || this.isExpanded(notebook)) {
       return;
-    }
-
-    if (this.isExpanded(notebook)) {
-      throw new Error(`fail to expand notebook ${notebook.id}`);
     }
 
     this.expandedItems.push(notebook);
@@ -104,15 +100,18 @@ export class ItemTree extends EventEmitter {
     this.emit('sync', child);
   }
 
-  moveToRoot(child: TreeItem | TreeItemId) {
+  moveToRoot(child: Notebook | Notebook['id']) {
     if (!this.root.value) {
       throw new Error('no root notebook');
     }
 
-    this.moveTo(
-      isTreeItem(child) ? child : this.getItem(child),
-      this.root.value,
-    );
+    const _child = isString(child) ? this.getItem(child) : child;
+
+    if (!Notebook.isA(_child)) {
+      return;
+    }
+
+    this.moveTo(_child, this.root.value);
   }
 
   isExpanded(notebook: Notebook) {
