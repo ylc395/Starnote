@@ -102,6 +102,10 @@ export class ItemTree extends EventEmitter {
     this.moveTo(child, this.root.value);
   }
 
+  isExpanded(notebook: Notebook) {
+    return this.expandedIds.value.includes(notebook.id);
+  }
+
   static isTreeItem(instance: unknown): instance is TreeItem {
     return instance instanceof Notebook || instance instanceof Note;
   }

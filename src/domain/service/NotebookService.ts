@@ -24,7 +24,7 @@ export class NotebookService {
       throw new Error('no target notebook!');
     }
 
-    await this.notebookTree.expandNotebook(targetNotebook.id);
+    await this.notebookTree.expandNotebook(targetNotebook);
     const newNotebook = await NotebookService.create(targetNotebook, title);
 
     this.notebookTree.itemTree.setSelectedItem(newNotebook);

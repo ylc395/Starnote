@@ -28,11 +28,11 @@ export function useTreeData() {
       });
     }),
 
-    handleExpand(ids: Notebook['id'], { expanded, node }: ExpendEvent) {
-      const { key } = node.dataRef;
+    handleExpand(_: never, { expanded, node }: ExpendEvent) {
+      const { item } = node.dataRef;
 
-      if (expanded) {
-        expandNotebook(key);
+      if (expanded && Notebook.isA(item)) {
+        expandNotebook(item);
       }
     },
   };

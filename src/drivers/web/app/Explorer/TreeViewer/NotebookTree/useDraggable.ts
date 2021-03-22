@@ -35,10 +35,10 @@ export function useDraggable() {
     },
 
     handleDragenter: ({ node }: TreeDragEvent) => {
-      const { item, key } = node.dataRef;
+      const { item } = node.dataRef;
 
-      if (key !== draggingItem?.id && Notebook.isA(item)) {
-        expandNotebook(key);
+      if (Notebook.isA(item) && item.id !== draggingItem?.id) {
+        expandNotebook(item);
       }
     },
 

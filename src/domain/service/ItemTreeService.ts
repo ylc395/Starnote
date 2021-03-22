@@ -48,27 +48,16 @@ export class ItemTreeService {
     }
   }
 
-  async expandNotebook(
-    notebookId: Notebook['id'] | Notebook,
-    expandParent = true,
-  ) {
-    const notebook =
-      notebookId instanceof Notebook
-        ? notebookId
-        : this.itemTree.getItem(notebookId, Notebook);
-
+  async expandNotebook(notebook: Notebook) {
     if (notebook.isRoot) {
       return;
     }
 
-    await notebookRepository.loadChildren(notebook, NOTEBOOK_ONLY);
-
-    if (notebook.hasParent() && expandParent) {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      await this.expandNotebook(notebook.parentId.value!, true);
+    if (!notebook.children.value) {
+      await notebookRepository.loadChildren(notebook, NOTEBOOK_ONLY);
     }
 
-    if (!this.itemTree.expandedIds.value.includes(notebook.id)) {
+    if (!this.itemTree.isExpanded(notebook)) {
       this.itemTree.expandedIds.value = [
         ...this.itemTree.expandedIds.value,
         notebook.id,
