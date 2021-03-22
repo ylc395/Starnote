@@ -53,9 +53,7 @@ export class ItemTreeService {
       return;
     }
 
-    if (!notebook.children.value) {
-      await notebookRepository.loadChildren(notebook, NOTEBOOK_ONLY);
-    }
+    await notebookRepository.loadChildren(notebook, NOTEBOOK_ONLY);
 
     if (!this.itemTree.isExpanded(notebook)) {
       this.itemTree.expandedIds.value = [

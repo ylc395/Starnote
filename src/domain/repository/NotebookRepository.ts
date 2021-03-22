@@ -65,7 +65,7 @@ export class NotebookRepository extends Repository {
   }
 
   async loadChildren(notebook: Notebook, notebookOnly: boolean, force = false) {
-    if (notebook.children.value && !force) {
+    if (notebook.isChildrenLoaded && !force) {
       return;
     }
 
