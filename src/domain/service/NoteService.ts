@@ -5,6 +5,16 @@ import { container } from 'tsyringe';
 const noteRepository = container.resolve(NoteRepository);
 
 export class NoteService {
+  static async loadContent(note: Note) {
+    const noteDo = await noteRepository.queryNoteById(note.id, ['content']);
+
+    if (!noteDo) {
+      throw new Error(`no note(${note.id}) to load content`);
+    }
+
+    note.content.value = noteDo.content ?? '';
+  }
+
   static createEmptyNote(parent: Notebook, parentSynced: boolean) {
     const newNote = Note.from(
       {

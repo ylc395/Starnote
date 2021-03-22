@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { singleton, inject } from 'tsyringe';
-import { Do, Note, Notebook, isWithId } from 'domain/entity';
+import { Note, Notebook, isWithId, NoteDo } from 'domain/entity';
 import { Repository, emit } from './BaseRepository';
 import type { Dao } from './BaseRepository';
 import { NOTE_DAO_TOKEN, NOTEBOOK_DAO_TOKEN } from './daoTokens';
@@ -15,10 +15,19 @@ export class NoteRepository extends Repository {
   ) {
     super();
   }
-  queryNoteById(id: Note['id']) {
-    return this.noteDao!.one({ id }).then((note) =>
-      note ? Note.from(note) : note,
-    );
+  queryNoteById(id: Note['id']): Promise<Note | null>;
+  queryNoteById(
+    id: Note['id'],
+    fields: (keyof NoteDo)[],
+  ): Promise<NoteDo | null>;
+  queryNoteById(id: Note['id'], fields?: (keyof NoteDo)[]) {
+    if (!fields) {
+      return this.noteDao!.one({ id }).then((note) =>
+        note ? Note.from(note) : note,
+      );
+    }
+
+    return this.noteDao!.one({ id }, fields);
   }
 
   @emit('noteCreated')
@@ -32,18 +41,8 @@ export class NoteRepository extends Repository {
     return note;
   }
 
-  async loadContent(note: Note) {
-    const noteDo = await this.noteDao!.one({ id: note.id });
-
-    if (!noteDo) {
-      throw new Error(`no note(${note.id}) to load content`);
-    }
-
-    note.content.value = noteDo.content ?? '';
-  }
-
   updateNote(note: Note) {
-    const noteDo = omitBy(note.toDo(), isNil) as Do<Note>;
+    const noteDo = omitBy(note.toDo(), isNil) as NoteDo;
 
     if (!isWithId(noteDo)) {
       throw new Error('no noteId when update');

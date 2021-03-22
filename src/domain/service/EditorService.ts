@@ -62,7 +62,7 @@ export class EditorService {
 
   async openInEditor(note: Note, isNew = false) {
     if (!isNew) {
-      await noteRepository.loadContent(note);
+      await NoteService.loadContent(note);
     }
 
     this.editorManager.openInEditor(note);
