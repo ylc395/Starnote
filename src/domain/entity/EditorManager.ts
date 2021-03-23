@@ -6,7 +6,7 @@ import {
   computed,
   shallowReadonly,
 } from '@vue/reactivity';
-import { isEmpty, remove, without } from 'lodash';
+import { isEmpty, isNull, remove, without } from 'lodash';
 import { Editor } from './Editor';
 import type { Note } from './Note';
 
@@ -37,7 +37,12 @@ export class EditorManager {
       .value;
   }
 
-  setActiveEditor(editor: Editor | Editor['id'], noteToLoad?: Note) {
+  setActiveEditor(editor: Editor | Editor['id'] | null, noteToLoad?: Note) {
+    if (isNull(editor)) {
+      this._activeEditor.value = editor;
+      return;
+    }
+
     const editorInstance = Editor.isA(editor)
       ? editor
       : this.getEditorById(editor);
@@ -99,6 +104,8 @@ export class EditorManager {
 
     if (!isEmpty(this._editors)) {
       this.setActiveEditor(this._editors[index] || this._editors[index - 1]);
+    } else {
+      this.setActiveEditor(null);
     }
   }
 }

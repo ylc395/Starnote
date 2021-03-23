@@ -7,7 +7,7 @@ import { ListItem } from './abstract/ListItem';
 
 export class Editor extends EventEmitter implements ListItem {
   readonly withContextmenu = ref(false);
-  readonly id = uniqueId();
+  readonly id = uniqueId('editor-');
   readonly title = ref('');
   readonly content = ref('');
   private readonly _isActive = ref(false);
