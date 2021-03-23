@@ -42,7 +42,7 @@ export function useTreeData() {
           item,
           class: item.withContextmenu.value ? 'with-contextmenu' : '', // set class property to make rt reactive
           key: item.id,
-          title: item.title.value,
+          slots: { title: 'title' },
           isLeaf: !Notebook.isA(item),
           children: Notebook.isA(item)
             ? item.children.value?.map(mapper) ?? undefined

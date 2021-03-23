@@ -1,7 +1,11 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { Tree, Modal } from 'ant-design-vue';
-import { FolderOutlined, PlusOutlined } from '@ant-design/icons-vue';
+import {
+  FolderOutlined,
+  PlusOutlined,
+  ContainerOutlined,
+} from '@ant-design/icons-vue';
 import { TreeItem } from 'domain/entity';
 import NotebookCreator from './NotebookCreator/index.vue';
 import { useNotebookCreator } from './NotebookCreator/useNotebookCreator';
@@ -16,6 +20,7 @@ export default defineComponent({
     Modal,
     PlusOutlined,
     FolderOutlined,
+    ContainerOutlined,
     NotebookCreator,
     Contextmenu,
   },
@@ -94,7 +99,15 @@ export default defineComponent({
       @dragend="handleDragend"
       @dragleave="handleDragleave"
       @rightClick="openContextmenu($event.event, $event.node.dataRef.item)"
-    />
+    >
+      <template #title="{ item }"
+        >{{ item.title.value }}
+        <ContainerOutlined
+          v-if="item.indexNote.value"
+          class="ml-1 opacity-80"
+          title="这是一个目录笔记"
+      /></template>
+    </Tree>
     <Modal
       :visible="isCreating"
       :footer="null"
