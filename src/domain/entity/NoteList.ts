@@ -5,10 +5,18 @@ import EventEmitter from 'eventemitter3';
 import { pull } from 'lodash';
 
 export class NoteList extends EventEmitter {
-  constructor(readonly notebook?: Notebook) {
+  constructor(
+    // 只有临时占位凑数的 NoteList 才会没有 notebook
+    readonly notebook?: Notebook,
+  ) {
     super();
   }
-  readonly notes: Note[] = shallowReactive([]);
+  private readonly _notes: Note[] = shallowReactive([]);
+  readonly notes = computed(() => {
+    return this._notes.filter(
+      (note) => note.id !== this.notebook?.indexNote.value?.id,
+    );
+  });
   readonly newNoteDisabled = computed(() => {
     return this.notebook?.isRoot ?? true;
   });
@@ -18,18 +26,18 @@ export class NoteList extends EventEmitter {
       throw new Error("note's parent is wrong");
     }
 
-    if (this.notes.find(note.isEqual.bind(note))) {
+    if (this._notes.find(note.isEqual.bind(note))) {
       throw new Error(`note(${note.id}) already existed`);
     }
 
-    this.notes.push(note);
+    this._notes.push(note);
   }
   moveTo(noteId: Note['id'], notebook: Notebook) {
     return this.removeNoteById(noteId).setParent(notebook, false);
   }
 
   getNoteById(id: Note['id']) {
-    const note = this.notes.find((note) => note.id === id);
+    const note = this._notes.find((note) => note.id === id);
 
     if (!note) {
       throw new Error(`no such note(id: ${id})`);
@@ -41,7 +49,7 @@ export class NoteList extends EventEmitter {
   removeNoteById(id: Note['id']) {
     const note = this.getNoteById(id);
 
-    pull(this.notes, note);
+    pull(this._notes, note);
 
     return note;
   }
