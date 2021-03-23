@@ -49,6 +49,10 @@ export class Editor extends EventEmitter implements ListItem {
       throw new Error('load a note before editor activated!');
     }
 
+    if (this._isActive.value) {
+      return;
+    }
+
     this._isActive.value = true;
     this.saveRunner = effect(this.saveNote.bind(this));
   }
