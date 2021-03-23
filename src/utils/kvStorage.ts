@@ -45,6 +45,14 @@ export class KvStorage {
     });
   }
 
+  has<T>(key: unknown, type?: Class<T>) {
+    try {
+      return type ? !!this.getItem(key, type) : this.map.has(key);
+    } catch {
+      return false;
+    }
+  }
+
   remove(itemKey: unknown | unknown[]) {
     if (Array.isArray(itemKey)) {
       itemKey.forEach(this.map.delete.bind(this.map));

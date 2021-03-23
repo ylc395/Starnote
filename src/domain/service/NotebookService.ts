@@ -7,36 +7,43 @@ import { NoteService } from './NoteService';
 
 const notebookRepository = container.resolve(NotebookRepository);
 
+export const token = Symbol();
 export class NotebookService {
-  readonly notebook: Notebook | null;
-  constructor(private readonly itemTree: ItemTreeService, notebook?: Notebook) {
-    this.notebook = Notebook.isA(notebook)
-      ? notebook
-      : this.itemTree.itemTree.root.value;
-  }
+  constructor(
+    private readonly editorService: EditorService,
+    private readonly itemTreeService: ItemTreeService,
+  ) {}
+  async createSubNotebook(title: string, parent?: unknown) {
+    const target = Notebook.isA(parent)
+      ? parent
+      : this.itemTreeService.itemTree.root.value;
 
-  async createSubNotebook(title: string) {
-    if (!Notebook.isA(this.notebook)) {
-      throw new Error('no target notebook!');
+    if (!Notebook.isA(target)) {
+      throw new Error('sub notebook parent is not a notebook');
     }
 
-    await this.itemTree.expandNotebook(this.notebook);
-    const newNotebook = await NotebookService.create(this.notebook, title);
-
-    this.itemTree.itemTree.setSelectedItem(newNotebook);
+    await this.itemTreeService.expandNotebook(target);
+    const newNotebook = await NotebookService.create(target, title);
+    this.itemTreeService.itemTree.setSelectedItem(newNotebook);
 
     return newNotebook;
   }
 
-  async createIndexNote(title: string, editorService: EditorService) {
-    const newNotebook = await this.createSubNotebook(title);
-    const newNote = await NoteService.createEmptyNote(newNotebook, false, {
-      title,
-    });
+  async createIndexNote(title: string, parent?: unknown) {
+    const target = Notebook.isA(parent)
+      ? parent
+      : this.itemTreeService.itemTree.root.value;
+
+    if (!Notebook.isA(target)) {
+      throw new Error('sub notebook parent is not a notebook');
+    }
+
+    const newNotebook = await this.createSubNotebook(title, target);
+    const newNote = await NoteService.createEmptyNote(target, false, { title });
 
     newNotebook.indexNote.value = newNote;
     notebookRepository.updateNotebook(newNotebook);
-    editorService.openInEditor(newNote, newNotebook);
+    this.editorService.openInEditor(newNotebook);
   }
 
   static create(parent: Notebook, title: string) {

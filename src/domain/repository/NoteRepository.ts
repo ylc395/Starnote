@@ -7,6 +7,9 @@ import { NOTE_DAO_TOKEN, NOTEBOOK_DAO_TOKEN } from './daoTokens';
 import { TIME_FORMAT } from 'domain/constant';
 import { isNil, omitBy } from 'lodash';
 
+export enum NoteEvents {
+  NoteCreated = 'NOTE_CREATED',
+}
 @singleton()
 export class NoteRepository extends Repository {
   constructor(
@@ -30,7 +33,7 @@ export class NoteRepository extends Repository {
     return this.noteDao!.one({ id }, fields);
   }
 
-  @emit('noteCreated')
+  @emit(NoteEvents.NoteCreated)
   async createNote(note: Note) {
     this.notebookDao!.update({
       id: note.parentId.value,

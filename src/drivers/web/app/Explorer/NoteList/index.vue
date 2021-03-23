@@ -25,6 +25,7 @@ import {
 import Contextmenu from '../Contextmenu/index.vue';
 import { useContextmenu as useCommonContextmenu } from 'drivers/web/components/Contextmenu/useContextmenu';
 import { useDraggable } from './useDraggable';
+import { NoteService, token as noteToken } from 'domain/service/NoteService';
 
 export default defineComponent({
   components: {
@@ -38,20 +39,15 @@ export default defineComponent({
     Contextmenu,
   },
   setup() {
-    const itemTreeService = inject<ItemTreeService>(ItemTreeToken)!;
-    const noteListService = inject<NoteListService>(noteListToken)!;
-    const {
-      openInEditor,
-      createAndOpenInEditor,
-      isActive,
-    } = inject<EditorService>(editorToken)!;
-
-    const { noteList } = noteListService;
-    const { open: openContextmenu } = useCommonContextmenu<Note>();
-    const { handleDragstart } = useDraggable();
     const {
       itemTree: { historyBack, isEmptyHistory },
-    } = itemTreeService;
+    } = inject<ItemTreeService>(ItemTreeToken)!;
+    const { noteList } = inject<NoteListService>(noteListToken)!;
+    const { openInEditor, isActive } = inject<EditorService>(editorToken)!;
+    const { createAndOpenInEditor } = inject<NoteService>(noteToken)!;
+
+    const { open: openContextmenu } = useCommonContextmenu<Note>();
+    const { handleDragstart } = useDraggable();
 
     return {
       EMPTY_TITLE,

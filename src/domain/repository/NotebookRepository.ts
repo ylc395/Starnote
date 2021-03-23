@@ -11,6 +11,13 @@ export enum QueryEntityTypes {
   All = 'All',
 }
 
+export enum NotebookEvents {
+  ItemFetched = 'ITEM_FETCHED',
+  NoteFetched = 'NOTE_FETCHED',
+  NotebookFetched = 'NOTEBOOK_FETCHED',
+  NotebookCreated = 'NOTEBOOK_CREATED',
+}
+
 export interface Children {
   notes: Note[];
   notebooks: Notebook[];
@@ -24,7 +31,7 @@ export class NotebookRepository extends Repository {
     super();
   }
 
-  @emit('itemFetched')
+  @emit(NotebookEvents.ItemFetched)
   queryChildrenOf(
     notebook: Notebook | Notebook['id'],
     type: QueryEntityTypes,
@@ -49,7 +56,7 @@ export class NotebookRepository extends Repository {
           ]);
 
     return Promise.all([notebooks, notes]).then(([notebooks, notes]) => {
-      return {
+      const result = {
         notes: notes.map((note) => {
           return Notebook.isA(notebook)
             ? Note.from(note, notebook)
@@ -61,10 +68,15 @@ export class NotebookRepository extends Repository {
             : Notebook.from(notebookDo);
         }),
       };
+
+      this.emit(NotebookEvents.NotebookFetched, result.notebooks);
+      this.emit(NotebookEvents.NoteFetched, result.notes);
+      return result;
     });
   }
 
-  @emit('itemFetched')
+  @emit(NotebookEvents.NotebookFetched)
+  @emit(NotebookEvents.ItemFetched)
   async queryOrCreateRootNotebook() {
     const root = await this.notebookDao!.one({ id: ROOT_NOTEBOOK_ID });
     const rootNotebook = root
@@ -78,7 +90,7 @@ export class NotebookRepository extends Repository {
     return rootNotebook;
   }
 
-  @emit('notebookCreated')
+  @emit(NotebookEvents.NotebookCreated)
   async createNotebook(notebook: Notebook) {
     await this.notebookDao!.create(notebook.toDo());
     return notebook;

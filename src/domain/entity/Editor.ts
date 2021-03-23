@@ -4,6 +4,7 @@ import dayjs from 'dayjs';
 import EventEmitter from 'eventemitter3';
 import { after, uniqueId } from 'lodash';
 import { ListItem } from './abstract/ListItem';
+import { EntityEvents } from './abstract/Entity';
 
 export class Editor extends EventEmitter implements ListItem {
   readonly withContextmenu = ref(false);
@@ -17,7 +18,7 @@ export class Editor extends EventEmitter implements ListItem {
   private saveRunner?: ReturnType<typeof effect>;
   // only emit after activating
   private readonly emitSaved = after(2, () => {
-    this.emit('saved', this._note.value);
+    this.emit(EntityEvents.Saved, this._note.value);
   });
   constructor(note: Note | null = null) {
     super();

@@ -13,6 +13,7 @@ import { isString, last, pull } from 'lodash';
 import EventEmitter from 'eventemitter3';
 import { Class } from 'utils/types';
 import { EditorService } from 'domain/service/EditorService';
+import { EntityEvents } from './abstract/Entity';
 
 type TreeItemId = Notebook['id'] | Note['id'];
 export type TreeItem = Notebook | Note;
@@ -36,7 +37,7 @@ export class ItemTree extends EventEmitter {
   }
 
   setSelectedItem(item: TreeItem, editorService?: EditorService) {
-    if (item.isEqual(this.selectedItem.value)) {
+    if (item.isEqual(this.selectedItem.value) || !this.itemsKV.has(item.id)) {
       return;
     }
 
@@ -102,7 +103,7 @@ export class ItemTree extends EventEmitter {
 
     child.setParent(parent);
     this.setSelectedItem(child);
-    this.emit('sync', child);
+    this.emit(EntityEvents.Sync, child);
   }
 
   moveToRoot(child: Notebook | Notebook['id']) {
@@ -125,9 +126,9 @@ export class ItemTree extends EventEmitter {
     return this.expandedItems.findIndex(isEqual) >= 0;
   }
 
-  static isTreeItem(instance: unknown): instance is TreeItem {
+  static isA(instance: unknown): instance is TreeItem {
     return instance instanceof Notebook || instance instanceof Note;
   }
 }
 
-export const isTreeItem = ItemTree.isTreeItem;
+export const isTreeItem = ItemTree.isA;

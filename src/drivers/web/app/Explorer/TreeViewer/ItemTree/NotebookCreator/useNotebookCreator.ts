@@ -1,30 +1,30 @@
-import { NotebookService } from 'domain/service/NotebookService';
-import { Notebook } from 'domain/entity/Notebook';
-import {
-  ItemTreeService,
-  token as ItemTreeToken,
-} from 'domain/service/ItemTreeService';
-import { inject, ref, provide, computed, shallowRef } from 'vue';
+import { inject, ref, shallowRef, provide, computed } from 'vue';
 import type { InjectionKey, Ref } from 'vue';
+import { TreeItem } from 'domain/entity';
 import {
-  EditorService,
-  token as editorToken,
-} from 'domain/service/EditorService';
+  NotebookService,
+  token as notebookToken,
+} from 'domain/service/NotebookService';
+import { Notebook } from 'domain/entity/Notebook';
 
 export const token: InjectionKey<
   ReturnType<typeof useNotebookCreator>
 > = Symbol();
 
 export function useNotebookCreator() {
-  const notebookService: Ref<NotebookService | null> = shallowRef(null);
-  const itemTreeService = inject<ItemTreeService>(ItemTreeToken)!;
-  const editorService = inject<EditorService>(editorToken)!;
+  const { createIndexNote, createSubNotebook } = inject<NotebookService>(
+    notebookToken,
+  )!;
   const isCreating = ref(false);
   const title = ref('');
+
+  let _type = '';
+  const _target: Ref<TreeItem | undefined | null> = shallowRef(null);
   const path = computed(() => {
-    let node = notebookService.value?.notebook;
+    let node = _target.value;
     const path = [];
-    while (node) {
+
+    while (Notebook.isA(node)) {
       if (!node.isRoot) {
         path.push(node.title.value);
       }
@@ -41,24 +41,24 @@ export function useNotebookCreator() {
     stopCreating(true);
   };
 
-  let _type = '';
-
   function startCreating(
     target?: Notebook,
     type: 'notebook' | 'indexNote' = 'notebook',
   ) {
     _type = type;
-    notebookService.value = new NotebookService(itemTreeService, target);
+    _target.value = target;
+    console.log(_target.value);
+
     isCreating.value = true;
   }
 
   function stopCreating(isConfirmed: boolean) {
     if (isConfirmed && _type === 'notebook') {
-      notebookService!.value!.createSubNotebook(title.value);
+      createSubNotebook(title.value, _target.value);
     }
 
     if (isConfirmed && _type === 'indexNote') {
-      notebookService!.value!.createIndexNote(title.value, editorService);
+      createIndexNote(title.value, _target.value);
     }
 
     title.value = '';

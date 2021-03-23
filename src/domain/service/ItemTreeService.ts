@@ -2,6 +2,7 @@ import { container } from 'tsyringe';
 import {
   Children,
   NotebookRepository,
+  NotebookEvents,
   NoteRepository,
 } from 'domain/repository';
 import { Note, Notebook, ItemTree, TreeItem } from 'domain/entity';
@@ -21,14 +22,21 @@ export class ItemTreeService {
   private async init() {
     this.itemTree.on('sync', this.syncItem);
 
-    notebookRepository.on('itemFetched', (items: TreeItem | Children) => {
-      this.itemTree.putItem(
-        'id' in items ? items : [...items.notebooks, ...items.notes],
-      );
-    });
+    notebookRepository.on(
+      NotebookEvents.NotebookFetched,
+      (items: TreeItem | TreeItem[] | Children) => {
+        this.itemTree.putItem(
+          Array.isArray(items)
+            ? items
+            : 'id' in items
+            ? items
+            : [...items.notebooks, ...items.notes],
+        );
+      },
+    );
 
     notebookRepository.on(
-      'notebookCreated',
+      NotebookEvents.NotebookCreated,
       this.itemTree.putItem,
       this.itemTree,
     );

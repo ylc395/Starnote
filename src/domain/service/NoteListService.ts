@@ -3,6 +3,7 @@ import type { Ref } from '@vue/reactivity';
 import { Note, Notebook } from 'domain/entity';
 import {
   NotebookRepository,
+  NoteEvents,
   NoteRepository,
   QueryEntityTypes,
 } from 'domain/repository';
@@ -25,7 +26,7 @@ export class NoteListService {
   }
 
   private init() {
-    noteRepository.on('noteCreated', this.addNote, this);
+    noteRepository.on(NoteEvents.NoteCreated, this.addNote, this);
     effect(this.refreshNoteList.bind(this));
   }
 

@@ -10,7 +10,7 @@ import {
 import { container } from 'tsyringe';
 import { isEmpty, isNull, remove, without, debounce } from 'lodash';
 import { NoteRepository } from 'domain/repository';
-import { Note, Editor, Notebook } from 'domain/entity';
+import { Note, Editor, Notebook, TreeItem, EntityEvents } from 'domain/entity';
 import type { ItemTreeService } from './ItemTreeService';
 import { NoteService } from './NoteService';
 
@@ -40,7 +40,7 @@ export class EditorService {
       }
 
       activeEditor.on(
-        'saved',
+        EntityEvents.Saved,
         debounce(noteRepository.updateNote.bind(noteRepository), 500),
       );
     });
@@ -108,13 +108,15 @@ export class EditorService {
     });
   }
 
-  async createAndOpenInEditor(parent: Notebook, parentSynced: boolean) {
-    const note = await NoteService.createEmptyNote(parent, parentSynced);
-    await this.openInEditor(note, parent);
-  }
+  async openInEditor(item: TreeItem) {
+    if (Notebook.isA(item)) {
+      if (item.indexNote.value) {
+        this.openIndexNoteInEditor(item.indexNote.value);
+      }
+      return;
+    }
 
-  async openInEditor(item: Note | Notebook, parent: Notebook | null = null) {
-    const note = Notebook.isA(item) ? item.indexNote.value : item;
+    const note = item;
 
     if (!note) {
       return;
@@ -138,9 +140,10 @@ export class EditorService {
     await NoteService.loadContent(note);
     this._editors.push(newEditor);
     this.setActiveEditor(newEditor);
+    this.itemTreeService.itemTree.setSelectedItem(note);
+  }
 
-    if (parent) {
-      this.itemTreeService.itemTree.setSelectedItem(parent);
-    }
+  private async openIndexNoteInEditor(note: Note) {
+    note;
   }
 }
