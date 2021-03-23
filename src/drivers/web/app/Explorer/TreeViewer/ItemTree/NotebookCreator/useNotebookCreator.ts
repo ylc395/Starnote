@@ -47,7 +47,6 @@ export function useNotebookCreator() {
   ) {
     _type = type;
     _target.value = target;
-    console.log(_target.value);
 
     isCreating.value = true;
   }

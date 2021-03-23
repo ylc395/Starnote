@@ -39,7 +39,9 @@ export class NotebookService {
     }
 
     const newNotebook = await this.createSubNotebook(title, target);
-    const newNote = await NoteService.createEmptyNote(target, false, { title });
+    const newNote = await NoteService.createEmptyNote(newNotebook, false, {
+      title,
+    });
 
     newNotebook.indexNote.value = newNote;
     notebookRepository.updateNotebook(newNotebook);

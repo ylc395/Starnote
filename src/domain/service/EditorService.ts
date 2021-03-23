@@ -109,14 +109,7 @@ export class EditorService {
   }
 
   async openInEditor(item: TreeItem) {
-    if (Notebook.isA(item)) {
-      if (item.indexNote.value) {
-        this.openIndexNoteInEditor(item.indexNote.value);
-      }
-      return;
-    }
-
-    const note = item;
+    const note = Notebook.isA(item) ? item.indexNote.value : item;
 
     if (!note) {
       return;
@@ -131,19 +124,20 @@ export class EditorService {
       return;
     }
 
+    const newEditor = new Editor(note);
+    await NoteService.loadContent(note);
+
+    this.safeAddEditor(newEditor);
+    this.setActiveEditor(newEditor);
+    this.itemTreeService.itemTree.setSelectedItem(note);
+  }
+
+  private safeAddEditor(editor: Editor) {
     if (this._editors.length >= this.maxEditorCount.value) {
       const lastEditor = this._editors.shift();
       lastEditor?.destroy();
     }
 
-    const newEditor = new Editor(note);
-    await NoteService.loadContent(note);
-    this._editors.push(newEditor);
-    this.setActiveEditor(newEditor);
-    this.itemTreeService.itemTree.setSelectedItem(note);
-  }
-
-  private async openIndexNoteInEditor(note: Note) {
-    note;
+    this._editors.push(editor);
   }
 }

@@ -4,7 +4,7 @@ import { Tree, Modal } from 'ant-design-vue';
 import {
   FolderOutlined,
   PlusOutlined,
-  ContainerOutlined,
+  FileOutlined,
 } from '@ant-design/icons-vue';
 import { TreeItem } from 'domain/entity';
 import NotebookCreator from './NotebookCreator/index.vue';
@@ -20,7 +20,7 @@ export default defineComponent({
     Modal,
     PlusOutlined,
     FolderOutlined,
-    ContainerOutlined,
+    FileOutlined,
     NotebookCreator,
     Contextmenu,
   },
@@ -76,7 +76,7 @@ export default defineComponent({
       </h1>
       <div>
         <button
-          @click="startCreating"
+          @click="startCreating()"
           class="bg-transparent border-none cursor-pointer focus:outline-none"
         >
           <PlusOutlined />
@@ -102,7 +102,7 @@ export default defineComponent({
     >
       <template #title="{ item }"
         >{{ item.title.value }}
-        <ContainerOutlined
+        <FileOutlined
           v-if="item.indexNote.value"
           class="ml-1 opacity-80"
           title="这是一个目录笔记"
