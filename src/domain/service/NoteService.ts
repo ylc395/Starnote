@@ -1,11 +1,16 @@
 import { Note, Notebook, NoteDo } from 'domain/entity';
 import { NoteRepository } from 'domain/repository';
 import { container } from 'tsyringe';
+import { isNull } from 'lodash';
 
 const noteRepository = container.resolve(NoteRepository);
 
 export class NoteService {
-  static async loadContent(note: Note) {
+  static async loadContent(note: Note, forced = false) {
+    if (!forced && !isNull(note.content.value)) {
+      return;
+    }
+
     const noteDo = await noteRepository.queryNoteById(note.id, ['content']);
 
     if (!noteDo) {

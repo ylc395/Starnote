@@ -36,7 +36,7 @@ export class NotebookService {
 
     newNotebook.indexNote.value = newNote;
     notebookRepository.updateNotebook(newNotebook);
-    editorService.openInEditor(newNote, true, newNotebook);
+    editorService.openInEditor(newNote, newNotebook);
   }
 
   static create(parent: Notebook, title: string) {

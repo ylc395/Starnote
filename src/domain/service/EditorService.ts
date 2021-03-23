@@ -31,8 +31,22 @@ export class EditorService {
   constructor(private readonly itemTreeService: ItemTreeService) {
     this.keepActiveNoteSynced();
   }
+  private keepActiveNoteSynced() {
+    effect(() => {
+      const activeEditor = this.activeEditor.value;
 
-  getEditorById(id: Editor['id']) {
+      if (!activeEditor || !activeEditor.note.value) {
+        return;
+      }
+
+      activeEditor.on(
+        'saved',
+        debounce(noteRepository.updateNote.bind(noteRepository), 500),
+      );
+    });
+  }
+
+  private getEditorById(id: Editor['id']) {
     const result = this._editors.find((editor) => editor.id === id);
 
     if (!result) {
@@ -69,16 +83,6 @@ export class EditorService {
     );
   }
 
-  activateEditor() {
-    const activeEditor = this._activeEditor.value;
-
-    if (!activeEditor) {
-      return;
-    }
-
-    activeEditor.activate();
-  }
-
   closeEditorById(id: Editor['id']) {
     const byId = (editor: Editor) => editor.id === id;
     const index = this._editors.findIndex(byId);
@@ -98,21 +102,6 @@ export class EditorService {
     }
   }
 
-  private keepActiveNoteSynced() {
-    effect(() => {
-      const activeEditor = this.activeEditor.value;
-
-      if (!activeEditor || !activeEditor.note.value) {
-        return;
-      }
-
-      activeEditor.on(
-        'saved',
-        debounce(noteRepository.updateNote.bind(noteRepository), 500),
-      );
-    });
-  }
-
   isActive(noteId: Note['id']) {
     return computed(() => {
       return this.activeEditor.value?.note.value?.id === noteId;
@@ -121,14 +110,10 @@ export class EditorService {
 
   async createAndOpenInEditor(parent: Notebook, parentSynced: boolean) {
     const note = await NoteService.createEmptyNote(parent, parentSynced);
-    await this.openInEditor(note, true, parent);
+    await this.openInEditor(note, parent);
   }
 
-  async openInEditor(
-    item: Note | Notebook,
-    isNew = false,
-    parent: Notebook | null = null,
-  ) {
+  async openInEditor(item: Note | Notebook, parent: Notebook | null = null) {
     const note = Notebook.isA(item) ? item.indexNote.value : item;
 
     if (!note) {
@@ -150,11 +135,7 @@ export class EditorService {
     }
 
     const newEditor = new Editor(note);
-
-    if (!isNew) {
-      await NoteService.loadContent(note);
-    }
-
+    await NoteService.loadContent(note);
     this._editors.push(newEditor);
     this.setActiveEditor(newEditor);
 
