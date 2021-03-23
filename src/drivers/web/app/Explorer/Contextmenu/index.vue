@@ -21,23 +21,25 @@ export default defineComponent({
 });
 </script>
 <template>
-  <CommonContextmenu @click="handleClick">
+  <CommonContextmenu @click="handleClick" class="w-32">
     <template v-if="type === 'notebook'">
-      <MenuItem key="createNotebook">新建笔记本</MenuItem>
+      <SubMenu title="新建笔记本" key="aaa">
+        <MenuItem key="createNotebook">笔记本</MenuItem>
+        <MenuItem key="createIndexNote">目录笔记</MenuItem>
+      </SubMenu>
       <MenuItem key="createNote">新建笔记</MenuItem>
-      <MenuItem key="createIndexNote">编写目录笔记</MenuItem>
     </template>
     <MenuItem key="remove">删除</MenuItem>
     <MenuItem key="rename">重命名</MenuItem>
-    <SubMenu title="排序方式" key="sortBy" v-if="type === 'notebook'">
-      <MenuItem key="title">按标题</MenuItem>
-      <MenuItem key="lastModifiedAt">按修改日期</MenuItem>
-      <MenuItem key="createdAt">按创建日期</MenuItem>
-      <MenuItem key="custom">手动排序</MenuItem>
+    <SubMenu title="排序方式" v-if="type === 'notebook'">
+      <MenuItem key="sortByTitle">按标题</MenuItem>
+      <MenuItem key="sortByLastModifiedAt">按修改日期</MenuItem>
+      <MenuItem key="sortByCreatedAt">按创建日期</MenuItem>
+      <MenuItem key="sortByCustom">手动排序</MenuItem>
     </SubMenu>
-    <SubMenu title="升序/降序" key="sortOrder" v-if="type === 'notebook'">
-      <MenuItem key="asc">升序</MenuItem>
-      <MenuItem key="desc">降序</MenuItem>
+    <SubMenu title="升序/降序" v-if="type === 'notebook'">
+      <MenuItem key="orderAsc">升序</MenuItem>
+      <MenuItem key="orderDesc">降序</MenuItem>
     </SubMenu>
   </CommonContextmenu>
 </template>

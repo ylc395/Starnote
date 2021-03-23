@@ -39,16 +39,28 @@ export class EditorService {
 
   async createAndOpenInEditor(parent: Notebook, parentSynced: boolean) {
     const note = await NoteService.createEmptyNote(parent, parentSynced);
-
-    await this.openInEditor(note, true);
-    this.itemTreeService.itemTree.setSelectedItem(parent);
+    await this.openInEditor(note, true, parent);
   }
 
-  async openInEditor(note: Note, isNew = false) {
+  async openInEditor(
+    item: Note | Notebook,
+    isNew = false,
+    parent: Notebook | null = null,
+  ) {
+    const note = Notebook.isA(item) ? item.indexNote.value : item;
+
+    if (!note) {
+      return;
+    }
+
     if (!isNew) {
       await NoteService.loadContent(note);
     }
 
     this.editorManager.openInEditor(note);
+
+    if (parent) {
+      this.itemTreeService.itemTree.setSelectedItem(parent);
+    }
   }
 }

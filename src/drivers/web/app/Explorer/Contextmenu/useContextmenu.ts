@@ -23,6 +23,9 @@ export function useContextmenu() {
       case 'createNote':
         createAndOpenInEditor(notebook, false);
         return;
+      case 'createIndexNote':
+        notebookCreator?.startCreating(notebook, 'indexNote');
+        return;
       default:
         break;
     }

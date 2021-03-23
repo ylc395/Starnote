@@ -1,4 +1,4 @@
-import { Note, Notebook } from 'domain/entity';
+import { Note, Notebook, NoteDo } from 'domain/entity';
 import { NoteRepository } from 'domain/repository';
 import { container } from 'tsyringe';
 
@@ -15,11 +15,16 @@ export class NoteService {
     note.content.value = noteDo.content ?? '';
   }
 
-  static createEmptyNote(parent: Notebook, parentSynced: boolean) {
+  static createEmptyNote(
+    parent: Notebook,
+    parentSynced: boolean,
+    note: NoteDo = {},
+  ) {
     const newNote = Note.from(
       {
         title: 'untitled note',
         content: '',
+        ...note,
         ...(parentSynced ? null : { parentId: parent.id }),
       },
       parentSynced ? parent : undefined,

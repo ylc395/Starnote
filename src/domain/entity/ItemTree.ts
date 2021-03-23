@@ -12,6 +12,7 @@ import { KvStorage } from 'utils/kvStorage';
 import { isString, last, pull } from 'lodash';
 import EventEmitter from 'eventemitter3';
 import { Class } from 'utils/types';
+import { EditorService } from 'domain/service/EditorService';
 
 type TreeItemId = Notebook['id'] | Note['id'];
 export type TreeItem = Notebook | Note;
@@ -34,12 +35,16 @@ export class ItemTree extends EventEmitter {
     this.root.value = notebook;
   }
 
-  setSelectedItem(item: TreeItem) {
+  setSelectedItem(item: TreeItem, editorService?: EditorService) {
     if (item.isEqual(this.selectedItem.value)) {
       return;
     }
 
     this.selectedItem.value = item;
+
+    if (editorService) {
+      editorService.openInEditor(item);
+    }
   }
 
   private maintainHistory() {

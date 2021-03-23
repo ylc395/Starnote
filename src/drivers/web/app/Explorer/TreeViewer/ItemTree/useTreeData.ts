@@ -1,4 +1,11 @@
-import { ItemTreeService, token } from 'domain/service/ItemTreeService';
+import {
+  ItemTreeService,
+  token as itemTreeToken,
+} from 'domain/service/ItemTreeService';
+import {
+  EditorService,
+  token as editorToken,
+} from 'domain/service/EditorService';
 import type {
   ExpendEvent,
   SelectEvent,
@@ -18,7 +25,9 @@ export function useTreeData() {
       foldNotebook,
     },
     expandNotebook,
-  } = inject<ItemTreeService>(token)!;
+  } = inject<ItemTreeService>(itemTreeToken)!;
+
+  const editorService = inject<EditorService>(editorToken)!;
 
   return {
     treeData: computed<TreeDataItem>(() => {
@@ -48,7 +57,7 @@ export function useTreeData() {
       const { item } = node.dataRef;
 
       if (selected && isTreeItem(item)) {
-        setSelectedItem(item);
+        setSelectedItem(item, editorService);
       }
     },
 

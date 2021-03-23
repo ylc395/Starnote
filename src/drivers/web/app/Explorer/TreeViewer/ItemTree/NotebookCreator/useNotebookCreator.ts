@@ -6,6 +6,10 @@ import {
 } from 'domain/service/ItemTreeService';
 import { inject, ref, provide, computed, shallowRef } from 'vue';
 import type { InjectionKey, Ref } from 'vue';
+import {
+  EditorService,
+  token as editorToken,
+} from 'domain/service/EditorService';
 
 export const token: InjectionKey<
   ReturnType<typeof useNotebookCreator>
@@ -14,6 +18,7 @@ export const token: InjectionKey<
 export function useNotebookCreator() {
   const notebookService: Ref<NotebookService | null> = shallowRef(null);
   const itemTreeService = inject<ItemTreeService>(ItemTreeToken)!;
+  const editorService = inject<EditorService>(editorToken)!;
   const isCreating = ref(false);
   const title = ref('');
   const path = computed(() => {
@@ -36,15 +41,26 @@ export function useNotebookCreator() {
     stopCreating(true);
   };
 
-  function startCreating(target?: Notebook) {
+  let _type = '';
+
+  function startCreating(
+    target?: Notebook,
+    type: 'notebook' | 'indexNote' = 'notebook',
+  ) {
+    _type = type;
     notebookService.value = new NotebookService(itemTreeService, target);
     isCreating.value = true;
   }
 
   function stopCreating(isConfirmed: boolean) {
-    if (isConfirmed) {
+    if (isConfirmed && _type === 'notebook') {
       notebookService!.value!.createSubNotebook(title.value);
     }
+
+    if (isConfirmed && _type === 'indexNote') {
+      notebookService!.value!.createIndexNote(title.value, editorService);
+    }
+
     title.value = '';
     isCreating.value = false;
   }

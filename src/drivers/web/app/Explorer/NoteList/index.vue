@@ -55,7 +55,7 @@ export default defineComponent({
 
     return {
       EMPTY_TITLE,
-      notes: computed(() => noteList.value.notes),
+      notes: computed(() => noteList.value.notes.value),
       historyBack,
       newNoteDisabled: computed(() => noteList.value.newNoteDisabled.value),
       isEmptyHistory,
