@@ -52,7 +52,6 @@ export class Note extends Hierarchic<Notebook> implements ListItem {
       throw new Error('wrong parent, since two ids are not equal');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     note.setParent(parent);
 
     return note;
