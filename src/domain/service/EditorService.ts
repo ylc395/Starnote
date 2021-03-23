@@ -1,24 +1,106 @@
-import { computed, effect } from '@vue/reactivity';
+import {
+  shallowReactive,
+  ref,
+  shallowRef,
+  Ref,
+  computed,
+  shallowReadonly,
+  effect,
+} from '@vue/reactivity';
 import { container } from 'tsyringe';
-import { EditorManager, Note, Notebook } from 'domain/entity';
+import { isEmpty, isNull, remove, without, debounce } from 'lodash';
 import { NoteRepository } from 'domain/repository';
-import { selfish } from 'utils/index';
-import { debounce } from 'lodash';
+import { Note, Editor, Notebook } from 'domain/entity';
+import type { ItemTreeService } from './ItemTreeService';
 import { NoteService } from './NoteService';
-import { ItemTreeService } from './ItemTreeService';
 
 const noteRepository = container.resolve(NoteRepository);
-export const token = Symbol();
 
+const MAX_EDITOR_COUNT = 3;
+export const token = Symbol();
 export class EditorService {
-  editorManager = selfish(new EditorManager());
+  private readonly maxEditorCount = ref(MAX_EDITOR_COUNT);
+  private readonly _editors: Editor[] = shallowReactive([]);
+  readonly editors = computed(() => {
+    return shallowReadonly(this._editors);
+  });
+  private _activeEditor: Ref<Editor | null> = shallowRef(null);
+  readonly activeEditor = computed(() => {
+    return this._activeEditor.value;
+  });
   constructor(private readonly itemTreeService: ItemTreeService) {
     this.keepActiveNoteSynced();
   }
 
+  getEditorById(id: Editor['id']) {
+    const result = this._editors.find((editor) => editor.id === id);
+
+    if (!result) {
+      throw new Error(`wrong editor id ${id}`);
+    }
+
+    return result;
+  }
+
+  getNoteById(id: Note['id']) {
+    return this._editors.find((editor) => editor.note.value?.id === id)?.note
+      .value;
+  }
+
+  setActiveEditor(editor: Editor | Editor['id'] | null, noteToLoad?: Note) {
+    if (isNull(editor)) {
+      this._activeEditor.value = editor;
+      return;
+    }
+
+    const editorInstance = Editor.isA(editor)
+      ? editor
+      : this.getEditorById(editor);
+
+    this._activeEditor.value = editorInstance;
+
+    if (noteToLoad) {
+      editorInstance.loadNote(noteToLoad);
+    }
+
+    editorInstance.activate();
+    without(this._editors, editorInstance).forEach((editor) =>
+      editor.inactivate(),
+    );
+  }
+
+  activateEditor() {
+    const activeEditor = this._activeEditor.value;
+
+    if (!activeEditor) {
+      return;
+    }
+
+    activeEditor.activate();
+  }
+
+  closeEditorById(id: Editor['id']) {
+    const byId = (editor: Editor) => editor.id === id;
+    const index = this._editors.findIndex(byId);
+
+    if (index < 0) {
+      throw new Error('no editor to close!');
+    }
+
+    const [removed] = remove(this._editors, byId);
+
+    removed.destroy();
+
+    if (!isEmpty(this._editors)) {
+      this.setActiveEditor(this._editors[index] || this._editors[index - 1]);
+    } else {
+      this.setActiveEditor(null);
+    }
+  }
+
   private keepActiveNoteSynced() {
     effect(() => {
-      const activeEditor = this.editorManager.activeEditor.value;
+      const activeEditor = this.activeEditor.value;
 
       if (!activeEditor || !activeEditor.note.value) {
         return;
@@ -33,7 +115,7 @@ export class EditorService {
 
   isActive(noteId: Note['id']) {
     return computed(() => {
-      return this.editorManager.activeEditor.value?.note.value?.id === noteId;
+      return this.activeEditor.value?.note.value?.id === noteId;
     });
   }
 
@@ -53,11 +135,28 @@ export class EditorService {
       return;
     }
 
+    const openedEditor = this._editors.find((editor) =>
+      note.isEqual(editor.note.value),
+    );
+
+    if (openedEditor) {
+      this.setActiveEditor(openedEditor, note);
+      return;
+    }
+
+    if (this._editors.length >= this.maxEditorCount.value) {
+      const lastEditor = this._editors.shift();
+      lastEditor?.destroy();
+    }
+
+    const newEditor = new Editor(note);
+
     if (!isNew) {
       await NoteService.loadContent(note);
     }
 
-    this.editorManager.openInEditor(note);
+    this._editors.push(newEditor);
+    this.setActiveEditor(newEditor);
 
     if (parent) {
       this.itemTreeService.itemTree.setSelectedItem(parent);

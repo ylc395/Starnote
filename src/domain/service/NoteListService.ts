@@ -34,7 +34,7 @@ export class NoteListService {
       return;
     }
     // todo: 目前是从 editors 里找 note，以确保 noteList 中的 note 和 editor 中的是同一个。再想想有没有更好的做法
-    const noteInEditor = this.editorService.editorManager.getNoteById(note.id);
+    const noteInEditor = this.editorService.getNoteById(note.id);
     this.noteList.value.add(noteInEditor || note);
   }
 

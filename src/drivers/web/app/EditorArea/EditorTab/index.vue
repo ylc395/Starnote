@@ -8,12 +8,10 @@ export default defineComponent({
   components: { Tabs, TabPane: Tabs.TabPane },
   setup() {
     const {
-      editorManager: {
-        editors,
-        activeEditor,
-        closeEditorById,
-        setActiveEditor,
-      },
+      editors,
+      activeEditor,
+      closeEditorById,
+      setActiveEditor,
     } = inject<EditorService>(token)!;
 
     return {

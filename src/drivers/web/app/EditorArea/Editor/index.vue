@@ -4,9 +4,7 @@ import { token, EditorService } from 'domain/service/EditorService';
 
 export default defineComponent({
   setup() {
-    const {
-      editorManager: { activeEditor },
-    } = inject<EditorService>(token)!;
+    const { activeEditor } = inject<EditorService>(token)!;
 
     return { activeEditor };
   },
