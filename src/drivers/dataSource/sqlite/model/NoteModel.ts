@@ -1,7 +1,5 @@
 import { DataTypes, NOW, UUIDV4 } from 'sequelize';
 import { db } from '../db';
-import { ROOT_NOTEBOOK_ID } from 'domain/entity';
-import { NotebookModel } from './NotebookModel';
 
 export const NoteModel = db.define('Note', {
   id: {
@@ -13,15 +11,6 @@ export const NoteModel = db.define('Note', {
     type: DataTypes.TEXT,
     defaultValue: '',
     allowNull: false,
-  },
-  parentId: {
-    type: DataTypes.UUIDV4,
-    defaultValue: ROOT_NOTEBOOK_ID,
-    allowNull: false,
-    references: {
-      model: NotebookModel,
-      key: 'id',
-    },
   },
   content: {
     type: DataTypes.TEXT,

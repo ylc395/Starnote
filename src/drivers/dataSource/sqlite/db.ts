@@ -10,12 +10,13 @@ if (IS_DEVELOPMENT) {
 export const db = new Sequelize({
   dialect: 'sqlite',
   storage: path.join(APP_DIRECTORY, 'database.sqlite'),
+  // eslint-disable-next-line no-console
   logging: IS_DEVELOPMENT ? console.log : false,
   define: {
     freezeTableName: true,
     underscored: true,
   },
-  query: { nest: true, raw: true },
+  query: { nest: true },
 });
 
 export type Db = Sequelize;

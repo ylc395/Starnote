@@ -6,6 +6,8 @@ import { db } from './db';
 import { IS_DEVELOPMENT } from 'drivers/platform/common/constants';
 
 export const noteDao = daoAdaptor<Note>(NoteModel);
-export const notebookDao = daoAdaptor<Notebook>(NotebookModel);
+export const notebookDao = daoAdaptor<Notebook>(NotebookModel, {
+  include: { model: NoteModel, as: 'indexNote' },
+});
 
 db.sync({ force: IS_DEVELOPMENT });

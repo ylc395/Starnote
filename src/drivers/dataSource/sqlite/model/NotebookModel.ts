@@ -2,15 +2,13 @@ import { db } from '../db';
 import { DataTypes, UUIDV4, NOW } from 'sequelize';
 import { ROOT_NOTEBOOK_ID } from 'domain/entity';
 import { SortByEnums, SortDirectEnums } from 'domain/constant';
+import { NoteModel } from './NoteModel';
 
 export const NotebookModel = db.define('Notebook', {
   id: {
     type: DataTypes.UUIDV4,
     defaultValue: UUIDV4,
     primaryKey: true,
-  },
-  attachedNoteId: {
-    type: DataTypes.UUIDV4,
   },
   title: {
     type: DataTypes.TEXT,
@@ -55,5 +53,21 @@ export const NotebookModel = db.define('Notebook', {
     type: DataTypes.DATE,
     defaultValue: NOW,
     allowNull: false,
+  },
+});
+
+NotebookModel.belongsTo(NoteModel, {
+  keyType: DataTypes.UUIDV4,
+  as: 'indexNote',
+  foreignKey: 'indexNoteId',
+  constraints: false,
+});
+
+NoteModel.belongsTo(NotebookModel, {
+  keyType: DataTypes.UUIDV4,
+  foreignKey: {
+    name: 'parentId',
+    allowNull: false,
+    defaultValue: ROOT_NOTEBOOK_ID,
   },
 });

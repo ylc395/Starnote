@@ -12,7 +12,7 @@ import { Hierarchic, WithChildren } from './abstract/Hierarchic';
 import { Note } from './Note';
 import { SortByEnums, SortDirectEnums } from '../constant';
 import { ListItem } from './abstract/ListItem';
-import { Exclude, Expose } from 'class-transformer';
+import { Exclude, Expose, Transform, Type } from 'class-transformer';
 
 export const ROOT_NOTEBOOK_ID: Notebook['id'] = NIL;
 
@@ -34,9 +34,13 @@ export class Notebook
   @RefTransform
   readonly parentId: Ref<Notebook['id'] | null> = ref(ROOT_NOTEBOOK_ID);
 
-  @Expose({ name: 'attachedNoteId' })
-  @RefTransform
-  readonly noteId: Ref<Note['id'] | null> = ref(null);
+  @Type(() => Note)
+  @Expose({ name: 'indexNoteId' })
+  @Transform(({ value }) => value.value?.id || null, { toPlainOnly: true })
+  @Transform(({ value }) => shallowRef(value?.id ? value : null), {
+    toClassOnly: true,
+  })
+  readonly indexNote: Ref<Note | null> = shallowRef(null);
 
   @RefTransform
   readonly sortBy: Ref<SortByEnums> = ref(SortByEnums.Title);
