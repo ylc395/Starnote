@@ -14,8 +14,7 @@ import { partial } from 'lodash';
 
 export function useDraggable() {
   const {
-    expandNotebook,
-    itemTree: { foldNotebook, moveTo, moveToRoot },
+    itemTree: { foldNotebook, moveTo, moveToRoot, expandNotebook },
   } = inject<ItemTreeService>(itemTreeToken)!;
 
   const { moveTo: moveNoteTo } = inject<NoteListService>(noteListToken)!;

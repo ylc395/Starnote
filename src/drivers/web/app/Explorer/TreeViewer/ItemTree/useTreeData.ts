@@ -23,8 +23,8 @@ export function useTreeData() {
       selectedItem,
       expandedItems,
       foldNotebook,
+      expandNotebook,
     },
-    expandNotebook,
   } = inject<ItemTreeService>(itemTreeToken)!;
 
   const editorService = inject<EditorService>(editorToken)!;

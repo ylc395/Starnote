@@ -21,7 +21,7 @@ export class NotebookService {
       throw new Error('sub notebook parent is not a notebook');
     }
 
-    await this.itemTreeService.expandNotebook(target);
+    await this.itemTreeService.itemTree.expandNotebook(target);
     const newNotebook = await NotebookService.create(target, title);
     this.itemTreeService.itemTree.setSelectedItem(newNotebook);
 

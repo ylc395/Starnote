@@ -60,9 +60,4 @@ export class ItemTreeService {
       this.notebookRepository.updateNotebook(item);
     }
   }
-
-  expandNotebook(notebook: Notebook) {
-    this.itemTree.expandNotebook(notebook);
-    return NotebookService.loadChildren(notebook, NOTEBOOK_ONLY);
-  }
 }

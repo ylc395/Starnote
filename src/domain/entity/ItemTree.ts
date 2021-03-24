@@ -14,6 +14,7 @@ import EventEmitter from 'eventemitter3';
 import { Class } from 'utils/types';
 import { EditorService } from 'domain/service/EditorService';
 import { EntityEvents } from './abstract/Entity';
+import { NotebookService } from 'domain/service/NotebookService';
 
 type TreeItemId = Notebook['id'] | Note['id'];
 export type TreeItem = Notebook | Note;
@@ -103,6 +104,7 @@ export class ItemTree extends EventEmitter {
 
     child.setParent(parent);
     this.setSelectedItem(child);
+    NotebookService.loadChildren(parent, true);
     this.emit(EntityEvents.Sync, child);
   }
 
