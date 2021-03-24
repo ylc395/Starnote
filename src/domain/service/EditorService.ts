@@ -12,7 +12,7 @@ import { isEmpty, isNull, remove, without, debounce } from 'lodash';
 import { NoteRepository } from 'domain/repository';
 import { Note, Editor, Notebook, TreeItem, EntityEvents } from 'domain/entity';
 import type { ItemTreeService } from './ItemTreeService';
-import { NoteService } from './NoteService';
+import { NoteListService } from './NoteListService';
 
 const MAX_EDITOR_COUNT = 3;
 export const token = Symbol();
@@ -124,7 +124,7 @@ export class EditorService {
     }
 
     const newEditor = new Editor(note);
-    await new NoteService(this).loadContent(note);
+    await NoteListService.loadContentOf(note);
 
     this.safeAddEditor(newEditor);
     this.setActiveEditor(newEditor);

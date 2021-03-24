@@ -19,7 +19,6 @@ import {
   NotebookService,
   token as notebookToken,
 } from 'domain/service/NotebookService';
-import { NoteService, token as noteToken } from 'domain/service/NoteService';
 
 export default defineComponent({
   components: { Explorer, EditorArea },
@@ -32,13 +31,11 @@ export default defineComponent({
     const notebookService = selfish(
       new NotebookService(editorService, itemTreeService),
     );
-    const noteService = selfish(new NoteService(editorService));
 
     provide(itemTreeToken, itemTreeService);
     provide(editorToken, editorService);
     provide(noteListToken, noteListService);
     provide(notebookToken, notebookService);
-    provide(noteToken, noteService);
   },
 });
 </script>

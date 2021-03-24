@@ -47,12 +47,17 @@ export class NotebookService {
     this.editorService?.openInEditor(newNotebook);
   }
 
-  async loadChildren(notebook: Notebook, notebookOnly: boolean, force = false) {
+  static async loadChildren(
+    notebook: Notebook,
+    notebookOnly = true,
+    force = false,
+  ) {
     if (notebook.isChildrenLoaded && !force) {
       return;
     }
 
-    const { notebooks, notes } = await this.notebookRepository.queryChildrenOf(
+    const notebookRepository = container.resolve(NotebookRepository);
+    const { notebooks, notes } = await notebookRepository.queryChildrenOf(
       notebook,
       notebookOnly ? QueryEntityTypes.Notebook : QueryEntityTypes.All,
     );

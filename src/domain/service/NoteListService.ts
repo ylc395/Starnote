@@ -11,6 +11,7 @@ import { container } from 'tsyringe';
 import { ItemTreeService } from './ItemTreeService';
 import { EditorService } from './EditorService';
 import { NoteList } from 'domain/entity/NoteList';
+import { isNull } from 'lodash';
 
 export const token = Symbol();
 export class NoteListService {
@@ -45,6 +46,17 @@ export class NoteListService {
     this.noteRepository.updateNote(note);
   }
 
+  async createAndOpenInEditor(parent: Notebook, parentSynced: boolean) {
+    const note = this.createEmptyNote(parent, parentSynced);
+    await this.editorService.openInEditor(note);
+  }
+
+  private createEmptyNote(parent: Notebook, parentSynced: boolean) {
+    const newNote = Note.createEmptyNote(parent, parentSynced);
+
+    this.noteRepository.createNote(newNote);
+    return newNote;
+  }
   async refreshNoteList() {
     const selected = this.itemTreeService.itemTree.selectedItem.value;
 
@@ -60,5 +72,19 @@ export class NoteListService {
     );
 
     notes.forEach(this.addNote.bind(this));
+  }
+  static async loadContentOf(note: Note, forced = false) {
+    if (!forced && !isNull(note.content.value)) {
+      return;
+    }
+
+    const noteRepository = container.resolve(NoteRepository);
+    const noteDo = await noteRepository.queryNoteById(note.id, ['content']);
+
+    if (!noteDo) {
+      throw new Error(`no note(${note.id}) to load content`);
+    }
+
+    note.content.value = noteDo.content ?? '';
   }
 }

@@ -6,7 +6,6 @@ import {
   NoteRepository,
 } from 'domain/repository';
 import {
-  Note,
   Notebook,
   ItemTree,
   TreeItem,
@@ -16,8 +15,6 @@ import {
 import { selfish } from 'utils/index';
 import { NotebookService } from './NotebookService';
 
-const NOTEBOOK_ONLY = true;
-
 export const token = Symbol();
 export class ItemTreeService {
   private readonly notebookRepository = container.resolve(NotebookRepository);
@@ -26,13 +23,9 @@ export class ItemTreeService {
   constructor() {
     this.init();
   }
-  private loadChildren(notebook: Notebook) {
-    return new NotebookService().loadChildren(notebook, NOTEBOOK_ONLY);
-  }
-
   private async init() {
     this.itemTree.on(EntityEvents.Sync, this.syncItem, this);
-    this.itemTree.on(ItemTreeEvents.Expanded, this.loadChildren);
+    this.itemTree.on(ItemTreeEvents.Expanded, NotebookService.loadChildren);
 
     this.notebookRepository.on(
       NotebookEvents.NotebookFetched,
@@ -59,17 +52,15 @@ export class ItemTreeService {
   private async initRoot() {
     const rootNotebook = await this.notebookRepository.queryOrCreateRootNotebook();
 
-    this.loadChildren(rootNotebook);
+    NotebookService.loadChildren(rootNotebook);
     this.itemTree.loadRoot(rootNotebook);
   }
 
-  private syncItem(item: Note | Notebook) {
-    if (item instanceof Note) {
-      this.noteRepository.updateNote(item);
-    }
-
-    if (item instanceof Notebook) {
+  private syncItem(item: TreeItem) {
+    if (Notebook.isA(item)) {
       this.notebookRepository.updateNotebook(item);
+    } else {
+      this.noteRepository.updateNote(item);
     }
   }
 }
