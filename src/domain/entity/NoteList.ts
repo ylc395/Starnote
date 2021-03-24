@@ -33,7 +33,8 @@ export class NoteList extends EventEmitter {
     this._notes.push(note);
   }
   moveTo(noteId: Note['id'], notebook: Notebook) {
-    return this.removeNoteById(noteId).setParent(notebook, false);
+    const BIDIRECTIONAL = false; //  todo: 这个变量的值应当由分栏模式决定
+    return this.removeNoteById(noteId).setParent(notebook, BIDIRECTIONAL);
   }
 
   getNoteById(id: Note['id']) {

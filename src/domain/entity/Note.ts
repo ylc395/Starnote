@@ -45,7 +45,7 @@ export class Note extends Hierarchic<Notebook> implements ListItem {
     return this.parent.value?.indexNote.value === this;
   }
 
-  static from(dataObject: NoteDo, parent?: Notebook) {
+  static from(dataObject: NoteDo, parent?: Notebook, bidirectional = true) {
     const note = dataObjectToInstance(this, dataObject);
 
     if (!parent) {
@@ -56,14 +56,14 @@ export class Note extends Hierarchic<Notebook> implements ListItem {
       throw new Error('wrong parent, since two ids are not equal');
     }
 
-    note.setParent(parent);
+    note.setParent(parent, bidirectional);
 
     return note;
   }
 
   static createEmptyNote(
     parent: Notebook,
-    parentSynced: boolean,
+    bidirectional: boolean,
     note: NoteDo = {},
   ) {
     return Note.from(
@@ -71,9 +71,9 @@ export class Note extends Hierarchic<Notebook> implements ListItem {
         title: 'untitled note',
         content: '',
         ...note,
-        ...(parentSynced ? null : { parentId: parent.id }),
       },
-      parentSynced ? parent : undefined,
+      parent,
+      bidirectional,
     );
   }
 }

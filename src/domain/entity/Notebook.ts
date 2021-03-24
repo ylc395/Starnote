@@ -100,8 +100,8 @@ export class Notebook
     return super.hasParent() && this.parentId.value !== ROOT_NOTEBOOK_ID;
   }
 
-  createSubNotebook(title: string) {
-    return Notebook.from({ parentId: this.id, title }, this);
+  createSubNotebook(title: string, bidirectional = true) {
+    return Notebook.from({ parentId: this.id, title }, this, bidirectional);
   }
 
   createIndexNote(title: string) {
@@ -123,7 +123,7 @@ export class Notebook
     });
   }
 
-  static from(dataObject: NotebookDo, parent?: Notebook) {
+  static from(dataObject: NotebookDo, parent?: Notebook, bidirectional = true) {
     const notebook = dataObjectToInstance(this, dataObject);
 
     if (!parent) {
@@ -134,7 +134,7 @@ export class Notebook
       throw new Error('wrong parent, since two ids are not equal');
     }
 
-    notebook.setParent(parent);
+    notebook.setParent(parent, bidirectional);
 
     return notebook;
   }

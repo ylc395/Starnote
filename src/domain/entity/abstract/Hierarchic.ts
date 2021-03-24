@@ -9,7 +9,7 @@ export interface WithChildren extends Entity {
 export abstract class Hierarchic<P extends WithChildren> extends Entity {
   abstract readonly parentId: Ref<P['id'] | null>;
   protected abstract readonly parent: Ref<P | null>;
-  setParent(newParent: P, bidirectional = true) {
+  setParent(newParent: P, bidirectional: boolean) {
     const oldParent = this.parent.value;
 
     if (oldParent?.children?.value) {

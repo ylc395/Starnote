@@ -104,7 +104,7 @@ export class ItemTree extends EventEmitter {
       return;
     }
 
-    child.setParent(parent);
+    child.setParent(parent, true);
     this.setSelectedItem(child);
     this.emit(EntityEvents.Sync, child);
   }
