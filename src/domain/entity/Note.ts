@@ -41,6 +41,10 @@ export class Note extends Hierarchic<Notebook> implements ListItem {
   @Exclude()
   protected readonly parent: Ref<Notebook | null> = shallowRef(null);
 
+  get isIndexNote() {
+    return this.parent.value?.indexNote.value === this;
+  }
+
   static from(dataObject: NoteDo, parent?: Notebook) {
     const note = dataObjectToInstance(this, dataObject);
 
@@ -56,5 +60,22 @@ export class Note extends Hierarchic<Notebook> implements ListItem {
 
     return note;
   }
+
+  static createEmptyNote(
+    parent: Notebook,
+    parentSynced: boolean,
+    note: NoteDo = {},
+  ) {
+    return Note.from(
+      {
+        title: 'untitled note',
+        content: '',
+        ...note,
+        ...(parentSynced ? null : { parentId: parent.id }),
+      },
+      parentSynced ? parent : undefined,
+    );
+  }
 }
+
 export type NoteDo = Do<Note>;

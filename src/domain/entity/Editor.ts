@@ -17,8 +17,8 @@ export class Editor extends EventEmitter implements ListItem {
   readonly note = computed(() => this._note.value);
   private saveRunner?: ReturnType<typeof effect>;
   // only emit after activating
-  private readonly emitSaved = after(2, () => {
-    this.emit(EntityEvents.Saved, this._note.value);
+  private readonly emitSync = after(2, () => {
+    this.emit(EntityEvents.Sync, this._note.value);
   });
   constructor(note: Note | null = null) {
     super();
@@ -42,7 +42,7 @@ export class Editor extends EventEmitter implements ListItem {
     this._note.value.title.value = this.title.value;
     this._note.value.content.value = this.content.value;
     this._note.value.userModifiedAt.value = dayjs();
-    this.emitSaved();
+    this.emitSync();
   }
 
   activate() {

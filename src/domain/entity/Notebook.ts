@@ -100,6 +100,17 @@ export class Notebook
     return super.hasParent() && this.parentId.value !== ROOT_NOTEBOOK_ID;
   }
 
+  createSubNotebook(title: string) {
+    return Notebook.from({ parentId: this.id, title }, this);
+  }
+
+  createIndexNote(title: string) {
+    const newNote = Note.createEmptyNote(this, false, { title });
+    this.indexNote.value = newNote;
+
+    return this;
+  }
+
   static isA(instance: unknown): instance is Notebook {
     return instance instanceof Notebook;
   }

@@ -39,7 +39,7 @@ export class EditorService {
       }
 
       activeEditor.on(
-        EntityEvents.Saved,
+        EntityEvents.Sync,
         debounce(this.noteRepository.updateNote.bind(this.noteRepository), 500),
       );
     });
@@ -124,7 +124,7 @@ export class EditorService {
     }
 
     const newEditor = new Editor(note);
-    await NoteService.loadContent(note);
+    await new NoteService(this).loadContent(note);
 
     this.safeAddEditor(newEditor);
     this.setActiveEditor(newEditor);

@@ -6,15 +6,19 @@ import {
   stop,
 } from '@vue/reactivity';
 import type { Ref } from '@vue/reactivity';
-import { Note } from './Note';
-import { Notebook } from './Notebook';
-import { KvStorage } from 'utils/kvStorage';
 import { isString, last, pull } from 'lodash';
 import EventEmitter from 'eventemitter3';
+
+import { KvStorage } from 'utils/kvStorage';
 import { Class } from 'utils/types';
-import { EditorService } from 'domain/service/EditorService';
+import { Note } from './Note';
+import { Notebook } from './Notebook';
 import { EntityEvents } from './abstract/Entity';
-import { NotebookService } from 'domain/service/NotebookService';
+
+export enum ItemTreeEvents {
+  Selected = 'SELECTED',
+  Expanded = 'EXPANDED',
+}
 
 type TreeItemId = Notebook['id'] | Note['id'];
 export type TreeItem = Notebook | Note;
@@ -37,16 +41,13 @@ export class ItemTree extends EventEmitter {
     this.root.value = notebook;
   }
 
-  setSelectedItem(item: TreeItem, editorService?: EditorService) {
+  setSelectedItem(item: TreeItem) {
     if (item.isEqual(this.selectedItem.value) || !this.itemsKV.has(item.id)) {
       return;
     }
 
     this.selectedItem.value = item;
-
-    if (editorService) {
-      editorService.openInEditor(item);
-    }
+    this.emit(ItemTreeEvents.Selected, item);
   }
 
   private maintainHistory() {
@@ -95,6 +96,7 @@ export class ItemTree extends EventEmitter {
     }
 
     this.expandedItems.push(notebook);
+    this.emit(ItemTreeEvents.Expanded, notebook);
   }
 
   moveTo(child: TreeItem, parent: Notebook) {
@@ -104,7 +106,6 @@ export class ItemTree extends EventEmitter {
 
     child.setParent(parent);
     this.setSelectedItem(child);
-    NotebookService.loadChildren(parent, true);
     this.emit(EntityEvents.Sync, child);
   }
 

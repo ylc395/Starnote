@@ -78,5 +78,4 @@ export const DayjsRefTransform = (target: Entity, propertyName: string) => {
 
 export enum EntityEvents {
   Sync = 'SYNC',
-  Saved = 'SAVED',
 }

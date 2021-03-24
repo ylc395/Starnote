@@ -2,17 +2,13 @@ import {
   ItemTreeService,
   token as itemTreeToken,
 } from 'domain/service/ItemTreeService';
-import {
-  EditorService,
-  token as editorToken,
-} from 'domain/service/EditorService';
 import type {
   ExpendEvent,
   SelectEvent,
   TreeDataItem,
 } from 'ant-design-vue/lib/tree/Tree';
 import { computed, inject } from 'vue';
-import { isTreeItem, Notebook } from 'domain/entity';
+import { Notebook } from 'domain/entity';
 import { map } from 'lodash';
 
 export function useTreeData() {
@@ -26,8 +22,6 @@ export function useTreeData() {
       expandNotebook,
     },
   } = inject<ItemTreeService>(itemTreeToken)!;
-
-  const editorService = inject<EditorService>(editorToken)!;
 
   return {
     treeData: computed<TreeDataItem>(() => {
@@ -53,11 +47,12 @@ export function useTreeData() {
 
     selectedKeys: computed(() => [selectedItem.value?.id]),
     expandedKeys: computed(() => map(expandedItems, 'id')),
+
     handleSelect(_: never, { selected, node }: SelectEvent) {
       const { item } = node.dataRef;
 
-      if (selected && isTreeItem(item)) {
-        setSelectedItem(item, editorService);
+      if (selected) {
+        setSelectedItem(item);
       }
     },
 

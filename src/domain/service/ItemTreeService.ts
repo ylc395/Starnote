@@ -5,7 +5,14 @@ import {
   NotebookEvents,
   NoteRepository,
 } from 'domain/repository';
-import { Note, Notebook, ItemTree, TreeItem } from 'domain/entity';
+import {
+  Note,
+  Notebook,
+  ItemTree,
+  TreeItem,
+  ItemTreeEvents,
+  EntityEvents,
+} from 'domain/entity';
 import { selfish } from 'utils/index';
 import { NotebookService } from './NotebookService';
 
@@ -19,8 +26,13 @@ export class ItemTreeService {
   constructor() {
     this.init();
   }
+  private loadChildren(notebook: Notebook) {
+    return new NotebookService().loadChildren(notebook, NOTEBOOK_ONLY);
+  }
+
   private async init() {
-    this.itemTree.on('sync', this.syncItem);
+    this.itemTree.on(EntityEvents.Sync, this.syncItem, this);
+    this.itemTree.on(ItemTreeEvents.Expanded, this.loadChildren);
 
     this.notebookRepository.on(
       NotebookEvents.NotebookFetched,
@@ -47,7 +59,7 @@ export class ItemTreeService {
   private async initRoot() {
     const rootNotebook = await this.notebookRepository.queryOrCreateRootNotebook();
 
-    NotebookService.loadChildren(rootNotebook, NOTEBOOK_ONLY);
+    this.loadChildren(rootNotebook);
     this.itemTree.loadRoot(rootNotebook);
   }
 

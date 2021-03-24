@@ -53,11 +53,11 @@ export function useNotebookCreator() {
 
   function stopCreating(isConfirmed: boolean) {
     if (isConfirmed && _type === 'notebook') {
-      createSubNotebook(title.value, _target.value);
+      createSubNotebook(title.value, _target.value as Notebook);
     }
 
     if (isConfirmed && _type === 'indexNote') {
-      createIndexNote(title.value, _target.value);
+      createIndexNote(title.value, _target.value as Notebook);
     }
 
     title.value = '';
