@@ -46,17 +46,14 @@ export class NoteListService {
     this.noteRepository.updateNote(note);
   }
 
-  async createAndOpenInEditor(parent: Notebook, parentSynced: boolean) {
-    const note = this.createEmptyNote(parent, parentSynced);
-    await this.editorService.openInEditor(note);
-  }
-
-  private createEmptyNote(parent: Notebook, parentSynced: boolean) {
+  async createNoteAndOpenInEditor(parent: Notebook, parentSynced: boolean) {
     const newNote = Note.createEmptyNote(parent, parentSynced);
 
-    this.noteRepository.createNote(newNote);
-    return newNote;
+    await this.noteRepository.createNote(newNote);
+    this.itemTreeService.itemTree.setSelectedItem(parent);
+    this.editorService.openInEditor(newNote);
   }
+
   async refreshNoteList() {
     const selected = this.itemTreeService.itemTree.selectedItem.value;
 

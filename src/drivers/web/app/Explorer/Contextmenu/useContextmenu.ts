@@ -13,7 +13,7 @@ import {
 export function useContextmenu() {
   const notebookCreator = inject(notebookCreatorToken, null);
   const { context } = inject<ReturnType<typeof useCommonContextmenu>>(token)!;
-  const { createAndOpenInEditor } = inject<NoteListService>(noteListToken)!;
+  const { createNoteAndOpenInEditor } = inject<NoteListService>(noteListToken)!;
 
   const handleNotebook = (notebook: Notebook, key: string) => {
     switch (key) {
@@ -21,7 +21,7 @@ export function useContextmenu() {
         notebookCreator?.startCreating(notebook);
         return;
       case 'createNote':
-        createAndOpenInEditor(notebook, false);
+        createNoteAndOpenInEditor(notebook, false);
         return;
       case 'createIndexNote':
         notebookCreator?.startCreating(notebook, 'indexNote');

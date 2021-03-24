@@ -41,7 +41,7 @@ export default defineComponent({
     const {
       itemTree: { historyBack, isEmptyHistory },
     } = inject<ItemTreeService>(ItemTreeToken)!;
-    const { noteList, createAndOpenInEditor } = inject<NoteListService>(
+    const { noteList, createNoteAndOpenInEditor } = inject<NoteListService>(
       noteListToken,
     )!;
     const { openInEditor, isActive } = inject<EditorService>(editorToken)!;
@@ -59,8 +59,8 @@ export default defineComponent({
       isActive,
       openContextmenu,
       handleDragstart,
-      createAndOpenInEditor: () => {
-        createAndOpenInEditor(noteList.value.notebook!, false);
+      createNoteAndOpenInEditor: () => {
+        createNoteAndOpenInEditor(noteList.value.notebook!, false);
       },
     };
   },
@@ -84,7 +84,7 @@ export default defineComponent({
         type="primary"
         :disabled="newNoteDisabled"
         size="small"
-        @click="createAndOpenInEditor"
+        @click="createNoteAndOpenInEditor"
         class="rounded-md mr-2"
       >
         <template #icon>
