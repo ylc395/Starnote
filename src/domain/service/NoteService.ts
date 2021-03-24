@@ -4,8 +4,6 @@ import { container } from 'tsyringe';
 import { isNull } from 'lodash';
 import { EditorService } from './EditorService';
 
-const noteRepository = container.resolve(NoteRepository);
-
 export const token = Symbol();
 
 export class NoteService {
@@ -15,6 +13,7 @@ export class NoteService {
       return;
     }
 
+    const noteRepository = container.resolve(NoteRepository);
     const noteDo = await noteRepository.queryNoteById(note.id, ['content']);
 
     if (!noteDo) {
@@ -38,6 +37,8 @@ export class NoteService {
       },
       parentSynced ? parent : undefined,
     );
+    const noteRepository = container.resolve(NoteRepository);
+
     return noteRepository.createNote(newNote);
   }
 

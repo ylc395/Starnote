@@ -14,11 +14,10 @@ import { Note, Editor, Notebook, TreeItem, EntityEvents } from 'domain/entity';
 import type { ItemTreeService } from './ItemTreeService';
 import { NoteService } from './NoteService';
 
-const noteRepository = container.resolve(NoteRepository);
-
 const MAX_EDITOR_COUNT = 3;
 export const token = Symbol();
 export class EditorService {
+  private readonly noteRepository = container.resolve(NoteRepository);
   private readonly maxEditorCount = ref(MAX_EDITOR_COUNT);
   private readonly _editors: Editor[] = shallowReactive([]);
   readonly editors = computed(() => {
@@ -41,7 +40,7 @@ export class EditorService {
 
       activeEditor.on(
         EntityEvents.Saved,
-        debounce(noteRepository.updateNote.bind(noteRepository), 500),
+        debounce(this.noteRepository.updateNote.bind(this.noteRepository), 500),
       );
     });
   }

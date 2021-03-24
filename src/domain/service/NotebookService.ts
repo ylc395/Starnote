@@ -5,10 +5,9 @@ import { EditorService } from './EditorService';
 import { ItemTreeService } from './ItemTreeService';
 import { NoteService } from './NoteService';
 
-const notebookRepository = container.resolve(NotebookRepository);
-
 export const token = Symbol();
 export class NotebookService {
+  private readonly notebookRepository = container.resolve(NotebookRepository);
   constructor(
     private readonly editorService: EditorService,
     private readonly itemTreeService: ItemTreeService,
@@ -44,7 +43,7 @@ export class NotebookService {
     });
 
     newNotebook.indexNote.value = newNote;
-    notebookRepository.updateNotebook(newNotebook);
+    this.notebookRepository.updateNotebook(newNotebook);
     this.editorService.openInEditor(newNotebook);
   }
 
@@ -57,6 +56,7 @@ export class NotebookService {
       parent,
     );
 
+    const notebookRepository = container.resolve(NotebookRepository);
     return notebookRepository.createNotebook(newNotebook);
   }
 
@@ -69,6 +69,7 @@ export class NotebookService {
       return;
     }
 
+    const notebookRepository = container.resolve(NotebookRepository);
     const { notebooks, notes } = await notebookRepository.queryChildrenOf(
       notebook,
       notebookOnly ? QueryEntityTypes.Notebook : QueryEntityTypes.All,

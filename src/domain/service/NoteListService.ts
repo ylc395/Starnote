@@ -12,11 +12,11 @@ import { ItemTreeService } from './ItemTreeService';
 import { EditorService } from './EditorService';
 import { NoteList } from 'domain/entity/NoteList';
 
-const notebookRepository = container.resolve(NotebookRepository);
-const noteRepository = container.resolve(NoteRepository);
-
 export const token = Symbol();
 export class NoteListService {
+  private readonly notebookRepository = container.resolve(NotebookRepository);
+  private readonly noteRepository = container.resolve(NoteRepository);
+
   readonly noteList: Ref<NoteList> = shallowRef(new NoteList());
   constructor(
     private readonly itemTreeService: ItemTreeService,
@@ -26,7 +26,7 @@ export class NoteListService {
   }
 
   private init() {
-    noteRepository.on(NoteEvents.NoteCreated, this.addNote, this);
+    this.noteRepository.on(NoteEvents.NoteCreated, this.addNote, this);
     effect(this.refreshNoteList.bind(this));
   }
 
@@ -42,7 +42,7 @@ export class NoteListService {
   moveTo(noteId: Note['id'], notebook: Notebook) {
     const note = this.noteList.value.moveTo(noteId, notebook);
 
-    noteRepository.updateNote(note);
+    this.noteRepository.updateNote(note);
   }
 
   async refreshNoteList() {
@@ -54,7 +54,7 @@ export class NoteListService {
 
     this.noteList.value = new NoteList(selected);
 
-    const { notes } = await notebookRepository.queryChildrenOf(
+    const { notes } = await this.notebookRepository.queryChildrenOf(
       selected.id,
       QueryEntityTypes.Note,
     );
