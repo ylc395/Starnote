@@ -10,7 +10,14 @@ import {
 import { container } from 'tsyringe';
 import { isEmpty, isNull, remove, without, debounce } from 'lodash';
 import { NoteRepository } from 'domain/repository';
-import { Note, Editor, Notebook, TreeItem, EntityEvents } from 'domain/entity';
+import {
+  Note,
+  Editor,
+  Notebook,
+  TreeItem,
+  EntityEvents,
+  ItemTreeEvents,
+} from 'domain/entity';
 import type { ItemTreeService } from './ItemTreeService';
 import { NoteListService } from './NoteListService';
 
@@ -29,6 +36,7 @@ export class EditorService {
   });
   constructor(private readonly itemTreeService: ItemTreeService) {
     this.keepActiveNoteSynced();
+    this.monitorItemTree();
   }
   private keepActiveNoteSynced() {
     effect(() => {
@@ -43,6 +51,14 @@ export class EditorService {
         debounce(this.noteRepository.updateNote.bind(this.noteRepository), 500),
       );
     });
+  }
+
+  private monitorItemTree() {
+    this.itemTreeService.itemTree.on(
+      ItemTreeEvents.Selected,
+      this.openInEditor,
+      this,
+    );
   }
 
   private getEditorById(id: Editor['id']) {
@@ -108,12 +124,12 @@ export class EditorService {
   }
 
   async openInEditor(item: TreeItem) {
-    const note = Notebook.isA(item) ? item.indexNote.value : item;
-
-    if (!note) {
+    if (Notebook.isA(item)) {
+      this.openNotebookInEditor(item);
       return;
     }
 
+    const note = item;
     const openedEditor = this._editors.find((editor) =>
       note.isEqual(editor.note.value),
     );
@@ -128,7 +144,14 @@ export class EditorService {
 
     this.safeAddEditor(newEditor);
     this.setActiveEditor(newEditor);
-    this.itemTreeService.itemTree.setSelectedItem(note);
+  }
+
+  private openNotebookInEditor(notebook: Notebook) {
+    if (!notebook.indexNote.value) {
+      return;
+    }
+
+    this.openInEditor(notebook.indexNote.value);
   }
 
   private safeAddEditor(editor: Editor) {

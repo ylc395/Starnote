@@ -40,10 +40,9 @@ export default defineComponent({
   setup() {
     const {
       itemTree: { historyBack, isEmptyHistory },
+      createNoteAndOpenInEditor,
     } = inject<ItemTreeService>(ItemTreeToken)!;
-    const { noteList, createNoteAndOpenInEditor } = inject<NoteListService>(
-      noteListToken,
-    )!;
+    const { noteList } = inject<NoteListService>(noteListToken)!;
     const { openInEditor, isActive } = inject<EditorService>(editorToken)!;
 
     const { open: openContextmenu } = useCommonContextmenu<Note>();
@@ -60,7 +59,7 @@ export default defineComponent({
       openContextmenu,
       handleDragstart,
       createNoteAndOpenInEditor: () => {
-        createNoteAndOpenInEditor(noteList.value.notebook!, false);
+        createNoteAndOpenInEditor(noteList.value.notebook!);
       },
     };
   },

@@ -27,12 +27,11 @@ export abstract class Hierarchic<P extends WithChildren> extends Entity {
       newParent.children.value = [];
     }
 
-    const childrenOfNewParent = newParent.children.value.filter(
-      (entity) => !entity.isEqual(this),
-    );
-    childrenOfNewParent.push(this);
-    newParent.children.value = [...childrenOfNewParent];
+    if (newParent.children.value.find(this.isEqual.bind(this))) {
+      throw new Error('parent already contains this');
+    }
 
+    newParent.children.value = [...newParent.children.value, this];
     return this;
   }
 

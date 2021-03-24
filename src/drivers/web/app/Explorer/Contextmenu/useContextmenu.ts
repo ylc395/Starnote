@@ -6,14 +6,14 @@ import {
 import { token as notebookCreatorToken } from '../TreeViewer/ItemTree/NotebookCreator/useNotebookCreator';
 import { Notebook } from 'domain/entity';
 import {
-  NoteListService,
-  token as noteListToken,
-} from 'domain/service/NoteListService';
+  ItemTreeService,
+  token as itemTreeToken,
+} from 'domain/service/ItemTreeService';
 
 export function useContextmenu() {
   const notebookCreator = inject(notebookCreatorToken, null);
   const { context } = inject<ReturnType<typeof useCommonContextmenu>>(token)!;
-  const { createNoteAndOpenInEditor } = inject<NoteListService>(noteListToken)!;
+  const { createNoteAndOpenInEditor } = inject<ItemTreeService>(itemTreeToken)!;
 
   const handleNotebook = (notebook: Notebook, key: string) => {
     switch (key) {
@@ -21,7 +21,7 @@ export function useContextmenu() {
         notebookCreator?.startCreating(notebook);
         return;
       case 'createNote':
-        createNoteAndOpenInEditor(notebook, false);
+        createNoteAndOpenInEditor(notebook);
         return;
       case 'createIndexNote':
         notebookCreator?.startCreating(notebook, 'indexNote');

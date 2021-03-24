@@ -100,8 +100,8 @@ export class Notebook
     return super.hasParent() && this.parentId.value !== ROOT_NOTEBOOK_ID;
   }
 
-  createSubNotebook(title: string, bidirectional = true) {
-    return Notebook.from({ parentId: this.id, title }, this, bidirectional);
+  createSubNotebook(title: string) {
+    return Notebook.from({ parentId: this.id, title }, this);
   }
 
   createIndexNote(title: string) {
