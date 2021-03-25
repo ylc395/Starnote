@@ -42,10 +42,10 @@ export class Notebook
   readonly indexNote: Ref<Note | null> = shallowRef(null);
 
   @RefTransform
-  readonly sortBy: Ref<SortByEnums> = ref(SortByEnums.Title);
+  readonly sortBy: Ref<SortByEnums> = ref(SortByEnums.Default);
 
   @RefTransform
-  readonly sortDirect: Ref<SortDirectEnums> = ref(SortDirectEnums.Asc);
+  readonly sortDirect: Ref<SortDirectEnums> = ref(SortDirectEnums.Default);
 
   @RefTransform
   readonly sortOrder: Ref<number> = ref(0);

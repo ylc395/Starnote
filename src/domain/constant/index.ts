@@ -9,9 +9,11 @@ export enum SortByEnums {
   UpdatedAt = 'UPDATED_AT',
   Title = 'TITLE',
   Custom = 'CUSTOM',
+  Default = 'DEFAULT',
 }
 
 export enum SortDirectEnums {
+  Default = 'DEFAULT',
   Asc = 'ASC',
   Desc = 'DESC',
 }
