@@ -18,8 +18,7 @@ import {
   EntityEvents,
   ItemTreeEvents,
 } from 'domain/entity';
-import type { ItemTreeService } from './ItemTreeService';
-import { NoteListService } from './NoteListService';
+import { ItemTreeService } from './ItemTreeService';
 
 const MAX_EDITOR_COUNT = 3;
 export const token = Symbol();
@@ -54,10 +53,8 @@ export class EditorService {
   }
 
   private monitorItemTree() {
-    this.itemTreeService.itemTree.on(
-      ItemTreeEvents.Selected,
-      this.openInEditor,
-      this,
+    this.itemTreeService.itemTree.on(ItemTreeEvents.Selected, ({ origin }) =>
+      this.openInEditor(origin),
     );
   }
 
@@ -140,7 +137,7 @@ export class EditorService {
     }
 
     const newEditor = new Editor(note);
-    await NoteListService.loadContentOf(note);
+    await ItemTreeService.loadContentOf(note);
 
     this.safeAddEditor(newEditor);
     this.setActiveEditor(newEditor);

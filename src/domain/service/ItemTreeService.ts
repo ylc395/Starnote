@@ -1,4 +1,5 @@
 import { container } from 'tsyringe';
+import { isNull } from 'lodash';
 import {
   Children,
   NotebookRepository,
@@ -82,7 +83,7 @@ export class ItemTreeService {
     const newNote = Note.createEmptyNote(parent, BIDIRECTIONAL);
 
     await this.noteRepository.createNote(newNote);
-    this.itemTree.setSelectedItem(parent);
+    this.itemTree.setSelectedItem(newNote, true);
   }
 
   async createSubNotebook(title: string, parent: Notebook | null) {
@@ -119,5 +120,19 @@ export class ItemTreeService {
       notebook,
       notebookOnly ? QueryEntityTypes.Notebook : QueryEntityTypes.All,
     );
+  }
+  static async loadContentOf(note: Note, forced = false) {
+    if (!forced && !isNull(note.content.value)) {
+      return;
+    }
+
+    const noteRepository = container.resolve(NoteRepository);
+    const noteDo = await noteRepository.queryNoteById(note.id, ['content']);
+
+    if (!noteDo) {
+      throw new Error(`no note(${note.id}) to load content`);
+    }
+
+    note.content.value = noteDo.content ?? '';
   }
 }

@@ -41,13 +41,19 @@ export class ItemTree extends EventEmitter {
     this.root.value = notebook;
   }
 
-  setSelectedItem(item: TreeItem) {
-    if (item.isEqual(this.selectedItem.value) || !this.itemsKV.has(item.id)) {
+  setSelectedItem(item: TreeItem, alwaysEmit = false) {
+    const lastSelected = this.selectedItem.value;
+    const _item = this.itemsKV.has(item.id) ? item : item.getParent();
+
+    if (!_item) {
       return;
     }
 
-    this.selectedItem.value = item;
-    this.emit(ItemTreeEvents.Selected, item);
+    this.selectedItem.value = _item;
+
+    if (alwaysEmit || !_item.isEqual(lastSelected)) {
+      this.emit(ItemTreeEvents.Selected, { origin: item, actual: _item });
+    }
   }
 
   private maintainHistory() {
