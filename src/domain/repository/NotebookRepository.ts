@@ -1,5 +1,11 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Notebook, Note, ROOT_NOTEBOOK_ID } from 'domain/entity';
+import {
+  Notebook,
+  Note,
+  ROOT_NOTEBOOK_ID,
+  NotebookWithoutParent,
+  NoteWithoutParent,
+} from 'domain/entity';
 import { emit, Repository } from './BaseRepository';
 import type { Dao } from './BaseRepository';
 import { NOTEBOOK_DAO_TOKEN, NOTE_DAO_TOKEN } from './daoTokens';
@@ -22,6 +28,11 @@ export interface Children {
   notes: Note[];
   notebooks: Notebook[];
 }
+
+export interface UnidirectionalChildren {
+  notes: NoteWithoutParent[];
+  notebooks: NotebookWithoutParent[];
+}
 @singleton()
 export class NotebookRepository extends Repository {
   constructor(
@@ -31,11 +42,19 @@ export class NotebookRepository extends Repository {
     super();
   }
 
+  queryChildrenOf(
+    notebook: Notebook,
+    type: QueryEntityTypes,
+  ): Promise<Children>;
+  queryChildrenOf(
+    notebook: Notebook['id'],
+    type: QueryEntityTypes,
+  ): Promise<UnidirectionalChildren>;
   @emit(NotebookEvents.ItemFetched)
   queryChildrenOf(
     notebook: Notebook | Notebook['id'],
     type: QueryEntityTypes,
-  ): Promise<Children> {
+  ): Promise<Children | UnidirectionalChildren> {
     const notebookId = Notebook.isA(notebook) ? notebook.id : notebook;
 
     const notebooks =

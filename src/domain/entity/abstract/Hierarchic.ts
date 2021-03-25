@@ -43,3 +43,8 @@ export abstract class Hierarchic<P extends WithChildren> extends Entity {
     return !!this.parentId.value;
   }
 }
+
+export type WithoutParent<T extends Hierarchic<WithChildren>> = Omit<
+  T,
+  'parent' | 'getParent'
+>;

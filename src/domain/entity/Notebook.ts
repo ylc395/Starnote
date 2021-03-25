@@ -8,7 +8,7 @@ import {
   RefTransform,
   DayjsRefTransform,
 } from './abstract/Entity';
-import { Hierarchic, WithChildren } from './abstract/Hierarchic';
+import { Hierarchic, WithChildren, WithoutParent } from './abstract/Hierarchic';
 import { Note } from './Note';
 import { SortByEnums, SortDirectEnums } from '../constant';
 import { ListItem } from './abstract/ListItem';
@@ -140,3 +140,5 @@ export class Notebook
   }
 }
 type NotebookDo = Omit<Do<Notebook>, 'children' | 'parent'>;
+
+export type NotebookWithoutParent = WithoutParent<Notebook>;

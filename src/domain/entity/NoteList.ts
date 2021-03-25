@@ -1,36 +1,45 @@
-import { computed, shallowReactive } from '@vue/reactivity';
-import { Note } from './Note';
+import { computed, Ref, shallowRef } from '@vue/reactivity';
+import { Note, NoteWithoutParent } from './Note';
 import { Notebook } from './Notebook';
 import EventEmitter from 'eventemitter3';
-import { pull } from 'lodash';
+import { without } from 'lodash';
 
 export class NoteList extends EventEmitter {
-  constructor(
-    // 只有临时占位凑数的 NoteList 才会没有 notebook
-    readonly notebook?: Notebook,
-  ) {
-    super();
+  private _notebook: Ref<Notebook | null> = shallowRef(null);
+  get notebook() {
+    return this._notebook.value;
   }
-  private readonly _notes: Note[] = shallowReactive([]);
+  private readonly _notes: Ref<NoteWithoutParent[]> = shallowRef([]);
   readonly notes = computed(() => {
-    return this._notes.filter(
-      (note) => note.id !== this.notebook?.indexNote.value?.id,
+    return this._notes.value.filter(
+      (note) => note.id !== this._notebook.value?.indexNote.value?.id,
     );
   });
   readonly newNoteDisabled = computed(() => {
-    return this.notebook?.isRoot ?? true;
+    return this._notebook.value?.isRoot ?? true;
   });
 
-  add(note: Note) {
-    if (note.parentId.value !== this.notebook?.id) {
+  load(notebook: Notebook, notes: NoteWithoutParent[]) {
+    notes.forEach((note) => {
+      if (note.parentId.value !== notebook.id) {
+        throw new Error('wrong parent id');
+      }
+    });
+
+    this._notebook.value = notebook;
+    this._notes.value = notes;
+  }
+
+  add(note: NoteWithoutParent) {
+    if (note.parentId.value !== this._notebook.value?.id) {
       throw new Error("note's parent is wrong");
     }
 
-    if (this._notes.find(note.isEqual.bind(note))) {
+    if (this._notes.value.find(note.isEqual.bind(note))) {
       throw new Error(`note(${note.id}) already existed`);
     }
 
-    this._notes.push(note);
+    this._notes.value = [...this._notes.value, note];
   }
   moveTo(noteId: Note['id'], notebook: Notebook) {
     const BIDIRECTIONAL = false; //  todo: 这个变量的值应当由分栏模式决定
@@ -38,7 +47,7 @@ export class NoteList extends EventEmitter {
   }
 
   getNoteById(id: Note['id']) {
-    const note = this._notes.find((note) => note.id === id);
+    const note = this._notes.value.find((note) => note.id === id);
 
     if (!note) {
       throw new Error(`no such note(id: ${id})`);
@@ -50,7 +59,7 @@ export class NoteList extends EventEmitter {
   removeNoteById(id: Note['id']) {
     const note = this.getNoteById(id);
 
-    pull(this._notes, note);
+    this._notes.value = without(this._notes.value, note);
 
     return note;
   }

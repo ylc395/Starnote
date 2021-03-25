@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent, inject, computed } from 'vue';
+import { defineComponent, inject } from 'vue';
 import { List, Button, Input } from 'ant-design-vue';
 import {
   FileAddOutlined,
@@ -40,9 +40,13 @@ export default defineComponent({
   setup() {
     const {
       itemTree: { historyBack, isEmptyHistory },
-      createNoteAndOpenInEditor,
     } = inject<ItemTreeService>(ItemTreeToken)!;
-    const { noteList } = inject<NoteListService>(noteListToken)!;
+
+    const {
+      noteList: { notes, newNoteDisabled },
+      createNoteAndOpenInEditor,
+    } = inject<NoteListService>(noteListToken)!;
+
     const { openInEditor, isActive } = inject<EditorService>(editorToken)!;
 
     const { open: openContextmenu } = useCommonContextmenu<Note>();
@@ -50,17 +54,15 @@ export default defineComponent({
 
     return {
       EMPTY_TITLE,
-      notes: computed(() => noteList.value.notes.value),
+      notes,
       historyBack,
-      newNoteDisabled: computed(() => noteList.value.newNoteDisabled.value),
+      newNoteDisabled,
       isEmptyHistory,
       openInEditor,
       isActive,
       openContextmenu,
       handleDragstart,
-      createNoteAndOpenInEditor: () => {
-        createNoteAndOpenInEditor(noteList.value.notebook!);
-      },
+      createNoteAndOpenInEditor,
     };
   },
 });

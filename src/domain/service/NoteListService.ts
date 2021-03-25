@@ -1,6 +1,9 @@
-import { shallowRef } from '@vue/reactivity';
-import type { Ref } from '@vue/reactivity';
-import { ItemTreeEvents, Note, Notebook } from 'domain/entity';
+import {
+  ItemTreeEvents,
+  Note,
+  Notebook,
+  NoteWithoutParent,
+} from 'domain/entity';
 import {
   NotebookRepository,
   NoteEvents,
@@ -17,7 +20,7 @@ export class NoteListService {
   private readonly notebookRepository = container.resolve(NotebookRepository);
   private readonly noteRepository = container.resolve(NoteRepository);
 
-  readonly noteList: Ref<NoteList> = shallowRef(new NoteList());
+  readonly noteList = new NoteList();
   constructor(
     private readonly itemTreeService: ItemTreeService,
     private readonly editorService: EditorService,
@@ -32,29 +35,40 @@ export class NoteListService {
     );
   }
 
-  private addNote(note: Note) {
-    if (note.parentId.value !== this.noteList.value.notebook?.id) {
+  private addNote(note: NoteWithoutParent) {
+    if (note.parentId.value !== this.noteList.notebook?.id) {
       return;
     }
+
     // todo: 目前是从 editors 里找 note，以确保 noteList 中的 note 和 editor 中的是同一个。再想想有没有更好的做法
     const noteInEditor = this.editorService.getNoteById(note.id);
-    this.noteList.value.add(noteInEditor || note);
+    this.noteList.add(noteInEditor || note);
   }
 
   moveTo(noteId: Note['id'], notebook: Notebook) {
-    const note = this.noteList.value.moveTo(noteId, notebook);
+    const note = this.noteList.moveTo(noteId, notebook);
 
     this.noteRepository.updateNote(note);
   }
 
   async loadNotesOf(notebook: Notebook) {
-    this.noteList.value = new NoteList(notebook);
-
     const { notes } = await this.notebookRepository.queryChildrenOf(
       notebook.id,
       QueryEntityTypes.Note,
     );
 
+    this.noteList.load(notebook, []);
     notes.forEach((note) => this.addNote(note));
+  }
+
+  async createNoteAndOpenInEditor() {
+    if (!this.noteList.notebook) {
+      throw new Error('noteList do not associated with a notebook');
+    }
+
+    const newNote = Note.createEmptyNote(this.noteList.notebook, false);
+
+    await this.noteRepository.createNote(newNote);
+    this.itemTreeService.itemTree.setSelectedItem(newNote, true);
   }
 }

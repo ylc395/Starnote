@@ -9,7 +9,7 @@ import {
   RefTransform,
   DayjsRefTransform,
 } from 'domain/entity';
-import { Hierarchic } from './abstract/Hierarchic';
+import { Hierarchic, WithoutParent } from './abstract/Hierarchic';
 import { Notebook, ROOT_NOTEBOOK_ID } from './Notebook';
 import { ListItem } from './abstract/ListItem';
 import { Exclude } from 'class-transformer';
@@ -79,3 +79,4 @@ export class Note extends Hierarchic<Notebook> implements ListItem {
 }
 
 export type NoteDo = Do<Note>;
+export type NoteWithoutParent = WithoutParent<Note>;
