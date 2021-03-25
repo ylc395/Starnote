@@ -124,12 +124,12 @@ export class EditorService {
   }
 
   async openInEditor(item: TreeItem) {
-    if (Notebook.isA(item)) {
-      this.openNotebookInEditor(item);
+    const note = Notebook.isA(item) ? item.indexNote.value : item;
+
+    if (!note) {
       return;
     }
 
-    const note = item;
     const openedEditor = this._editors.find((editor) =>
       note.isEqual(editor.note.value),
     );
@@ -144,14 +144,6 @@ export class EditorService {
 
     this.safeAddEditor(newEditor);
     this.setActiveEditor(newEditor);
-  }
-
-  private openNotebookInEditor(notebook: Notebook) {
-    if (!notebook.indexNote.value) {
-      return;
-    }
-
-    this.openInEditor(notebook.indexNote.value);
   }
 
   private safeAddEditor(editor: Editor) {

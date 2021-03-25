@@ -12,7 +12,10 @@ export default defineComponent({
 </script>
 <template>
   <div v-if="activeEditor">
-    <input v-model="activeEditor.title.value" />
+    <input
+      v-model="activeEditor.title.value"
+      v-if="!activeEditor.note.value.isIndexNote"
+    />
     <textarea v-model="activeEditor.content.value"></textarea>
   </div>
 </template>

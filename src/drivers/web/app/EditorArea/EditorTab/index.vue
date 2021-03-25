@@ -36,7 +36,7 @@ export default defineComponent({
       v-for="editor of editors"
       :key="editor.id"
       :closable="true"
-      :tab="editor.title.value || EMPTY_TITLE"
+      :tab="editor.notebookTitle.value || editor.title.value || EMPTY_TITLE"
     />
   </Tabs>
 </template>

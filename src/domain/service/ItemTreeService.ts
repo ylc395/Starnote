@@ -15,6 +15,7 @@ import {
   EntityEvents,
 } from 'domain/entity';
 import { selfish } from 'utils/index';
+import { INDEX_NOTE_TITLE } from 'domain/constant';
 
 export const token = Symbol();
 export class ItemTreeService {
@@ -99,7 +100,9 @@ export class ItemTreeService {
     const target = await this.prepareTarget(parent);
 
     const newNotebook = await target.createSubNotebook(title);
-    const indexNote = Note.createEmptyNote(newNotebook, true, { title });
+    const indexNote = Note.createEmptyNote(newNotebook, true, {
+      title: INDEX_NOTE_TITLE,
+    });
 
     newNotebook.indexNote.value = indexNote;
     await this.notebookRepository.createNotebook(newNotebook);

@@ -126,6 +126,10 @@ export class Notebook
   static from(dataObject: NotebookDo, parent?: Notebook, bidirectional = true) {
     const notebook = dataObjectToInstance(this, dataObject);
 
+    if (notebook.indexNote.value) {
+      notebook.indexNote.value.setParent(notebook, false);
+    }
+
     if (!parent) {
       return notebook;
     }
