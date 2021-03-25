@@ -136,8 +136,8 @@ export class EditorService {
       return;
     }
 
-    const newEditor = new Editor(note);
     await ItemTreeService.loadContentOf(note);
+    const newEditor = new Editor(note);
 
     this.safeAddEditor(newEditor);
     this.setActiveEditor(newEditor);
