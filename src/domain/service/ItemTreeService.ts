@@ -100,14 +100,10 @@ export class ItemTreeService {
   async createSubNotebookWithIndexNote(title: string, parent: Notebook | null) {
     const target = await this.prepareTarget(parent);
 
-    const newNotebook = await target.createSubNotebook(title);
-    const indexNote = Note.createEmptyNote(newNotebook, true, {
-      title: INDEX_NOTE_TITLE,
-    });
-
-    newNotebook.indexNote.value = indexNote;
+    const newNotebook = target
+      .createSubNotebook(title)
+      .createIndexNote(INDEX_NOTE_TITLE);
     await this.notebookRepository.createNotebook(newNotebook);
-    await this.noteRepository.createNote(indexNote);
     this.itemTree.setSelectedItem(newNotebook);
 
     return newNotebook;

@@ -56,7 +56,7 @@ export const NotebookModel = db.define('Notebook', {
   },
 });
 
-NotebookModel.belongsTo(NoteModel, {
+export const IndexNote = NotebookModel.belongsTo(NoteModel, {
   keyType: DataTypes.UUIDV4,
   as: 'indexNote',
   foreignKey: 'indexNoteId',
@@ -65,6 +65,7 @@ NotebookModel.belongsTo(NoteModel, {
 
 NoteModel.belongsTo(NotebookModel, {
   keyType: DataTypes.UUIDV4,
+  constraints: false,
   foreignKey: {
     name: 'parentId',
     allowNull: false,

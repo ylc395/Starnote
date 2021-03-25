@@ -1,13 +1,18 @@
 import { Do, Entity } from 'domain/entity';
 import type { Dao, Query } from 'domain/repository';
 import { isArray } from 'lodash';
-import { FindOptions } from 'sequelize/types';
+import { FindOptions, CreateOptions } from 'sequelize/types';
 import { db } from './db';
 type SequelizeModal = ReturnType<typeof db['define']>;
 
+interface Options {
+  onCreate?: CreateOptions;
+  onFind?: FindOptions;
+}
+
 export function daoAdaptor<E extends Entity>(
   model: SequelizeModal,
-  options: FindOptions = {},
+  options: Options = {},
 ): Dao<E> {
   type RawRow = Do<E>;
   type Attributes = (keyof RawRow)[];
@@ -19,22 +24,27 @@ export function daoAdaptor<E extends Entity>(
             where,
             attributes,
             raw: true,
-            ...options,
+            ...options.onFind,
           }) as unknown) as Promise<Pick<RawRow, typeof attributes[number]>>)
-        : (model.findOne({ where, raw: true }) as Promise<RawRow | null>);
+        : (model.findOne({
+            where,
+            raw: true,
+            ...options.onFind,
+          }) as Promise<RawRow | null>);
     },
     all(where?: Query<E> | Attributes, attributes?: Attributes) {
       if (!where) {
-        return (model.findAll({ raw: true, ...options }) as unknown) as Promise<
-          RawRow[]
-        >;
+        return (model.findAll({
+          raw: true,
+          ...options.onFind,
+        }) as unknown) as Promise<RawRow[]>;
       }
 
       if (isArray(where)) {
         return (model.findAll({
           raw: true,
           attributes: where,
-          ...options,
+          ...options.onFind,
         }) as unknown) as Promise<Pick<RawRow, typeof where[number]>[]>;
       }
 
@@ -43,12 +53,12 @@ export function daoAdaptor<E extends Entity>(
             raw: true,
             where,
             attributes,
-            ...options,
+            ...options.onFind,
           }) as unknown) as Promise<Pick<RawRow, typeof attributes[number]>[]>)
         : ((model.findAll({
             where,
             raw: true,
-            ...options,
+            ...options.onFind,
           }) as unknown) as Promise<RawRow[]>);
     },
     deleteById(id) {
@@ -58,7 +68,7 @@ export function daoAdaptor<E extends Entity>(
       return model.update(dataObject, { where: { id: dataObject.id } }).then();
     },
     create(dataObject) {
-      return model.create(dataObject).then();
+      return model.create(dataObject, options.onCreate).then(() => undefined);
     },
   };
 }
