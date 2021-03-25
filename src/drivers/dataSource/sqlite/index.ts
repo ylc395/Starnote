@@ -7,7 +7,11 @@ import { IS_DEVELOPMENT } from 'drivers/platform/common/constants';
 
 export const noteDao = daoAdaptor<Note>(NoteModel);
 export const notebookDao = daoAdaptor<Notebook>(NotebookModel, {
-  include: { model: NoteModel, as: 'indexNote' },
+  include: {
+    model: NoteModel,
+    as: 'indexNote',
+    attributes: { exclude: ['content'] },
+  },
 });
 
 db.sync({ force: IS_DEVELOPMENT });

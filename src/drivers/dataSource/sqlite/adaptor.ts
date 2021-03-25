@@ -1,15 +1,13 @@
 import { Do, Entity } from 'domain/entity';
 import type { Dao, Query } from 'domain/repository';
 import { isArray } from 'lodash';
+import { FindOptions } from 'sequelize/types';
 import { db } from './db';
 type SequelizeModal = ReturnType<typeof db['define']>;
-interface Options {
-  include?: SequelizeModal | { model: SequelizeModal; as: string };
-}
 
 export function daoAdaptor<E extends Entity>(
   model: SequelizeModal,
-  options: Options = {},
+  options: FindOptions = {},
 ): Dao<E> {
   type RawRow = Do<E>;
   type Attributes = (keyof RawRow)[];
