@@ -43,8 +43,8 @@ export function useNotebookCreator() {
   };
 
   function startCreating(
-    target?: Notebook,
     type: 'notebook' | 'indexNote' = 'notebook',
+    target?: Notebook,
   ) {
     _type = type;
     _target.value = target || null;

@@ -18,13 +18,13 @@ export function useContextmenu() {
   const handleNotebook = (notebook: Notebook, key: string) => {
     switch (key) {
       case 'createNotebook':
-        notebookCreator?.startCreating(notebook);
+        notebookCreator?.startCreating('notebook', notebook);
         return;
       case 'createNote':
         createNoteAndOpenInEditor(notebook);
         return;
       case 'createIndexNote':
-        notebookCreator?.startCreating(notebook, 'indexNote');
+        notebookCreator?.startCreating('indexNote', notebook);
         return;
       default:
         break;
