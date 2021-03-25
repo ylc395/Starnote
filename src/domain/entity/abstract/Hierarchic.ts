@@ -28,7 +28,7 @@ export abstract class Hierarchic<P extends WithChildren> extends Entity {
     }
 
     if (newParent.children.value.find(this.isEqual.bind(this))) {
-      throw new Error('parent already contains this');
+      return this;
     }
 
     newParent.children.value = [...newParent.children.value, this];

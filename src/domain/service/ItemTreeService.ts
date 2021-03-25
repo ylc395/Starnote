@@ -113,11 +113,8 @@ export class ItemTreeService {
   }
 
   private static loadChildrenOf(notebook: Notebook, notebookOnly = true) {
-    if (notebook.isChildrenLoaded) {
-      return;
-    }
-
     const notebookRepository = container.resolve(NotebookRepository);
+
     return notebookRepository.queryChildrenOf(
       notebook,
       notebookOnly ? QueryEntityTypes.Notebook : QueryEntityTypes.All,

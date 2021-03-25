@@ -92,10 +92,6 @@ export class Notebook
     return this.id === ROOT_NOTEBOOK_ID;
   }
 
-  get isChildrenLoaded() {
-    return !!this.children.value;
-  }
-
   hasParent() {
     return super.hasParent() && this.parentId.value !== ROOT_NOTEBOOK_ID;
   }

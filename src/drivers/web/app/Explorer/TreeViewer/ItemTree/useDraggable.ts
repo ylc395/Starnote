@@ -12,6 +12,8 @@ import {
 import { token as dragIconToken } from '../../DragIcon/useDragIcon';
 import { partial } from 'lodash';
 
+const EXPAND_WAIT_TIME = 500;
+
 export function useDraggable() {
   const {
     itemTree: { foldNotebook, moveTo, moveToRoot, expandNotebook },
@@ -46,7 +48,10 @@ export function useDraggable() {
         return;
       }
 
-      timerMap.set(item.id, setTimeout(partial(expandNotebook, item), 300));
+      timerMap.set(
+        item.id,
+        setTimeout(partial(expandNotebook, item), EXPAND_WAIT_TIME),
+      );
     },
 
     handleDrop: ({ node, dragNode, dropToGap, event }: DropEvent) => {
@@ -62,7 +67,13 @@ export function useDraggable() {
         return;
       }
 
-      clearTimeout(timerMap.get(targetNotebook.id));
+      // antd-vue 的 Tree 组件是先触发 drop 才触发 dragenter 时间的
+      // 因此这里需要一个延时
+      setTimeout(() => {
+        clearTimeout(timerMap.get(targetNotebook.id));
+        // 400 这个数字来自
+        // https://github.com/vueComponent/ant-design-vue/blob/e30077dd8334c5aaf2c094a46401f10e6f662ad9/components/vc-tree/src/Tree.jsx#L321
+      }, 400);
 
       // 当拖动的不是notebook时， dropToGap 的值不准确
       if (dropToGap && !noteId) {
