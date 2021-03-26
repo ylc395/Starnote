@@ -11210,6 +11210,11 @@ vue-loader@^15.9.2:
     vue-hot-reload-api "^2.3.0"
     vue-style-loader "^4.1.0"
 
+vue-resizable@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.npmjs.org/vue-resizable/-/vue-resizable-2.0.1.tgz#6dfce74e64bce27952e12acfab76c480d279490f"
+  integrity sha512-3CueadexPK2/243Z4QDrvz1Ya+2T1V2S2MGvKVovyNf+Q0aORJAEyc0Qm63YrvSkEmb9DI5ESgwb5sZFvOhl4A==
+
 vue-style-loader@^4.1.0, vue-style-loader@^4.1.2:
   version "4.1.2"
   resolved "http://r.npm.sankuai.com/vue-style-loader/download/vue-style-loader-4.1.2.tgz#dedf349806f25ceb4e64f3ad7c0a44fba735fcf8"

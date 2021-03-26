@@ -1,15 +1,16 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import ItemTree from './ItemTree/index.vue';
+import Resizable from 'vue-resizable';
 
 export default defineComponent({
-  components: { ItemTree },
+  components: { ItemTree, Resizable },
 });
 </script>
 <template>
-  <div class="tree-viewer h-full w-60">
+  <Resizable class="tree-viewer h-full" :active="['r']" width="15rem">
     <ItemTree />
-  </div>
+  </Resizable>
 </template>
 <style scoped>
 .tree-viewer {

@@ -59,6 +59,7 @@ export default defineComponent({
       treeData,
       expandedKeys,
       selectedKeys,
+      getModalContainer: () => document.querySelector('#app'),
     };
   },
 });
@@ -113,6 +114,7 @@ export default defineComponent({
       :closable="false"
       :width="400"
       :destroyOnClose="true"
+      :getContainer="getModalContainer"
     >
       <NotebookCreator />
     </Modal>

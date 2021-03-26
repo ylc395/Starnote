@@ -6,6 +6,7 @@ import {
   SearchOutlined,
   ArrowLeftOutlined,
 } from '@ant-design/icons-vue';
+import Resizable from 'vue-resizable';
 
 import type { Note } from 'domain/entity';
 import { EMPTY_TITLE } from 'domain/constant';
@@ -36,6 +37,7 @@ export default defineComponent({
     AInput: Input,
     ListItem: List.Item,
     Contextmenu,
+    Resizable,
   },
   setup() {
     const {
@@ -71,8 +73,12 @@ export default defineComponent({
 });
 </script>
 <template>
-  <div class="h-full bg-gray-100 w-60 flex flex-col">
-    <div class="p-2">
+  <Resizable
+    width="15rem"
+    class="h-full bg-gray-100 flex flex-col"
+    :active="['r']"
+  >
+    <div class="py-2 px-3 flex items-center">
       <Button
         @click="historyBack"
         :disabled="isEmptyHistory"
@@ -95,7 +101,7 @@ export default defineComponent({
           <FileAddOutlined />
         </template>
       </Button>
-      <AInput placeholder="全局搜索" class="w-40">
+      <AInput placeholder="全局搜索" class="w-40 flex-grow">
         <template #prefix><SearchOutlined /></template>
       </AInput>
     </div>
@@ -117,5 +123,5 @@ export default defineComponent({
       </template>
     </List>
     <Contextmenu />
-  </div>
+  </Resizable>
 </template>
