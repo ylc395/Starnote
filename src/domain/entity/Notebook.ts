@@ -10,7 +10,7 @@ import {
 } from './abstract/Entity';
 import { Hierarchic, WithChildren, WithoutParent } from './abstract/Hierarchic';
 import { Note } from './Note';
-import { SortByEnums, SortDirectEnums } from '../constant';
+import { INDEX_NOTE_TITLE, SortByEnums, SortDirectEnums } from '../constant';
 import { ListItem } from './abstract/ListItem';
 import { Exclude, Transform, Type } from 'class-transformer';
 
@@ -55,38 +55,22 @@ export class Notebook
 
   @DayjsRefTransform
   readonly userCreatedAt: Ref<Dayjs> = shallowRef(dayjs());
-  // readonly orderedChildren = computed(() => {
-  //   if (!this.children) {
-  //     return [];
-  //   }
 
-  //   const copy = this.children.value.slice();
-  //   copy.sort((child1, child2) => {
-  //     const TOP = this.sortDirect.value === SortDirectEnums.Asc ? 1 : -1;
-  //     const BOTTOM = this.sortDirect.value === SortDirectEnums.Asc ? -1 : 1;
+  @Exclude()
+  private _noteToOpen: Note | null = null;
 
-  //     switch (this.sortBy.value) {
-  //       case SortByEnums.Title:
-  //         return child1.title > child2.title ? TOP : BOTTOM;
-  //       case SortByEnums.CreatedAt:
-  //         return child1.userCreatedAt.value.isAfter(child2.userCreatedAt.value)
-  //           ? TOP
-  //           : BOTTOM;
-  //       case SortByEnums.UpdatedAt:
-  //         return child1.userModifiedAt.value.isAfter(
-  //           child2.userModifiedAt.value,
-  //         )
-  //           ? TOP
-  //           : BOTTOM;
-  //       case SortByEnums.Custom:
-  //         return child1.sortOrder.value > child2.sortOrder.value ? TOP : BOTTOM;
-  //       default:
-  //         return -1;
-  //     }
-  //   });
+  get noteJustCreated() {
+    return this._noteToOpen;
+  }
 
-  //   return copy;
-  // });
+  set noteJustCreated(val: Note | null) {
+    if (val && val?.getParent() !== this) {
+      throw new Error('can not set note to open');
+    }
+
+    this._noteToOpen = val;
+  }
+
   get isRoot() {
     return this.id === ROOT_NOTEBOOK_ID;
   }
@@ -99,8 +83,17 @@ export class Notebook
     return Notebook.from({ parentId: this.id, title }, this);
   }
 
-  createIndexNote(title: string) {
-    const newNote = Note.createEmptyNote(this, false, { title });
+  createNote(bidirectional: boolean) {
+    const note = Note.createEmptyNote(this, bidirectional);
+    this.noteJustCreated = note;
+
+    return note;
+  }
+
+  createIndexNote() {
+    const newNote = Note.createEmptyNote(this, false, {
+      title: INDEX_NOTE_TITLE,
+    });
     this.indexNote.value = newNote;
 
     return this;

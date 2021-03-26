@@ -3,6 +3,7 @@ import {
   Note,
   Notebook,
   NoteWithoutParent,
+  TreeItem,
 } from 'domain/entity';
 import {
   NotebookRepository,
@@ -30,8 +31,13 @@ export class NoteListService {
 
   private init() {
     this.noteRepository.on(NoteEvents.NoteCreated, this.addNote, this);
-    this.itemTreeService.itemTree.on(ItemTreeEvents.Selected, ({ actual }) =>
-      this.loadNotesOf(actual),
+    this.itemTreeService.itemTree.on(
+      ItemTreeEvents.Selected,
+      (item: TreeItem) => {
+        if (Notebook.isA(item)) {
+          this.loadNotesOf(item);
+        }
+      },
     );
   }
 
@@ -41,7 +47,7 @@ export class NoteListService {
     }
 
     // todo: 目前是从 editors 里找 note，以确保 noteList 中的 note 和 editor 中的是同一个。再想想有没有更好的做法
-    const noteInEditor = this.editorService.getNoteById(note.id);
+    const noteInEditor = this.editorService.editorManager.getNoteById(note.id);
     this.noteList.add(noteInEditor || note);
   }
 
@@ -59,16 +65,5 @@ export class NoteListService {
 
     this.noteList.load(notebook, []);
     notes.forEach((note) => this.addNote(note));
-  }
-
-  async createNoteAndOpenInEditor() {
-    if (!this.noteList.notebook) {
-      throw new Error('noteList do not associated with a notebook');
-    }
-
-    const newNote = Note.createEmptyNote(this.noteList.notebook, false);
-
-    await this.noteRepository.createNote(newNote);
-    this.itemTreeService.itemTree.setSelectedItem(newNote, true);
   }
 }

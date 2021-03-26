@@ -9,10 +9,12 @@ export default defineComponent({
   components: { Tabs, TabPane: Tabs.TabPane, FileOutlined, FolderOutlined },
   setup() {
     const {
-      editors,
-      activeEditor,
-      closeEditorById,
-      setActiveEditor,
+      editorManager: {
+        editors,
+        activeEditor,
+        closeEditorById,
+        setActiveEditor,
+      },
     } = inject<EditorService>(token)!;
 
     return {
@@ -38,11 +40,7 @@ export default defineComponent({
         <FolderOutlined v-if="editor.note.value.isIndexNote" />
         <FileOutlined v-else />
         <span>
-          {{
-            (editor.note.value.isIndexNote
-              ? editor.notebookTitle.value
-              : editor.title.value) || EMPTY_TITLE
-          }}
+          {{ editor.title.value || EMPTY_TITLE }}
         </span>
       </template>
     </TabPane>

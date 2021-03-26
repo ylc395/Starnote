@@ -41,6 +41,9 @@ export class Note extends Hierarchic<Notebook> implements ListItem {
   @Exclude()
   protected readonly parent: Ref<Notebook | null> = shallowRef(null);
 
+  @Exclude({ toPlainOnly: true })
+  isJustCreated = false;
+
   get isIndexNote() {
     return this.parent.value?.indexNote.value === this;
   }
@@ -71,6 +74,7 @@ export class Note extends Hierarchic<Notebook> implements ListItem {
         title: 'untitled note',
         content: '',
         ...note,
+        isJustCreated: true,
       },
       parent,
       bidirectional,

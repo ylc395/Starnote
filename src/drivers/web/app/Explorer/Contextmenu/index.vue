@@ -1,6 +1,13 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { Menu } from 'ant-design-vue';
+import {
+  FolderAddOutlined,
+  FileAddOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  StarOutlined,
+} from '@ant-design/icons-vue';
 import CommonContextmenu from 'drivers/web/components/Contextmenu/index.vue';
 import { useContextmenu } from './useContextmenu';
 
@@ -9,6 +16,11 @@ export default defineComponent({
     MenuItem: Menu.Item,
     SubMenu: Menu.SubMenu,
     CommonContextmenu,
+    FolderAddOutlined,
+    FileAddOutlined,
+    DeleteOutlined,
+    EditOutlined,
+    StarOutlined,
   },
   setup() {
     const { type, handleClick } = useContextmenu();
@@ -21,16 +33,20 @@ export default defineComponent({
 });
 </script>
 <template>
-  <CommonContextmenu @click="handleClick" class="w-32">
+  <CommonContextmenu @click="handleClick" class="w-36">
     <template v-if="type === 'notebook'">
-      <SubMenu title="新建笔记本" key="aaa">
+      <SubMenu>
+        <template #title><FolderAddOutlined />新建笔记本</template>
         <MenuItem key="createNotebook">笔记本</MenuItem>
         <MenuItem key="createIndexNote">目录笔记</MenuItem>
       </SubMenu>
-      <MenuItem key="createNote">新建笔记</MenuItem>
+      <MenuItem key="createNote"><FileAddOutlined />新建笔记</MenuItem>
+      <MenuItem key="rename"><EditOutlined />重命名</MenuItem>
     </template>
-    <MenuItem key="remove">删除</MenuItem>
-    <MenuItem key="rename">重命名</MenuItem>
+    <MenuItem key="star"> <StarOutlined />收藏</MenuItem>
+    <MenuItem key="remove">
+      <DeleteOutlined class="text-red-400" />删除</MenuItem
+    >
     <SubMenu title="排序方式" v-if="type === 'notebook'">
       <MenuItem key="sortByTitle">按标题</MenuItem>
       <MenuItem key="sortByLastModifiedAt">按修改日期</MenuItem>

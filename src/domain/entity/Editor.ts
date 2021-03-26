@@ -10,7 +10,6 @@ export class Editor extends EventEmitter implements ListItem {
   readonly withContextmenu = ref(false);
   readonly id = uniqueId('editor-');
   readonly title = ref('');
-  readonly notebookTitle = ref('');
   readonly content = ref('');
   private readonly _isActive = ref(false);
   readonly isActive = computed(() => this._isActive.value);
@@ -20,6 +19,8 @@ export class Editor extends EventEmitter implements ListItem {
   // only emit after activating
   private readonly emitSync = after(2, () => {
     this.emit(EntityEvents.Sync, this._note.value);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    this._note.value!.isJustCreated = false;
   });
   constructor(note: Note) {
     super();
@@ -30,12 +31,10 @@ export class Editor extends EventEmitter implements ListItem {
   loadNote(note: Note) {
     this._note.value = note;
 
-    if (note.isIndexNote) {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      this.notebookTitle.value = note.getParent()!.title.value;
-    } else {
-      this.title.value = note.title.value;
-    }
+    this.title.value = note.isIndexNote
+      ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        note.getParent()!.title.value
+      : note.title.value;
 
     this.content.value = note.content.value ?? '';
   }

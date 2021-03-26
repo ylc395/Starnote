@@ -40,14 +40,17 @@ export default defineComponent({
   setup() {
     const {
       itemTree: { historyBack, isEmptyHistory },
+      createNote,
     } = inject<ItemTreeService>(ItemTreeToken)!;
 
     const {
       noteList: { notes, newNoteDisabled },
-      createNoteAndOpenInEditor,
     } = inject<NoteListService>(noteListToken)!;
 
-    const { openInEditor, isActive } = inject<EditorService>(editorToken)!;
+    const {
+      openInEditor,
+      editorManager: { isActive },
+    } = inject<EditorService>(editorToken)!;
 
     const { open: openContextmenu } = useCommonContextmenu<Note>();
     const { handleDragstart } = useDraggable();
@@ -62,7 +65,7 @@ export default defineComponent({
       isActive,
       openContextmenu,
       handleDragstart,
-      createNoteAndOpenInEditor,
+      createNote,
     };
   },
 });
@@ -85,7 +88,7 @@ export default defineComponent({
         type="primary"
         :disabled="newNoteDisabled"
         size="small"
-        @click="createNoteAndOpenInEditor"
+        @click="createNote()"
         class="rounded-md mr-2"
       >
         <template #icon>

@@ -16,7 +16,6 @@ import {
   EntityEvents,
 } from 'domain/entity';
 import { selfish } from 'utils/index';
-import { INDEX_NOTE_TITLE } from 'domain/constant';
 
 export const token = Symbol();
 export class ItemTreeService {
@@ -78,17 +77,21 @@ export class ItemTreeService {
     return target;
   }
 
-  async createNoteAndOpenInEditor(parent: Notebook) {
+  async createNote(parent?: Notebook) {
     const BIDIRECTIONAL = false; //  todo: 这个变量的值应当由分栏模式决定
-    const newNote = Note.createEmptyNote(parent, BIDIRECTIONAL);
+    const target = parent || this.itemTree.selectedItem.value;
 
+    if (!Notebook.isA(target)) {
+      throw new Error('no target notebook');
+    }
+
+    const newNote = target.createNote(BIDIRECTIONAL);
     await this.noteRepository.createNote(newNote);
-    this.itemTree.setSelectedItem(newNote, true);
+    this.itemTree.setSelectedItem(newNote);
   }
 
   async createSubNotebook(title: string, parent: Notebook | null) {
     const target = await this.prepareTarget(parent);
-
     const newNotebook = target.createSubNotebook(title);
 
     await this.notebookRepository.createNotebook(newNotebook);
@@ -99,10 +102,8 @@ export class ItemTreeService {
 
   async createSubNotebookWithIndexNote(title: string, parent: Notebook | null) {
     const target = await this.prepareTarget(parent);
+    const newNotebook = target.createSubNotebook(title).createIndexNote();
 
-    const newNotebook = target
-      .createSubNotebook(title)
-      .createIndexNote(INDEX_NOTE_TITLE);
     await this.notebookRepository.createNotebook(newNotebook);
     this.itemTree.setSelectedItem(newNotebook);
 

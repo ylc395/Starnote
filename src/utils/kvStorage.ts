@@ -1,22 +1,25 @@
 // @see https://2ality.com/2020/04/classes-as-values-typescript.html
 import { get, hasIn, isNil } from 'lodash';
 import { Class } from './types';
-function cast<T>(obj: unknown, TheClass?: Class<T>): T | never {
+function cast<T>(obj: unknown, TheClass?: Class<T>): T | unknown | never {
   if (TheClass && !(obj instanceof TheClass)) {
     throw new Error(`Not an instance of ${TheClass.name}: ${obj}`);
   }
-  return obj as T;
+
+  if (TheClass) {
+    return obj as T;
+  }
+
+  return obj as unknown;
 }
 
 export class KvStorage {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private readonly map = new Map<unknown, any>();
-  getItem<T>(key: unknown, type?: Class<T>): T | never {
+  getItem(key: unknown): unknown;
+  getItem<T>(key: unknown, type: Class<T>): T;
+  getItem<T>(key: unknown, type?: Class<T>): T | unknown {
     const item = this.map.get(key);
-
-    if (isNil(item)) {
-      throw new Error(`no item for key ${key}`);
-    }
 
     return cast(item, type);
   }

@@ -41,27 +41,23 @@ export class ItemTree extends EventEmitter {
     this.root.value = notebook;
   }
 
-  setSelectedItem(item: TreeItem, alwaysEmit = false) {
-    const lastSelected = this.selectedItem.value;
-    const _item = this.itemsKV.has(item.id) ? item : item.getParent();
+  setSelectedItem(item: TreeItem) {
+    const _item =
+      this.itemsKV.getItem(item.id) ||
+      this.itemsKV.getItem(item.getParent()?.id);
 
-    if (!_item) {
+    if (!isTreeItem(_item)) {
       return;
     }
 
     this.selectedItem.value = _item;
-
-    if (alwaysEmit || !_item.isEqual(lastSelected)) {
-      this.emit(ItemTreeEvents.Selected, { origin: item, actual: _item });
-    }
+    this.emit(ItemTreeEvents.Selected, _item);
   }
 
   private maintainHistory() {
-    this.historyMaintainer = effect(() => {
-      const selected = this.selectedItem.value;
-
-      if (Notebook.isA(selected) && last(this.history) !== selected) {
-        this.history.push(selected);
+    this.on(ItemTreeEvents.Selected, (item: TreeItem) => {
+      if (Notebook.isA(item) && last(this.history) !== item) {
+        this.history.push(item);
       }
     });
   }
@@ -80,8 +76,10 @@ export class ItemTree extends EventEmitter {
     this.maintainHistory();
   }
 
-  getItem<T>(id: TreeItemId, aClass?: Class<T>) {
-    return this.itemsKV.getItem(id, aClass);
+  getItem(id: TreeItemId): unknown;
+  getItem<T>(id: TreeItemId, aClass: Class<T>): T;
+  getItem<T>(id: TreeItemId, aClass?: Class<T>): unknown {
+    return aClass ? this.itemsKV.getItem(id, aClass) : this.itemsKV.getItem(id);
   }
 
   putItem(items: TreeItem | TreeItem[]) {
@@ -119,12 +117,7 @@ export class ItemTree extends EventEmitter {
       throw new Error('no root notebook');
     }
 
-    const _child = isString(child) ? this.getItem(child) : child;
-
-    if (!Notebook.isA(_child)) {
-      return;
-    }
-
+    const _child = isString(child) ? this.getItem(child, Notebook) : child;
     this.moveTo(_child, this.root.value);
   }
 
@@ -132,6 +125,11 @@ export class ItemTree extends EventEmitter {
     const isEqual = notebook.isEqual.bind(notebook);
 
     return this.expandedItems.findIndex(isEqual) >= 0;
+  }
+
+  rename(item: TreeItem, title: string) {
+    item.title.value = title;
+    this.emit(EntityEvents.Sync, item);
   }
 
   static isA(instance: unknown): instance is TreeItem {

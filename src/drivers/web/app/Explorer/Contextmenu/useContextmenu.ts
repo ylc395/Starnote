@@ -11,20 +11,22 @@ import {
 } from 'domain/service/ItemTreeService';
 
 export function useContextmenu() {
-  const notebookCreator = inject(notebookCreatorToken, null);
+  const notebookCreator = inject(notebookCreatorToken, null); // 在 NoteList 中时，将得到 null
   const { context } = inject<ReturnType<typeof useCommonContextmenu>>(token)!;
-  const { createNoteAndOpenInEditor } = inject<ItemTreeService>(itemTreeToken)!;
+  const { createNote } = inject<ItemTreeService>(itemTreeToken)!;
 
-  const handleNotebook = (notebook: Notebook, key: string) => {
+  const handleClick = ({ key }: { key: string }) => {
     switch (key) {
       case 'createNotebook':
-        notebookCreator?.startCreating('notebook', notebook);
+        notebookCreator?.startCreating('notebook', context.value as Notebook);
         return;
       case 'createNote':
-        createNoteAndOpenInEditor(notebook);
+        createNote(context.value as Notebook);
         return;
       case 'createIndexNote':
-        notebookCreator?.startCreating('indexNote', notebook);
+        notebookCreator?.startCreating('indexNote', context.value as Notebook);
+        return;
+      case 'rename':
         return;
       default:
         break;
@@ -39,10 +41,6 @@ export function useContextmenu() {
 
       return 'note';
     }),
-    handleClick({ key }: { key: string }) {
-      if (Notebook.isA(context.value)) {
-        handleNotebook(context.value, key);
-      }
-    },
+    handleClick,
   };
 }
