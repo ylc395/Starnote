@@ -1,13 +1,16 @@
 import { Ref } from '@vue/reactivity';
+import { hasIn } from 'lodash';
 
-export interface ListItem {
-  readonly withContextmenu?: Ref<boolean>;
-  readonly sortOrder?: Ref<number>;
+interface WithContextMenu {
+  readonly withContextmenu: Ref<boolean>;
 }
 
+export type ListItem = {
+  readonly sortOrder?: Ref<number>;
+} & Partial<WithContextMenu>;
+
 export function isWithContextmenu(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  instance: any,
-): instance is Pick<Required<ListItem>, 'withContextmenu'> {
-  return instance?.withContextmenu;
+  instance: unknown,
+): instance is WithContextMenu {
+  return hasIn(instance, 'withContextmenu');
 }
