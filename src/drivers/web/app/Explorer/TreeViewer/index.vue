@@ -10,7 +10,12 @@ export default defineComponent({
 </script>
 <template>
   <aside>
-    <Resizable class="tree-viewer h-full" :active="['r']" width="15rem">
+    <Resizable
+      class="tree-viewer h-full"
+      :active="['r']"
+      :disableAttributes="['h']"
+      width="15rem"
+    >
       <StarList />
       <ItemTree />
     </Resizable>

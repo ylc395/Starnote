@@ -76,6 +76,7 @@ export default defineComponent({
   <Resizable
     width="15rem"
     class="h-full bg-gray-100 flex flex-col"
+    :disableAttributes="['h']"
     :active="['r']"
   >
     <div class="py-2 px-3 flex items-center">
