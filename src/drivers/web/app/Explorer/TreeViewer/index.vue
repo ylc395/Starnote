@@ -9,12 +9,12 @@ export default defineComponent({
 });
 </script>
 <template>
-  <Aside>
+  <aside>
     <Resizable class="tree-viewer h-full" :active="['r']" width="15rem">
       <StarList />
       <ItemTree />
     </Resizable>
-  </Aside>
+  </aside>
 </template>
 <style scoped>
 .tree-viewer {
