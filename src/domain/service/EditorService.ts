@@ -7,6 +7,7 @@ import {
   TreeItem,
   EntityEvents,
   ItemTreeEvents,
+  ItemTree,
 } from 'domain/entity';
 import { ItemTreeService } from './ItemTreeService';
 import { effect } from '@vue/reactivity';
@@ -17,14 +18,16 @@ export const token = Symbol();
 export class EditorService {
   readonly editorManager = selfish(new EditorManager());
   private readonly noteRepository = container.resolve(NoteRepository);
-  constructor(private readonly itemTreeService: ItemTreeService) {
-    this.itemTreeService.itemTree.on(
-      ItemTreeEvents.Selected,
-      this.openInEditor,
-      this,
-    );
-
+  constructor(itemTreeService: ItemTreeService) {
     effect(this.keepSync.bind(this));
+    this.monitorItemTree(itemTreeService.itemTree);
+  }
+
+  private monitorItemTree(itemTree: ItemTree) {
+    itemTree.on(ItemTreeEvents.Selected, this.openInEditor, this);
+    effect(() => {
+      itemTree.editingNotes.value = this.editorManager.editingNotes.value;
+    });
   }
 
   private keepSync() {

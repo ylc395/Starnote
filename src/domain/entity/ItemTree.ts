@@ -32,6 +32,7 @@ export class ItemTree extends EventEmitter {
   });
   readonly selectedItem: Ref<Notebook | Note | null> = shallowRef(null);
   readonly expandedItems: Notebook[] = shallowReactive([]);
+  editingNotes: Ref<Note[]> = shallowRef([]);
   constructor() {
     super();
     this.maintainHistory();

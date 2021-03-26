@@ -21,9 +21,7 @@ export default defineComponent({
   setup() {
     const itemTreeService = selfish(new ItemTreeService());
     const editorService = selfish(new EditorService(itemTreeService));
-    const noteListService = selfish(
-      new NoteListService(itemTreeService, editorService),
-    );
+    const noteListService = selfish(new NoteListService(itemTreeService));
 
     provide(itemTreeToken, itemTreeService);
     provide(editorToken, editorService);

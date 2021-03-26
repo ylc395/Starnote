@@ -1,4 +1,5 @@
 import {
+  ItemTree,
   ItemTreeEvents,
   Note,
   Notebook,
@@ -13,32 +14,27 @@ import {
 } from 'domain/repository';
 import { container } from 'tsyringe';
 import { ItemTreeService } from './ItemTreeService';
-import { EditorService } from './EditorService';
 import { NoteList } from 'domain/entity/NoteList';
 
 export const token = Symbol();
 export class NoteListService {
   private readonly notebookRepository = container.resolve(NotebookRepository);
   private readonly noteRepository = container.resolve(NoteRepository);
+  private itemTree: ItemTree;
 
   readonly noteList = new NoteList();
-  constructor(
-    private readonly itemTreeService: ItemTreeService,
-    private readonly editorService: EditorService,
-  ) {
+  constructor(itemTreeService: ItemTreeService) {
+    this.itemTree = itemTreeService.itemTree;
     this.init();
   }
 
   private init() {
     this.noteRepository.on(NoteEvents.NoteCreated, this.addNote, this);
-    this.itemTreeService.itemTree.on(
-      ItemTreeEvents.Selected,
-      (item: TreeItem) => {
-        if (Notebook.isA(item)) {
-          this.loadNotesOf(item);
-        }
-      },
-    );
+    this.itemTree.on(ItemTreeEvents.Selected, (item: TreeItem) => {
+      if (Notebook.isA(item)) {
+        this.loadNotesOf(item);
+      }
+    });
   }
 
   private addNote(note: NoteWithoutParent) {
@@ -46,8 +42,9 @@ export class NoteListService {
       return;
     }
 
-    // todo: 目前是从 editors 里找 note，以确保 noteList 中的 note 和 editor 中的是同一个。再想想有没有更好的做法
-    const noteInEditor = this.editorService.editorManager.getNoteById(note.id);
+    const noteInEditor = this.itemTree.editingNotes.value.find((n) =>
+      n.isEqual(note),
+    );
     this.noteList.add(noteInEditor || note);
   }
 
