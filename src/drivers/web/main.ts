@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import './assets/tailwind.css';
+import './main.css';
 import 'drivers/dataSource/ipc/rendererProcess';
 
 import { createApp } from 'vue';

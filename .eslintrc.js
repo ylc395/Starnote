@@ -10,6 +10,7 @@ module.exports = {
     'plugin:vue/vue3-essential',
     'eslint:recommended',
     '@vue/typescript/recommended',
+    'plugin:vue-scoped-css/vue3-recommended',
     'prettier',
   ],
   parserOptions: {
@@ -17,6 +18,7 @@ module.exports = {
   },
   rules: {
     'no-undef': 'error',
+    'vue-scoped-css/require-scoped': 'error',
     'prefer-rest-params': isProduction ? 'error' : 'warn',
     'no-console': isProduction ? 'error' : 'warn',
     'no-debugger': isProduction ? 'error' : 'warn',

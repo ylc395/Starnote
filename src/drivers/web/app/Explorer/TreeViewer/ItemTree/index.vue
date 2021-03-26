@@ -66,13 +66,9 @@ export default defineComponent({
 </script>
 <template>
   <div class="flex flex-col h-full">
-    <div class="text-white flex justify-between items-center p-2">
-      <h1
-        class="text-inherit text-sm uppercase my-0"
-        @dragover.prevent
-        @drop="handleRootDrop"
-      >
-        <FolderOutlined class="mr-1" ref="notebookIconRef" />
+    <div class="tree-viewer-header">
+      <h1 class="tree-viewer-title" @dragover.prevent @drop="handleRootDrop">
+        <FolderOutlined class="tree-viewer-icon" ref="notebookIconRef" />
         Notebooks
       </h1>
       <button
@@ -122,6 +118,7 @@ export default defineComponent({
   </div>
 </template>
 <style scoped>
+/* eslint-disable-next-line vue-scoped-css/no-unused-selector */
 .ant-tree :deep(li) {
   padding-top: 0;
   padding-bottom: 0;

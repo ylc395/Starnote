@@ -46,7 +46,7 @@ export default defineComponent({
       >
       <MenuItem key="rename"><EditOutlined />重命名</MenuItem>
     </template>
-    <MenuItem key="star"> <StarOutlined />收藏</MenuItem>
+    <MenuItem v-if="type === 'note'" key="star"> <StarOutlined />收藏</MenuItem>
     <MenuItem key="remove">
       <DeleteOutlined class="text-red-400" />删除</MenuItem
     >
