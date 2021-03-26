@@ -12,14 +12,10 @@ export const token: InjectionKey<
 > = Symbol();
 
 export function useNotebookCreator() {
-  const {
-    createSubNotebookWithIndexNote,
-    createSubNotebook,
-  } = inject<ItemTreeService>(itemTreeToken)!;
+  const { createSubNotebook } = inject<ItemTreeService>(itemTreeToken)!;
   const isCreating = ref(false);
   const title = ref('');
 
-  let _type = '';
   const _target: Ref<TreeItem | null> = shallowRef(null);
   const path = computed(() => {
     let node = _target.value;
@@ -42,26 +38,15 @@ export function useNotebookCreator() {
     stopCreating(true);
   };
 
-  function startCreating(
-    type: 'notebook' | 'indexNote' = 'notebook',
-    target?: Notebook,
-  ) {
-    _type = type;
+  function startCreating(target?: Notebook) {
     _target.value = target || null;
 
     isCreating.value = true;
   }
 
   function stopCreating(isConfirmed: boolean) {
-    if (isConfirmed && _type === 'notebook') {
+    if (isConfirmed) {
       createSubNotebook(title.value, _target.value as Notebook | null);
-    }
-
-    if (isConfirmed && _type === 'indexNote') {
-      createSubNotebookWithIndexNote(
-        title.value,
-        _target.value as Notebook | null,
-      );
     }
 
     title.value = '';

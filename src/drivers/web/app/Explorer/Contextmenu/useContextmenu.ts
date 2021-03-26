@@ -13,18 +13,20 @@ import {
 export function useContextmenu() {
   const notebookCreator = inject(notebookCreatorToken, null); // 在 NoteList 中时，将得到 null
   const { context } = inject<ReturnType<typeof useCommonContextmenu>>(token)!;
-  const { createNote } = inject<ItemTreeService>(itemTreeToken)!;
+  const { createNote, createIndexNote } = inject<ItemTreeService>(
+    itemTreeToken,
+  )!;
 
   const handleClick = ({ key }: { key: string }) => {
     switch (key) {
       case 'createNotebook':
-        notebookCreator?.startCreating('notebook', context.value as Notebook);
+        notebookCreator?.startCreating(context.value as Notebook);
         return;
       case 'createNote':
         createNote(context.value as Notebook);
         return;
       case 'createIndexNote':
-        notebookCreator?.startCreating('indexNote', context.value as Notebook);
+        createIndexNote(context.value as Notebook);
         return;
       case 'rename':
         return;
@@ -41,6 +43,7 @@ export function useContextmenu() {
 
       return 'note';
     }),
+    context,
     handleClick,
   };
 }

@@ -1,6 +1,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { Tree, Modal, Dropdown, Menu } from 'ant-design-vue';
+import { Tree, Modal } from 'ant-design-vue';
 import {
   FolderOutlined,
   PlusOutlined,
@@ -18,9 +18,6 @@ export default defineComponent({
   components: {
     Tree: Tree.DirectoryTree,
     Modal,
-    Dropdown,
-    Menu,
-    MenuItem: Menu.Item,
     PlusOutlined,
     FolderOutlined,
     FileOutlined,
@@ -77,23 +74,12 @@ export default defineComponent({
         <FolderOutlined class="mr-1" ref="notebookIconRef" />
         Notebooks
       </h1>
-      <div>
-        <Dropdown :trigger="['click']">
-          <template #overlay>
-            <Menu>
-              <MenuItem @click="startCreating()">新建笔记本</MenuItem>
-              <MenuItem @click="startCreating('indexNote')"
-                >新建目录笔记</MenuItem
-              >
-            </Menu>
-          </template>
-          <button
-            class="bg-transparent border-none cursor-pointer focus:outline-none"
-          >
-            <PlusOutlined />
-          </button>
-        </Dropdown>
-      </div>
+      <button
+        @click="startCreating()"
+        class="bg-transparent border-none cursor-pointer focus:outline-none"
+      >
+        <PlusOutlined />
+      </button>
     </div>
     <Tree
       draggable

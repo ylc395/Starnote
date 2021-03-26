@@ -23,11 +23,12 @@ export default defineComponent({
     StarOutlined,
   },
   setup() {
-    const { type, handleClick } = useContextmenu();
+    const { type, handleClick, context } = useContextmenu();
 
     return {
       type,
       handleClick,
+      context,
     };
   },
 });
@@ -35,12 +36,14 @@ export default defineComponent({
 <template>
   <CommonContextmenu @click="handleClick" class="w-36">
     <template v-if="type === 'notebook'">
-      <SubMenu>
-        <template #title><FolderAddOutlined />新建笔记本</template>
-        <MenuItem key="createNotebook">笔记本</MenuItem>
-        <MenuItem key="createIndexNote">目录笔记</MenuItem>
-      </SubMenu>
+      <MenuItem key="createNotebook"><FolderAddOutlined />新建笔记本</MenuItem>
       <MenuItem key="createNote"><FileAddOutlined />新建笔记</MenuItem>
+      <MenuItem key="createIndexNote" v-if="!context.indexNote.value"
+        ><EditOutlined />编写目录笔记</MenuItem
+      >
+      <MenuItem key="removeIndexNote" v-else
+        ><DeleteOutlined class="text-red-400" />删除目录笔记</MenuItem
+      >
       <MenuItem key="rename"><EditOutlined />重命名</MenuItem>
     </template>
     <MenuItem key="star"> <StarOutlined />收藏</MenuItem>

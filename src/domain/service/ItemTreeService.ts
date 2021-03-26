@@ -100,14 +100,14 @@ export class ItemTreeService {
     return newNotebook;
   }
 
-  async createSubNotebookWithIndexNote(title: string, parent: Notebook | null) {
-    const target = await this.prepareTarget(parent);
-    const newNotebook = target.createSubNotebook(title).createIndexNote();
+  async createIndexNote(parent: Notebook) {
+    const newNote = parent.createIndexNote();
 
-    await this.notebookRepository.createNotebook(newNotebook);
-    this.itemTree.setSelectedItem(newNotebook);
+    await this.notebookRepository.updateNotebook(parent);
+    await this.noteRepository.createNote(newNote);
+    this.itemTree.setSelectedItem(parent);
 
-    return newNotebook;
+    return newNote;
   }
 
   private static loadChildrenOf(notebook: Notebook, notebookOnly = true) {

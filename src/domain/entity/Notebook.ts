@@ -12,7 +12,7 @@ import { Hierarchic, WithChildren, WithoutParent } from './abstract/Hierarchic';
 import { Note } from './Note';
 import { INDEX_NOTE_TITLE, SortByEnums, SortDirectEnums } from '../constant';
 import { ListItem } from './abstract/ListItem';
-import { Exclude, Transform, Type } from 'class-transformer';
+import { Exclude, Expose, Transform, Type } from 'class-transformer';
 
 export const ROOT_NOTEBOOK_ID: Notebook['id'] = NIL;
 
@@ -41,6 +41,11 @@ export class Notebook
   @Transform(({ value }) => value.value, { toPlainOnly: true })
   readonly indexNote: Ref<Note | null> = shallowRef(null);
 
+  @Expose()
+  get indexNoteId() {
+    return this.indexNote.value?.id ?? null;
+  }
+
   @RefTransform
   readonly sortBy: Ref<SortByEnums> = ref(SortByEnums.Default);
 
@@ -57,10 +62,10 @@ export class Notebook
   readonly userCreatedAt: Ref<Dayjs> = shallowRef(dayjs());
 
   @Exclude()
-  private _noteToOpen: Note | null = null;
+  private _noteJustCreated: Note | null = null;
 
   get noteJustCreated() {
-    return this._noteToOpen;
+    return this._noteJustCreated;
   }
 
   set noteJustCreated(val: Note | null) {
@@ -68,7 +73,7 @@ export class Notebook
       throw new Error('can not set note to open');
     }
 
-    this._noteToOpen = val;
+    this._noteJustCreated = val;
   }
 
   get isRoot() {
@@ -96,7 +101,7 @@ export class Notebook
     });
     this.indexNote.value = newNote;
 
-    return this;
+    return newNote;
   }
 
   static isA(instance: unknown): instance is Notebook {
