@@ -10,12 +10,7 @@ import { emit, Repository } from './BaseRepository';
 import type { Dao } from './BaseRepository';
 import { NOTEBOOK_DAO_TOKEN, NOTE_DAO_TOKEN } from './daoTokens';
 import { singleton, inject } from 'tsyringe';
-
-export enum QueryEntityTypes {
-  Notebook = 'NOTEBOOK',
-  Note = 'NOTE',
-  All = 'All',
-}
+import { EntityTypes } from 'domain/constant';
 
 export enum NotebookEvents {
   ItemFetched = 'ITEM_FETCHED',
@@ -42,28 +37,25 @@ export class NotebookRepository extends Repository {
     super();
   }
 
-  queryChildrenOf(
-    notebook: Notebook,
-    type: QueryEntityTypes,
-  ): Promise<Children>;
+  queryChildrenOf(notebook: Notebook, type?: EntityTypes): Promise<Children>;
   queryChildrenOf(
     notebook: Notebook['id'],
-    type: QueryEntityTypes,
+    type?: EntityTypes,
   ): Promise<UnidirectionalChildren>;
   @emit(NotebookEvents.ItemFetched)
   queryChildrenOf(
     notebook: Notebook | Notebook['id'],
-    type: QueryEntityTypes,
+    type?: EntityTypes,
   ): Promise<Children | UnidirectionalChildren> {
     const notebookId = Notebook.isA(notebook) ? notebook.id : notebook;
 
     const notebooks =
-      type === QueryEntityTypes.Note
+      type === EntityTypes.Note
         ? Promise.resolve([])
         : this.notebookDao!.all({ parentId: notebookId });
 
     const notes =
-      type === QueryEntityTypes.Notebook
+      type === EntityTypes.Notebook
         ? Promise.resolve([])
         : this.noteDao!.all({ parentId: notebookId }, [
             'id',

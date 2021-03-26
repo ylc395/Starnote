@@ -5,7 +5,6 @@ import {
   NotebookRepository,
   NotebookEvents,
   NoteRepository,
-  QueryEntityTypes,
 } from 'domain/repository';
 import {
   Notebook,
@@ -16,6 +15,7 @@ import {
   EntityEvents,
 } from 'domain/entity';
 import { selfish } from 'utils/index';
+import { EntityTypes } from 'domain/constant';
 
 export const token = Symbol();
 export class ItemTreeService {
@@ -115,7 +115,7 @@ export class ItemTreeService {
 
     return notebookRepository.queryChildrenOf(
       notebook,
-      notebookOnly ? QueryEntityTypes.Notebook : QueryEntityTypes.All,
+      notebookOnly ? EntityTypes.Notebook : undefined,
     );
   }
   static async loadContentOf(note: Note, forced = false) {

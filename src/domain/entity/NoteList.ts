@@ -11,9 +11,7 @@ export class NoteList extends EventEmitter {
   }
   private readonly _notes: Ref<NoteWithoutParent[]> = shallowRef([]);
   readonly notes = computed(() => {
-    return this._notes.value.filter(
-      (note) => note.id !== this._notebook.value?.indexNote.value?.id,
-    );
+    return this._notes.value.filter((note) => !note.isIndexNote);
   });
   readonly newNoteDisabled = computed(() => {
     return this._notebook.value?.isRoot ?? true;

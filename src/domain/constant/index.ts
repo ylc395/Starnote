@@ -17,3 +17,8 @@ export enum SortDirectEnums {
   Asc = 'ASC',
   Desc = 'DESC',
 }
+
+export enum EntityTypes {
+  Notebook = 'NOTEBOOK',
+  Note = 'NOTE',
+}

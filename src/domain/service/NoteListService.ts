@@ -10,11 +10,11 @@ import {
   NotebookRepository,
   NoteEvents,
   NoteRepository,
-  QueryEntityTypes,
 } from 'domain/repository';
 import { container } from 'tsyringe';
 import { ItemTreeService } from './ItemTreeService';
 import { NoteList } from 'domain/entity/NoteList';
+import { EntityTypes } from 'domain/constant';
 
 export const token = Symbol();
 export class NoteListService {
@@ -57,7 +57,7 @@ export class NoteListService {
   async loadNotesOf(notebook: Notebook) {
     const { notes } = await this.notebookRepository.queryChildrenOf(
       notebook.id,
-      QueryEntityTypes.Note,
+      EntityTypes.Note,
     );
 
     this.noteList.load(notebook, []);
