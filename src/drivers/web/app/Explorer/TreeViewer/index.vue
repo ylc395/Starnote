@@ -7,7 +7,7 @@ export default defineComponent({
 });
 </script>
 <template>
-  <div class="tree-viewer min-h-screen w-60">
+  <div class="tree-viewer h-full w-60">
     <ItemTree />
   </div>
 </template>

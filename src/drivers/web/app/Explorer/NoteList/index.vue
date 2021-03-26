@@ -71,7 +71,7 @@ export default defineComponent({
 });
 </script>
 <template>
-  <div class="min-h-screen bg-gray-100 w-60">
+  <div class="h-full bg-gray-100 w-60 flex flex-col">
     <div class="p-2">
       <Button
         @click="historyBack"
@@ -99,7 +99,7 @@ export default defineComponent({
         <template #prefix><SearchOutlined /></template>
       </AInput>
     </div>
-    <List :dataSource="notes" class="border-none px-2">
+    <List :dataSource="notes" class="border-none px-2 overflow-y-auto">
       <template #renderItem="{ item }">
         <listItem
           draggable="true"

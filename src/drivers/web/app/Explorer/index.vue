@@ -13,7 +13,7 @@ export default defineComponent({
 });
 </script>
 <template>
-  <section class="flex flex-row">
+  <section class="flex h-screen">
     <TreeViewer />
     <NoteList />
     <DragIcon />

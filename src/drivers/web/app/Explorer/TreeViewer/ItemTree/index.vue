@@ -67,7 +67,7 @@ export default defineComponent({
 });
 </script>
 <template>
-  <div>
+  <div class="flex flex-col h-full">
     <div class="text-white flex justify-between items-center p-2">
       <h1
         class="text-inherit text-sm uppercase my-0"
@@ -97,6 +97,7 @@ export default defineComponent({
     </div>
     <Tree
       draggable
+      class="overflow-y-auto"
       :treeData="treeData"
       :showIcon="false"
       openAnimation="none"

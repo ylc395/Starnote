@@ -30,7 +30,7 @@ export default defineComponent({
 });
 </script>
 <template>
-  <main class="flex flex-row">
+  <main class="flex h-screen">
     <Explorer />
     <EditorArea />
   </main>
