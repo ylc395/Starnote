@@ -119,7 +119,7 @@ export class Notebook
     });
   }
 
-  static from(dataObject: NotebookDo, parent?: Notebook) {
+  static from(dataObject: NotebookDo, parent?: Notebook, bidirectional = true) {
     const notebook = dataObjectToInstance(this, dataObject);
 
     if (notebook.indexNote.value) {
@@ -134,7 +134,7 @@ export class Notebook
       throw new Error('wrong parent, since two ids are not equal');
     }
 
-    notebook.setParent(parent, true);
+    notebook.setParent(parent, bidirectional);
 
     return notebook;
   }

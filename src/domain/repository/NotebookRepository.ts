@@ -24,12 +24,17 @@ export class NotebookRepository {
     ]);
 
     return Promise.all([notebooks, notes]).then(([notebooks, notes]) => {
-      return [
+      const children = [
         ...notes
           .filter((noteDo) => noteDo.id !== notebook.indexNoteId)
-          .map((noteDo) => Note.from(noteDo, notebook)),
-        ...notebooks.map((notebookDo) => Notebook.from(notebookDo, notebook)),
+          .map((noteDo) => Note.from(noteDo, notebook, false)),
+        ...notebooks.map((notebookDo) =>
+          Notebook.from(notebookDo, notebook, false),
+        ),
       ];
+
+      notebook.children.value = children;
+      return children;
     });
   }
 
