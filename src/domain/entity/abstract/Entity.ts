@@ -42,7 +42,7 @@ export abstract class Entity {
     return classToPlain(this) as ObjectWithId;
   }
 
-  isEqual(entity: Entity | null | undefined) {
+  isEqual(entity: unknown) {
     return this === entity;
   }
 }

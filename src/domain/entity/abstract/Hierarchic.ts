@@ -40,6 +40,27 @@ export abstract class Hierarchic<P extends WithChildren> extends Entity {
     return this;
   }
 
+  isDescendenceOf(entity: WithChildren) {
+    // eslint-disable-next-line
+    let node: any = this;
+
+    while (node) {
+      const parent = node?.getParent();
+
+      if (!parent) {
+        return false;
+      }
+
+      if (entity.isEqual(parent)) {
+        return true;
+      }
+
+      node = parent;
+    }
+
+    return false;
+  }
+
   getParent() {
     return this.parent.value;
   }
