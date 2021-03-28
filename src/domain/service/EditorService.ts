@@ -25,6 +25,11 @@ export class EditorService {
 
   private monitorItemTree(itemTree: ItemTree) {
     itemTree.on(ItemTreeEvents.Selected, this.openInEditor, this);
+    itemTree.on(
+      ItemTreeEvents.Deleted,
+      this.editorManager.closeNote,
+      this.editorManager,
+    );
   }
 
   private keepSync() {

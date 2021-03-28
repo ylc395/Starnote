@@ -10,6 +10,7 @@ import { EntityEvents } from './abstract/Entity';
 export enum ItemTreeEvents {
   Selected = 'SELECTED',
   Expanded = 'EXPANDED',
+  Deleted = 'DELETED',
 }
 
 export enum ViewMode {
@@ -120,5 +121,25 @@ export class ItemTree extends EventEmitter {
 
     item.title.value = title;
     this.emit(EntityEvents.Sync, item);
+  }
+
+  deleteItem(item: TreeItem) {
+    const parent = item.getParent();
+
+    if (!parent) {
+      throw new Error('no parent when delete');
+    }
+
+    if (Note.isA(item) && item.isIndexNote) {
+      parent.indexNote.value = null;
+    } else {
+      parent.removeChild(item);
+    }
+
+    if (this.selectedItem.value === item) {
+      this.setSelectedItem(parent);
+    }
+
+    this.emit(ItemTreeEvents.Deleted, item);
   }
 }

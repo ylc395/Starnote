@@ -103,17 +103,7 @@ export class ItemTreeService {
   }
 
   deleteItem(item: TreeItem) {
-    const parent = item.getParent();
-
-    if (!parent) {
-      throw new Error('no parent when delete');
-    }
-
-    parent.removeChild(item);
-
-    if (this.itemTree.selectedItem.value === item) {
-      this.itemTree.setSelectedItem(parent);
-    }
+    this.itemTree.deleteItem(item);
 
     switch (true) {
       case Note.isA(item):

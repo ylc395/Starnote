@@ -23,6 +23,15 @@ export function useContextmenu() {
 
   const handleClick = ({ key }: { key: string }) => {
     const _context = context.value;
+    const modalConfig = {
+      title: `确认删除？`,
+      okType: 'danger' as const,
+      icon: createVNode(WarningFilled),
+      okText: '确认',
+      cancelText: '取消',
+      width: 300,
+      closable: false,
+    };
 
     switch (key) {
       case 'createNotebook':
@@ -39,15 +48,17 @@ export function useContextmenu() {
         return;
       case 'delete':
         Modal.confirm({
-          title: `确认删除？`,
-          okType: 'danger',
-          icon: createVNode(WarningFilled),
-          okText: '确认',
-          cancelText: '取消',
-          width: 300,
-          closable: false,
+          ...modalConfig,
           onOk() {
             deleteItem(_context as TreeItem);
+          },
+        });
+        return;
+      case 'deleteIndexNote':
+        Modal.confirm({
+          ...modalConfig,
+          onOk() {
+            deleteItem((_context as Notebook).indexNote.value!);
           },
         });
         return;

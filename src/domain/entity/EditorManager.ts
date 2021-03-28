@@ -75,6 +75,20 @@ export class EditorManager extends EventEmitter {
     }
   }
 
+  closeNote(note: Note) {
+    const editor = this._editors.find((editor) => {
+      console.log(editor);
+
+      return editor.note.value === note;
+    });
+
+    if (!editor) {
+      throw new Error('no such editor');
+    }
+
+    this.closeEditorById(editor.id);
+  }
+
   isActive(noteId: Note['id']) {
     return computed(() => {
       return this.activeEditor.value?.note.value?.id === noteId;
