@@ -35,7 +35,7 @@ export default defineComponent({
 });
 </script>
 <template>
-  <div @submit.prevent>
+  <div>
     <Breadcrumb class="mb-4">
       <BreadcrumbItem><FolderOpenOutlined /> 根目录</BreadcrumbItem>
       <BreadcrumbItem v-for="p of path" :key="p">{{ p }}</BreadcrumbItem>

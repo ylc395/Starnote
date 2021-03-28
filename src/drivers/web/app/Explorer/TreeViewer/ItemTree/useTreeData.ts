@@ -32,10 +32,6 @@ export function useTreeData() {
         return [];
       }
 
-      if (!root.children.value) {
-        return [];
-      }
-
       const notebookFilter = (item: TreeItem) => {
         if (mode.value === ViewMode.OneColumn) {
           return true;
