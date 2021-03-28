@@ -8,14 +8,14 @@ export default defineComponent({
       editorManager: { activeEditor },
     } = inject<EditorService>(token)!;
 
-    const titleRef: Ref<HTMLElement | null> = ref(null);
+    const titleRef: Ref<HTMLInputElement | null> = ref(null);
     const contentRef: Ref<HTMLElement | null> = ref(null);
 
     watchEffect(() => {
       const isNewNote = activeEditor.value?.note.value!.isJustCreated;
 
-      if (isNewNote) {
-        (titleRef.value || contentRef.value)?.focus();
+      if (isNewNote && titleRef.value) {
+        titleRef.value.select();
       } else {
         contentRef.value?.focus();
       }

@@ -13,6 +13,7 @@ import { Note } from './Note';
 import { INDEX_NOTE_TITLE, SortByEnums, SortDirectEnums } from '../constant';
 import { ListItem } from './abstract/ListItem';
 import { Exclude, Expose, Transform, Type } from 'class-transformer';
+import { without } from 'lodash';
 
 export const ROOT_NOTEBOOK_ID: Notebook['id'] = NIL;
 
@@ -105,6 +106,19 @@ export class Notebook
     this.indexNote.value = newNote;
 
     return newNote;
+  }
+
+  removeChild(child: Note | Notebook) {
+    if (!this.children.value) {
+      throw new Error('no children to remove');
+    }
+    const newChildren = without(this.children.value, child);
+
+    if (newChildren.length === this.children.value.length) {
+      throw new Error('no such child to remove');
+    }
+
+    this.children.value = newChildren;
   }
 
   static isA(instance: unknown): instance is Notebook {

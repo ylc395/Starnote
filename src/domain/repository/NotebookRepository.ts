@@ -60,4 +60,8 @@ export class NotebookRepository {
     await this.notebookDao!.update(notebook.toDo());
     return notebook;
   }
+
+  deleteNotebook(notebook: Notebook) {
+    return this.notebookDao!.deleteById(notebook.id);
+  }
 }

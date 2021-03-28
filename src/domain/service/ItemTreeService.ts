@@ -7,6 +7,7 @@ import {
   ItemTreeEvents,
   EntityEvents,
   ViewMode,
+  Note,
 } from 'domain/entity';
 import { selfish } from 'utils/index';
 
@@ -99,5 +100,28 @@ export class ItemTreeService {
     this.itemTree.setSelectedItem(parent);
 
     return newNote;
+  }
+
+  deleteItem(item: TreeItem) {
+    const parent = item.getParent();
+
+    if (!parent) {
+      throw new Error('no parent when delete');
+    }
+
+    parent.removeChild(item);
+
+    if (this.itemTree.selectedItem.value === item) {
+      this.itemTree.setSelectedItem(parent);
+    }
+
+    switch (true) {
+      case Note.isA(item):
+        return this.noteRepository.deleteNote(item as Note);
+      case Notebook.isA(item):
+        return this.notebookRepository.deleteNotebook(item as Notebook);
+      default:
+        return;
+    }
   }
 }

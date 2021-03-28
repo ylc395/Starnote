@@ -41,13 +41,13 @@ export default defineComponent({
       <MenuItem key="createIndexNote" v-if="!context.indexNote.value"
         ><EditOutlined />编写目录笔记</MenuItem
       >
-      <MenuItem key="removeIndexNote" v-else
+      <MenuItem key="deleteIndexNote" v-else
         ><DeleteOutlined class="text-red-400" />删除目录笔记</MenuItem
       >
       <MenuItem key="rename"><EditOutlined />重命名</MenuItem>
     </template>
     <MenuItem v-if="type === 'note'" key="star"> <StarOutlined />收藏</MenuItem>
-    <MenuItem key="remove">
+    <MenuItem key="delete">
       <DeleteOutlined class="text-red-400" />删除</MenuItem
     >
     <SubMenu title="排序方式" v-if="type === 'notebook'">

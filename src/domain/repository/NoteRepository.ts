@@ -51,4 +51,8 @@ export class NoteRepository {
 
     return this.noteDao!.update(noteDo);
   }
+
+  deleteNote(note: Note) {
+    return this.noteDao!.deleteById(note.id);
+  }
 }

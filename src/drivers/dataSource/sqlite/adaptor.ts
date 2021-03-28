@@ -62,7 +62,7 @@ export function daoAdaptor<E extends Entity>(
           }) as unknown) as Promise<RawRow[]>);
     },
     deleteById(id) {
-      return model.destroy({ where: { id } }).then();
+      return model.update({ valid: 0 }, { where: { id } }).then();
     },
     update(dataObject) {
       return model.update(dataObject, { where: { id: dataObject.id } }).then();

@@ -47,14 +47,10 @@ export default defineComponent({
       @keyup.enter="handleEnter"
     />
     <div class="text-right mt-5">
-      <Button
-        :disabled="!title"
-        @click="stopCreating(true)"
-        type="primary"
-        class="mr-2"
+      <Button class="mr-2" @click="stopCreating(false)">取消</Button>
+      <Button :disabled="!title" @click="stopCreating(true)" type="primary"
         >确定</Button
       >
-      <Button @click="stopCreating(false)">取消</Button>
     </div>
   </div>
 </template>

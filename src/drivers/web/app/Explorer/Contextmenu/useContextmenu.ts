@@ -1,4 +1,6 @@
-import { computed, inject } from 'vue';
+import { computed, createVNode, inject } from 'vue';
+import { Modal } from 'ant-design-vue';
+import { WarningFilled } from '@ant-design/icons-vue';
 import {
   useContextmenu as useCommonContextmenu,
   token,
@@ -15,23 +17,39 @@ export function useContextmenu() {
   const notebookCreator = inject(notebookCreatorToken, null); // 在 NoteList 中时，将得到 null
   const renamer = inject(renameToken, null);
   const { context } = inject<ReturnType<typeof useCommonContextmenu>>(token)!;
-  const { createNote, createIndexNote } = inject<ItemTreeService>(
+  const { createNote, createIndexNote, deleteItem } = inject<ItemTreeService>(
     itemTreeToken,
   )!;
 
   const handleClick = ({ key }: { key: string }) => {
+    const _context = context.value;
+
     switch (key) {
       case 'createNotebook':
-        notebookCreator?.startCreating(context.value as Notebook);
+        notebookCreator?.startCreating(_context as Notebook);
         return;
       case 'createNote':
-        createNote(context.value as Notebook);
+        createNote(_context as Notebook);
         return;
       case 'createIndexNote':
-        createIndexNote(context.value as Notebook);
+        createIndexNote(_context as Notebook);
         return;
       case 'rename':
-        renamer?.startEditing(context.value as TreeItem);
+        renamer?.startEditing(_context as TreeItem);
+        return;
+      case 'delete':
+        Modal.confirm({
+          title: `确认删除？`,
+          okType: 'danger',
+          icon: createVNode(WarningFilled),
+          okText: '确认',
+          cancelText: '取消',
+          width: 300,
+          closable: false,
+          onOk() {
+            deleteItem(_context as TreeItem);
+          },
+        });
         return;
       default:
         break;
