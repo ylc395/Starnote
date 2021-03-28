@@ -1,10 +1,6 @@
 import { inject } from 'vue';
 import type { TreeDragEvent, DropEvent } from 'ant-design-vue/lib/tree/Tree';
-import { isTreeItem, Notebook, TreeItem } from 'domain/entity';
-import {
-  NoteListService,
-  token as noteListToken,
-} from 'domain/service/NoteListService';
+import { Notebook, TreeItem } from 'domain/entity';
 import {
   ItemTreeService,
   token as itemTreeToken,
@@ -16,35 +12,29 @@ const EXPAND_WAIT_TIME = 500;
 
 export function useDraggable() {
   const {
-    itemTree: { foldNotebook, moveTo, moveToRoot, expandNotebook },
+    itemTree: { foldNotebook, moveTo, expandNotebook, movingItem, root },
   } = inject<ItemTreeService>(itemTreeToken)!;
-
-  const { moveTo: moveNoteTo } = inject<NoteListService>(noteListToken)!;
   const { noteIconRef, notebookIconRef } = inject(dragIconToken)!;
-
-  // todo: 给 antdV 的 dragenter 事件对象加个 dragNode 成员就能不再使用这个变量了
-  let draggingItem: null | TreeItem = null;
   const timerMap = new Map();
 
   return {
     handleDragstart: ({ node, event: { dataTransfer } }: TreeDragEvent) => {
-      draggingItem = node.dataRef.item as TreeItem;
+      movingItem.value = node.dataRef.item as TreeItem;
       const isNotebook = !node.dataRef.isLeaf;
       const icon = isNotebook ? notebookIconRef.value! : noteIconRef.value!;
 
-      if (Notebook.isA(draggingItem)) {
-        foldNotebook(draggingItem);
+      if (Notebook.isA(movingItem.value)) {
+        foldNotebook(movingItem.value);
       }
 
       dataTransfer!.setDragImage(icon, 30, 30);
-      dataTransfer!.setData('treeItemId', draggingItem.id);
       dataTransfer!.effectAllowed = 'move';
     },
 
     handleDragenter: ({ node }: TreeDragEvent) => {
       const { item } = node.dataRef;
 
-      if (!Notebook.isA(item) || item.id === draggingItem?.id) {
+      if (!Notebook.isA(item) || item.id === movingItem.value?.id) {
         return;
       }
 
@@ -54,14 +44,8 @@ export function useDraggable() {
       );
     },
 
-    handleDrop: ({ node, dragNode, dropToGap, event }: DropEvent) => {
-      if (draggingItem) {
-        draggingItem = null;
-      }
-
+    handleDrop: ({ node }: DropEvent) => {
       const targetNotebook = node.dataRef.item;
-      const noteId = event.dataTransfer!.getData('noteId');
-      const dragging = dragNode?.dataRef.item;
 
       if (!Notebook.isA(targetNotebook)) {
         return;
@@ -75,19 +59,7 @@ export function useDraggable() {
         // https://github.com/vueComponent/ant-design-vue/blob/e30077dd8334c5aaf2c094a46401f10e6f662ad9/components/vc-tree/src/Tree.jsx#L321
       }, 400);
 
-      // 当拖动的不是notebook时， dropToGap 的值不准确
-      if (dropToGap && !noteId) {
-        return;
-      }
-
-      if (noteId) {
-        moveNoteTo(noteId, targetNotebook);
-        return;
-      }
-
-      if (isTreeItem(dragging)) {
-        moveTo(dragging, targetNotebook);
-      }
+      moveTo(targetNotebook);
     },
 
     handleDragleave: ({ node }: TreeDragEvent) => {
@@ -99,13 +71,11 @@ export function useDraggable() {
 
       clearTimeout(timerMap.get(targetNotebook.id));
     },
-
-    handleRootDrop: ({ dataTransfer }: DragEvent) => {
-      moveToRoot(dataTransfer!.getData('treeItemId'));
+    handleRootDrop() {
+      moveTo(root.value!);
     },
-
     handleDragend: () => {
-      draggingItem = null;
+      movingItem.value = null;
     },
   };
 }

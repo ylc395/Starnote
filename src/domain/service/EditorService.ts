@@ -11,7 +11,7 @@ import {
 } from 'domain/entity';
 import { ItemTreeService } from './ItemTreeService';
 import { effect } from '@vue/reactivity';
-import { debounce } from 'lodash';
+import { debounce, isNull } from 'lodash';
 import { selfish } from 'utils/index';
 
 export const token = Symbol();
@@ -25,9 +25,6 @@ export class EditorService {
 
   private monitorItemTree(itemTree: ItemTree) {
     itemTree.on(ItemTreeEvents.Selected, this.openInEditor, this);
-    effect(() => {
-      itemTree.editingNotes.value = this.editorManager.editingNotes.value;
-    });
   }
 
   private keepSync() {
@@ -35,6 +32,20 @@ export class EditorService {
       EntityEvents.Sync,
       debounce((note: Note) => this.noteRepository.updateNote(note), 500),
     );
+  }
+  private async loadContentOf(note: Note, forced = false) {
+    if (!forced && !isNull(note.content.value)) {
+      return;
+    }
+
+    const noteRepository = container.resolve(NoteRepository);
+    const noteDo = await noteRepository.queryNoteById(note.id, ['content']);
+
+    if (!noteDo) {
+      throw new Error(`no note(${note.id}) to load content`);
+    }
+
+    note.content.value = noteDo.content ?? '';
   }
 
   async openInEditor(item: TreeItem) {
@@ -55,7 +66,7 @@ export class EditorService {
     })();
 
     if (note) {
-      await ItemTreeService.loadContentOf(note);
+      await this.loadContentOf(note);
       this.editorManager.openInEditor(note);
     }
   }

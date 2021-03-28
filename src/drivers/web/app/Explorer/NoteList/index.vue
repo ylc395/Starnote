@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent, inject } from 'vue';
+import { defineComponent } from 'vue';
 import { List, Button, Input } from 'ant-design-vue';
 import {
   FileAddOutlined,
@@ -10,18 +10,7 @@ import Resizable from 'vue-resizable';
 
 import type { Note } from 'domain/entity';
 import { EMPTY_TITLE } from 'domain/constant';
-import {
-  NoteListService,
-  token as noteListToken,
-} from 'domain/service/NoteListService';
-import {
-  ItemTreeService,
-  token as ItemTreeToken,
-} from 'domain/service/ItemTreeService';
-import {
-  EditorService,
-  token as editorToken,
-} from 'domain/service/EditorService';
+import { useNoteList } from './useNoteList';
 
 import Contextmenu from '../Contextmenu/index.vue';
 import { useContextmenu as useCommonContextmenu } from 'drivers/web/components/Contextmenu/useContextmenu';
@@ -41,19 +30,14 @@ export default defineComponent({
   },
   setup() {
     const {
-      itemTree: { historyBack, isEmptyHistory },
-      createNote,
-    } = inject<ItemTreeService>(ItemTreeToken)!;
-
-    const {
-      noteList: { notes, newNoteDisabled },
-    } = inject<NoteListService>(noteListToken)!;
-
-    const {
+      notes,
+      historyBack,
+      isEmptyHistory,
+      newNoteDisabled,
       openInEditor,
-      editorManager: { isActive },
-    } = inject<EditorService>(editorToken)!;
-
+      isActive,
+      createNote,
+    } = useNoteList();
     const { open: openContextmenu } = useCommonContextmenu<Note>();
     const { handleDragstart } = useDraggable();
 

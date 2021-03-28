@@ -38,10 +38,10 @@ export default defineComponent({
     const {
       handleDragstart,
       handleDragenter,
-      handleRootDrop,
       handleDragend,
       handleDragleave,
       handleDrop,
+      handleRootDrop,
     } = useDraggable();
 
     return {
@@ -99,7 +99,7 @@ export default defineComponent({
       <template #title="{ item }"
         >{{ item.title.value }}
         <FileOutlined
-          v-if="item.indexNote.value"
+          v-if="item.indexNote && item.indexNote.value"
           class="ml-1 opacity-80"
           title="这是一个目录笔记"
       /></template>
@@ -134,7 +134,7 @@ export default defineComponent({
   cursor: auto !important;
   height: 30px !important;
   width: 17px !important;
-  margin-left: 10px !important;
+  -left: 10px !important;
   display: inline-flex !important;
   align-items: center;
 }
@@ -169,5 +169,12 @@ export default defineComponent({
 
 :deep(.drag-over .ant-tree-node-content-wrapper) {
   background-color: inherit !important;
+}
+
+:deep(.item-tree-root) {
+  position: relative;
+  left: -10px;
+  top: -30px;
+  z-index: 5;
 }
 </style>

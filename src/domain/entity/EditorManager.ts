@@ -6,7 +6,7 @@ import {
   computed,
   shallowReadonly,
 } from '@vue/reactivity';
-import { compact, isEmpty, isNull, remove, without } from 'lodash';
+import { isEmpty, isNull, remove, without } from 'lodash';
 import { Note, Editor } from 'domain/entity';
 import EventEmitter from 'eventemitter3';
 
@@ -17,9 +17,6 @@ export class EditorManager extends EventEmitter {
   private readonly _editors: Editor[] = shallowReactive([]);
   readonly editors = computed(() => {
     return shallowReadonly(this._editors);
-  });
-  readonly editingNotes = computed(() => {
-    return compact(this._editors.map((editor) => editor.note.value));
   });
   private _activeEditor: Ref<Editor | null> = shallowRef(null);
   readonly activeEditor = computed(() => {

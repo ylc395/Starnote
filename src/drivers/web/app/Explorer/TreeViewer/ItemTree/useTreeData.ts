@@ -8,13 +8,14 @@ import type {
   TreeDataItem,
 } from 'ant-design-vue/lib/tree/Tree';
 import { computed, inject } from 'vue';
-import { Notebook } from 'domain/entity';
+import { Notebook, TreeItem, ViewMode } from 'domain/entity';
 import { map } from 'lodash';
 
 export function useTreeData() {
   const {
     itemTree: {
       root: _root,
+      mode,
       setSelectedItem,
       selectedItem,
       expandedItems,
@@ -31,18 +32,40 @@ export function useTreeData() {
         return [];
       }
 
-      return root.children.value.map(function mapper(item): TreeDataItem {
-        return {
-          item,
-          class: item.withContextmenu.value ? 'with-contextmenu' : '', // set class property to make rt reactive
-          key: item.id,
-          slots: { title: 'title' },
-          isLeaf: !Notebook.isA(item),
-          children: Notebook.isA(item)
-            ? item.children.value?.map(mapper) ?? undefined
-            : undefined,
-        };
-      });
+      if (!root.children.value) {
+        return [];
+      }
+
+      const notebookFilter = (item: TreeItem) => {
+        if (mode.value === ViewMode.OneColumn) {
+          return true;
+        }
+
+        return Notebook.isA(item);
+      };
+
+      return [
+        {
+          item: root,
+          key: root.id,
+          class: 'item-tree-root', // set class property to make rt reactive
+          children: root.children.value
+            .filter(notebookFilter)
+            .map(function mapper(item): TreeDataItem {
+              return {
+                item,
+                class: item.withContextmenu.value ? 'with-contextmenu' : '', // set class property to make rt reactive
+                key: item.id,
+                slots: { title: 'title' },
+                isLeaf: !Notebook.isA(item),
+                children: Notebook.isA(item)
+                  ? item.children.value?.filter(notebookFilter).map(mapper) ??
+                    undefined
+                  : undefined,
+              };
+            }),
+        },
+      ];
     }),
 
     selectedKeys: computed(() => [selectedItem.value?.id]),

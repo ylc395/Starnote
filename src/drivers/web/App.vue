@@ -10,10 +10,6 @@ import {
   ItemTreeService,
   token as itemTreeToken,
 } from 'domain/service/ItemTreeService';
-import {
-  NoteListService,
-  token as noteListToken,
-} from 'domain/service/NoteListService';
 import { selfish } from 'utils/index';
 
 export default defineComponent({
@@ -21,16 +17,14 @@ export default defineComponent({
   setup() {
     const itemTreeService = selfish(new ItemTreeService());
     const editorService = selfish(new EditorService(itemTreeService));
-    const noteListService = selfish(new NoteListService(itemTreeService));
 
     provide(itemTreeToken, itemTreeService);
     provide(editorToken, editorService);
-    provide(noteListToken, noteListService);
   },
 });
 </script>
 <template>
-  <main class="flex h-screen">
+  <main class="flex h-screen select-none">
     <Explorer />
     <EditorArea />
   </main>

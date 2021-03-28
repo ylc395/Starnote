@@ -8,7 +8,7 @@ import {
   RefTransform,
   DayjsRefTransform,
 } from './abstract/Entity';
-import { Hierarchic, WithChildren, WithoutParent } from './abstract/Hierarchic';
+import { Hierarchic, WithChildren } from './abstract/Hierarchic';
 import { Note } from './Note';
 import { INDEX_NOTE_TITLE, SortByEnums, SortDirectEnums } from '../constant';
 import { ListItem } from './abstract/ListItem';
@@ -85,11 +85,14 @@ export class Notebook
   }
 
   createSubNotebook(title: string) {
-    return Notebook.from({ parentId: this.id, title }, this);
+    const newNotebook = Notebook.from({ parentId: this.id, title }, this);
+    newNotebook.children.value = [];
+
+    return newNotebook;
   }
 
-  createNote(bidirectional: boolean) {
-    const note = Note.createEmptyNote(this, bidirectional);
+  createNote() {
+    const note = Note.createEmptyNote(this, true);
     this.noteJustCreated = note;
 
     return note;
@@ -116,7 +119,7 @@ export class Notebook
     });
   }
 
-  static from(dataObject: NotebookDo, parent?: Notebook, bidirectional = true) {
+  static from(dataObject: NotebookDo, parent?: Notebook) {
     const notebook = dataObjectToInstance(this, dataObject);
 
     if (notebook.indexNote.value) {
@@ -131,11 +134,9 @@ export class Notebook
       throw new Error('wrong parent, since two ids are not equal');
     }
 
-    notebook.setParent(parent, bidirectional);
+    notebook.setParent(parent, true);
 
     return notebook;
   }
 }
 type NotebookDo = Omit<Do<Notebook>, 'children' | 'parent'>;
-
-export type NotebookWithoutParent = WithoutParent<Notebook>;

@@ -1,21 +1,14 @@
 import { container } from 'tsyringe';
-import { isNull } from 'lodash';
-import {
-  Children,
-  NotebookRepository,
-  NotebookEvents,
-  NoteRepository,
-} from 'domain/repository';
+import { NotebookRepository, NoteRepository } from 'domain/repository';
 import {
   Notebook,
-  Note,
   ItemTree,
   TreeItem,
   ItemTreeEvents,
   EntityEvents,
+  ViewMode,
 } from 'domain/entity';
 import { selfish } from 'utils/index';
-import { EntityTypes } from 'domain/constant';
 
 export const token = Symbol();
 export class ItemTreeService {
@@ -26,35 +19,16 @@ export class ItemTreeService {
     this.init();
   }
   private async init() {
-    this.itemTree.on(EntityEvents.Sync, this.syncItem, this);
-    this.itemTree.on(ItemTreeEvents.Expanded, ItemTreeService.loadChildrenOf);
-
-    this.notebookRepository.on(
-      NotebookEvents.NotebookFetched,
-      (items: TreeItem | TreeItem[] | Children) => {
-        this.itemTree.putItem(
-          Array.isArray(items)
-            ? items
-            : 'id' in items
-            ? items
-            : [...items.notebooks, ...items.notes],
-        );
-      },
-    );
-
-    this.notebookRepository.on(
-      NotebookEvents.NotebookCreated,
-      this.itemTree.putItem,
-      this.itemTree,
-    );
+    this.itemTree
+      .on(EntityEvents.Sync, this.syncItem, this)
+      .on(ItemTreeEvents.Expanded, this.loadChildrenOf, this)
+      .on(ItemTreeEvents.Selected, this.loadOnSelected, this);
 
     this.initRoot();
   }
 
   private async initRoot() {
     const rootNotebook = await this.notebookRepository.queryOrCreateRootNotebook();
-
-    ItemTreeService.loadChildrenOf(rootNotebook);
     this.itemTree.loadRoot(rootNotebook);
   }
 
@@ -77,15 +51,32 @@ export class ItemTreeService {
     return target;
   }
 
+  private loadChildrenOf(notebook: Notebook) {
+    if (notebook.children.value) {
+      return;
+    }
+
+    this.notebookRepository.loadChildrenOf(notebook);
+  }
+
+  private loadOnSelected(item: TreeItem) {
+    if (!Notebook.isA(item)) {
+      return;
+    }
+
+    if (this.itemTree.mode.value === ViewMode.TwoColumn) {
+      this.loadChildrenOf(item);
+    }
+  }
+
   async createNote(parent?: Notebook) {
-    const BIDIRECTIONAL = false; //  todo: 这个变量的值应当由分栏模式决定
     const target = parent || this.itemTree.selectedItem.value;
 
     if (!Notebook.isA(target)) {
       throw new Error('no target notebook');
     }
 
-    const newNote = target.createNote(BIDIRECTIONAL);
+    const newNote = target.createNote();
     await this.noteRepository.createNote(newNote);
     this.itemTree.setSelectedItem(newNote);
   }
@@ -108,28 +99,5 @@ export class ItemTreeService {
     this.itemTree.setSelectedItem(parent);
 
     return newNote;
-  }
-
-  private static loadChildrenOf(notebook: Notebook, notebookOnly = true) {
-    const notebookRepository = container.resolve(NotebookRepository);
-
-    return notebookRepository.queryChildrenOf(
-      notebook,
-      notebookOnly ? EntityTypes.Notebook : undefined,
-    );
-  }
-  static async loadContentOf(note: Note, forced = false) {
-    if (!forced && !isNull(note.content.value)) {
-      return;
-    }
-
-    const noteRepository = container.resolve(NoteRepository);
-    const noteDo = await noteRepository.queryNoteById(note.id, ['content']);
-
-    if (!noteDo) {
-      throw new Error(`no note(${note.id}) to load content`);
-    }
-
-    note.content.value = noteDo.content ?? '';
   }
 }

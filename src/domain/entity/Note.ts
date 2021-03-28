@@ -9,7 +9,7 @@ import {
   RefTransform,
   DayjsRefTransform,
 } from 'domain/entity';
-import { Hierarchic, WithoutParent } from './abstract/Hierarchic';
+import { Hierarchic } from './abstract/Hierarchic';
 import { Notebook, ROOT_NOTEBOOK_ID } from './Notebook';
 import { ListItem } from './abstract/ListItem';
 import { Exclude } from 'class-transformer';
@@ -64,6 +64,10 @@ export class Note extends Hierarchic<Notebook> implements ListItem {
     return note;
   }
 
+  static isA(entity: unknown): entity is Note {
+    return entity instanceof Note;
+  }
+
   static createEmptyNote(
     parent: Notebook,
     bidirectional: boolean,
@@ -83,4 +87,3 @@ export class Note extends Hierarchic<Notebook> implements ListItem {
 }
 
 export type NoteDo = Do<Note>;
-export type NoteWithoutParent = WithoutParent<Note>;
