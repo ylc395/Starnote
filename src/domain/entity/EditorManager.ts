@@ -6,9 +6,10 @@ import {
   computed,
   shallowReadonly,
 } from '@vue/reactivity';
-import { isEmpty, isNull, remove, without } from 'lodash';
+import { compact, isEmpty, isNull, remove, without } from 'lodash';
 import { Note, Editor } from 'domain/entity';
 import EventEmitter from 'eventemitter3';
+import { Notebook } from './Notebook';
 
 const MAX_EDITOR_COUNT = 3;
 export const token = Symbol();
@@ -75,18 +76,19 @@ export class EditorManager extends EventEmitter {
     }
   }
 
-  closeNote(note: Note) {
-    const editor = this._editors.find((editor) => {
-      console.log(editor);
+  closeNote(item: Note | Notebook) {
+    const editors = Note.isA(item)
+      ? [this._editors.find((editor) => editor.note.value?.isEqual(item))]
+      : this._editors.filter((editor) =>
+          editor.note.value?.isDescendenceOf(item),
+        );
+    const compactEditors = compact(editors);
 
-      return editor.note.value === note;
-    });
-
-    if (!editor) {
+    if (isEmpty(compactEditors)) {
       throw new Error('no such editor');
     }
 
-    this.closeEditorById(editor.id);
+    compactEditors.forEach(({ id }) => this.closeEditorById(id));
   }
 
   isActive(noteId: Note['id']) {

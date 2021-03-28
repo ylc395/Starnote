@@ -136,7 +136,7 @@ export class ItemTree extends EventEmitter {
       parent.removeChild(item);
     }
 
-    if (this.selectedItem.value === item) {
+    if (this.selectedItem.value?.isEqual(item)) {
       this.setSelectedItem(parent);
     }
 
