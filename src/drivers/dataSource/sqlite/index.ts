@@ -12,6 +12,7 @@ export const notebookDao = daoAdaptor<Notebook>(NotebookModel, {
       model: NoteModel,
       as: 'indexNote',
       attributes: { exclude: ['content'] },
+      required: false,
     },
   },
   onCreate: {
