@@ -7,6 +7,8 @@ import {
   FileOutlined,
 } from '@ant-design/icons-vue';
 import { TreeItem } from 'domain/entity';
+import Renamer from './Renamer/index.vue';
+import { useRename } from './Renamer/useRename';
 import NotebookCreator from './NotebookCreator/index.vue';
 import { useNotebookCreator } from './NotebookCreator/useNotebookCreator';
 import Contextmenu from '../../Contextmenu/index.vue';
@@ -22,10 +24,12 @@ export default defineComponent({
     FolderOutlined,
     FileOutlined,
     NotebookCreator,
+    Renamer,
     Contextmenu,
   },
   setup() {
     const { isCreating, startCreating } = useNotebookCreator();
+    const { renamingItem } = useRename();
     const { open: openContextmenu } = useCommonContextmenu<TreeItem>();
 
     const {
@@ -59,13 +63,14 @@ export default defineComponent({
       treeData,
       expandedKeys,
       selectedKeys,
+      renamingItem,
       getModalContainer: () => document.querySelector('#app'),
     };
   },
 });
 </script>
 <template>
-  <div class="flex flex-col h-full">
+  <div class="flex flex-col">
     <div class="tree-viewer-header">
       <h1 class="tree-viewer-title" @dragover.prevent @drop="handleRootDrop">
         <FolderOutlined class="tree-viewer-icon" ref="notebookIconRef" />
@@ -96,13 +101,17 @@ export default defineComponent({
       @dragleave="handleDragleave"
       @rightClick="openContextmenu($event.event, $event.node.dataRef.item)"
     >
-      <template #title="{ item }"
-        >{{ item.title.value }}
+      <template #title="{ item }">
+        <Renamer v-if="renamingItem === item" />
+        <template v-else>
+          {{ item.title.value }}
+        </template>
         <FileOutlined
           v-if="item.indexNote && item.indexNote.value"
           class="ml-1 opacity-80"
           title="这是一个目录笔记"
-      /></template>
+        />
+      </template>
     </Tree>
     <Modal
       :visible="isCreating"

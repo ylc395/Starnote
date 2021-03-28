@@ -114,6 +114,10 @@ export class ItemTree extends EventEmitter {
   }
 
   rename(item: TreeItem, title: string) {
+    if (!title) {
+      throw new Error('empty title!');
+    }
+
     item.title.value = title;
     this.emit(EntityEvents.Sync, item);
   }
