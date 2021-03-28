@@ -1,23 +1,17 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { singleton, inject } from 'tsyringe';
 import { Note, Notebook, isWithId, NoteDo } from 'domain/entity';
-import { Repository, emit } from './BaseRepository';
-import type { Dao } from './BaseRepository';
+import type { Dao } from './types';
 import { NOTE_DAO_TOKEN, NOTEBOOK_DAO_TOKEN } from './daoTokens';
 import { TIME_FORMAT } from 'domain/constant';
 import { isNil, omitBy } from 'lodash';
 
-export enum NoteEvents {
-  NoteCreated = 'NOTE_CREATED',
-}
 @singleton()
-export class NoteRepository extends Repository {
+export class NoteRepository {
   constructor(
     @inject(NOTE_DAO_TOKEN) protected noteDao?: Dao<Note>,
     @inject(NOTEBOOK_DAO_TOKEN) protected notebookDao?: Dao<Notebook>,
-  ) {
-    super();
-  }
+  ) {}
   queryNoteById(id: Note['id']): Promise<Note | null>;
   queryNoteById(
     id: Note['id'],
@@ -33,7 +27,6 @@ export class NoteRepository extends Repository {
     return this.noteDao!.one({ id }, fields);
   }
 
-  @emit(NoteEvents.NoteCreated)
   async createNote(note: Note) {
     this.notebookDao!.update({
       id: note.parentId.value,

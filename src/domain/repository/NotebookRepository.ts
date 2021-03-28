@@ -1,18 +1,15 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Notebook, Note, ROOT_NOTEBOOK_ID } from 'domain/entity';
-import { Repository } from './BaseRepository';
-import type { Dao } from './BaseRepository';
+import type { Dao } from './types';
 import { NOTEBOOK_DAO_TOKEN, NOTE_DAO_TOKEN } from './daoTokens';
 import { singleton, inject } from 'tsyringe';
 
 @singleton()
-export class NotebookRepository extends Repository {
+export class NotebookRepository {
   constructor(
     @inject(NOTE_DAO_TOKEN) protected noteDao?: Dao<Note>,
     @inject(NOTEBOOK_DAO_TOKEN) protected notebookDao?: Dao<Notebook>,
-  ) {
-    super();
-  }
+  ) {}
 
   loadChildrenOf(notebook: Notebook): Promise<(Note | Notebook)[]> {
     const notebookId = notebook.id;
