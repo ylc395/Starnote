@@ -23,7 +23,12 @@ export default defineComponent({
 });
 </script>
 <template>
-  <Menu v-bind="$attrs" v-if="visible" :style="position" class="fixed z-50">
+  <Menu
+    v-bind="$attrs"
+    v-if="visible"
+    :style="position"
+    class="fixed z-50 shadow-lg"
+  >
     <slot></slot>
   </Menu>
 </template>
