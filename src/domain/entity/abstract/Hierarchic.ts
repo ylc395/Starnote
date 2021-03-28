@@ -28,8 +28,12 @@ export abstract class Hierarchic<P extends WithChildren> extends Entity {
       newParent.children.value = [];
     }
 
-    if (newParent.children.value.find(this.isEqual.bind(this))) {
-      return this;
+    const duplicated = newParent.children.value.find(
+      (child) => child.id === this.id || child === this,
+    );
+
+    if (duplicated) {
+      throw new Error('duplicated child');
     }
 
     newParent.children.value = [...newParent.children.value, this];

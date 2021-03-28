@@ -43,7 +43,7 @@ export abstract class Entity {
   }
 
   isEqual(entity: Entity | null | undefined) {
-    return this.id === entity?.id;
+    return this === entity;
   }
 }
 
