@@ -24,7 +24,7 @@ export default defineComponent({
 });
 </script>
 <template>
-  <main class="flex h-screen select-none">
+  <main class="flex h-screen">
     <Explorer />
     <EditorArea />
   </main>
