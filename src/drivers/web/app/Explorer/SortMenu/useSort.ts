@@ -8,7 +8,7 @@ import {
   token as contextmenuToken,
 } from 'drivers/web/components/Contextmenu/useContextmenu';
 import { SortByEnums, SortDirectEnums } from 'domain/constant';
-import { Notebook } from 'domain/entity';
+import { Notebook, TreeItem } from 'domain/entity';
 
 export function useSort() {
   const {
@@ -21,7 +21,7 @@ export function useSort() {
     contextmenuToken,
   )!;
   const notebook = computed(
-    () => (context.value || selectedItem.value) as Notebook,
+    () => (context.value || selectedItem.value) as TreeItem,
   );
   function handleClick(attr: 'sortBy', obj: { key: SortByEnums }): void;
   function handleClick(attr: 'direct', obj: { key: SortDirectEnums }): void;
@@ -29,6 +29,10 @@ export function useSort() {
     attr: 'sortBy' | 'direct',
     { key }: { key: SortByEnums | SortDirectEnums },
   ) {
+    if (!Notebook.isA(notebook.value)) {
+      return;
+    }
+
     switch (attr) {
       case 'sortBy':
         setSortBy(notebook.value, key as SortByEnums);
@@ -43,10 +47,16 @@ export function useSort() {
 
   return {
     handleClick,
-    currentSortValue: computed(() => notebook.value.sortBy.value),
-    currentDirectValue: computed(() => notebook.value.sortDirect.value),
-    allowDirect: computed(
-      () => notebook.value.sortBy.value !== SortByEnums.Custom,
+    currentSortValue: computed(() =>
+      Notebook.isA(notebook.value) ? notebook.value.sortBy.value : '',
+    ),
+    currentDirectValue: computed(() =>
+      Notebook.isA(notebook.value) ? notebook.value.sortDirect.value : '',
+    ),
+    allowDirect: computed(() =>
+      Notebook.isA(notebook.value)
+        ? notebook.value.sortBy.value !== SortByEnums.Custom
+        : false,
     ),
     sortOptions: [
       { key: SortByEnums.Title, title: '按标题' },
