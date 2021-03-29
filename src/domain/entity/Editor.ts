@@ -2,7 +2,7 @@ import { Ref, ref, shallowRef, effect, stop, computed } from '@vue/reactivity';
 import { Note } from './Note';
 import dayjs from 'dayjs';
 import EventEmitter from 'eventemitter3';
-import { after, uniqueId } from 'lodash';
+import { uniqueId } from 'lodash';
 import { ListItem } from './abstract/ListItem';
 import { EntityEvents } from './abstract/Entity';
 
@@ -16,12 +16,18 @@ export class Editor extends EventEmitter implements ListItem {
   private readonly _note: Ref<Note | null> = shallowRef(null);
   readonly note = computed(() => this._note.value);
   private saveRunner?: ReturnType<typeof effect>;
-  // only emit after activating
-  private readonly emitSync = after(2, () => {
+  private saveCount = 0;
+  private emitSync() {
+    if (this.saveCount < 1) {
+      this.saveCount++;
+      return;
+    }
+
     this.emit(EntityEvents.Sync, this._note.value);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this._note.value!.isJustCreated = false;
-  });
+  }
+
   constructor(note: Note) {
     super();
 
@@ -59,6 +65,7 @@ export class Editor extends EventEmitter implements ListItem {
       return;
     }
 
+    this.saveCount = 0;
     this._isActive.value = true;
     this.saveRunner = effect(this.saveNote.bind(this));
   }
@@ -72,16 +79,12 @@ export class Editor extends EventEmitter implements ListItem {
     }
   }
 
-  destroy(needSave = true) {
+  destroy() {
     this.inactivate();
     this.removeAllListeners();
 
     if (!this._note.value) {
       return;
-    }
-
-    if (needSave) {
-      this.saveNote();
     }
 
     this._note.value.content.value = null;
