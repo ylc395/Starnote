@@ -7,6 +7,9 @@ module.exports = {
       colors: {
         inherit: 'inherit',
       },
+      zIndex: {
+        100: '100',
+      },
     },
   },
   variants: {

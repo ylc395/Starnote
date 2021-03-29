@@ -27,7 +27,7 @@ export default defineComponent({
     v-bind="$attrs"
     v-if="visible"
     :style="position"
-    class="fixed z-50 shadow-lg"
+    class="fixed z-100 shadow-lg"
   >
     <slot></slot>
   </Menu>
