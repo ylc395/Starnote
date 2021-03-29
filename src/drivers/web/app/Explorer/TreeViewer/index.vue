@@ -14,6 +14,7 @@ export default defineComponent({
       class="tree-viewer h-full"
       :active="['r']"
       :disableAttributes="['h']"
+      :minWidth="180"
       width="15rem"
     >
       <StarList />

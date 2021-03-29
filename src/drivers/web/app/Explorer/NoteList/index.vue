@@ -59,6 +59,7 @@ export default defineComponent({
 <template>
   <Resizable
     width="15rem"
+    :minWidth="200"
     class="h-full bg-gray-100 flex flex-col"
     :disableAttributes="['h']"
     :active="['r']"
