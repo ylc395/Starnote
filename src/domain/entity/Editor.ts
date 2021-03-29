@@ -23,9 +23,11 @@ export class Editor extends EventEmitter implements ListItem {
       return;
     }
 
-    this.emit(EntityEvents.Sync, this._note.value);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    this._note.value!.userModifiedAt.value = dayjs();
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this._note.value!.isJustCreated = false;
+    this.emit(EntityEvents.Sync, this._note.value);
   }
 
   constructor(note: Note) {
@@ -52,7 +54,6 @@ export class Editor extends EventEmitter implements ListItem {
 
     this._note.value.title.value = this.title.value;
     this._note.value.content.value = this.content.value;
-    this._note.value.userModifiedAt.value = dayjs();
     this.emitSync();
   }
 
