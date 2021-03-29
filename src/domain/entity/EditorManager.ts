@@ -85,7 +85,7 @@ export class EditorManager extends EventEmitter {
     const compactEditors = compact(editors);
 
     if (isEmpty(compactEditors)) {
-      throw new Error('no such editor');
+      return;
     }
 
     compactEditors.forEach(({ id }) => this.closeEditorById(id));
