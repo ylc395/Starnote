@@ -7,7 +7,7 @@ import {
 } from 'drivers/web/components/Contextmenu/useContextmenu';
 import { token as notebookCreatorToken } from '../TreeViewer/ItemTree/NotebookCreator/useNotebookCreator';
 import { token as renameToken } from '../TreeViewer/ItemTree/Renamer/useRename';
-import { Notebook, TreeItem } from 'domain/entity';
+import { Notebook, TreeItem, ViewMode } from 'domain/entity';
 import {
   ItemTreeService,
   token as itemTreeToken,
@@ -17,9 +17,12 @@ export function useContextmenu() {
   const notebookCreator = inject(notebookCreatorToken, null); // 在 NoteList 中时，将得到 null
   const renamer = inject(renameToken, null);
   const { context } = inject<ReturnType<typeof useCommonContextmenu>>(token)!;
-  const { createNote, createIndexNote, deleteItem } = inject<ItemTreeService>(
-    itemTreeToken,
-  )!;
+  const {
+    createNote,
+    createIndexNote,
+    deleteItem,
+    itemTree: { mode },
+  } = inject<ItemTreeService>(itemTreeToken)!;
 
   const handleClick = ({ key }: { key: string }) => {
     const _context = context.value;
@@ -77,5 +80,6 @@ export function useContextmenu() {
     }),
     context,
     handleClick,
+    showSortMenu: computed(() => mode.value === ViewMode.OneColumn),
   };
 }

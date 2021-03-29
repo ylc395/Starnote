@@ -55,8 +55,9 @@ export function useTreeData() {
                 slots: { title: 'title' },
                 isLeaf: !Notebook.isA(item),
                 children: Notebook.isA(item)
-                  ? item.children.value?.filter(notebookFilter).map(mapper) ??
-                    undefined
+                  ? item.sortedChildren.value
+                      ?.filter(notebookFilter)
+                      .map(mapper)
                   : undefined,
               };
             }),

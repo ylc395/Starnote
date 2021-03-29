@@ -1,10 +1,13 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { List, Button, Input } from 'ant-design-vue';
+import { List, Button, Input, Dropdown } from 'ant-design-vue';
 import {
   FileAddOutlined,
   SearchOutlined,
   ArrowLeftOutlined,
+  SortAscendingOutlined,
+  CaretDownOutlined,
+  BarsOutlined,
 } from '@ant-design/icons-vue';
 import Resizable from 'vue-resizable';
 
@@ -15,6 +18,8 @@ import { useNoteList } from './useNoteList';
 import Contextmenu from '../Contextmenu/index.vue';
 import { useContextmenu as useCommonContextmenu } from 'drivers/web/components/Contextmenu/useContextmenu';
 import { useDraggable } from './useDraggable';
+import SortMenu from '../SortMenu/index.vue';
+import ViewModeMenu from './ViewModeMenu/index.vue';
 
 export default defineComponent({
   components: {
@@ -27,13 +32,19 @@ export default defineComponent({
     ListItem: List.Item,
     Contextmenu,
     Resizable,
+    SortMenu,
+    SortAscendingOutlined,
+    CaretDownOutlined,
+    BarsOutlined,
+    Dropdown,
+    ViewModeMenu,
   },
   setup() {
     const {
       notes,
       historyBack,
       isEmptyHistory,
-      newNoteDisabled,
+      isInvalidNotebook,
       openInEditor,
       isActive,
       createNote,
@@ -45,7 +56,7 @@ export default defineComponent({
       EMPTY_TITLE,
       notes,
       historyBack,
-      newNoteDisabled,
+      isInvalidNotebook,
       isEmptyHistory,
       openInEditor,
       isActive,
@@ -60,7 +71,7 @@ export default defineComponent({
   <Resizable
     width="15rem"
     :minWidth="200"
-    class="h-full bg-gray-100 flex flex-col"
+    class="h-full bg-gray-50 flex flex-col border-r border-0 border-solid border-gray-300"
     :disableAttributes="['h']"
     :active="['r']"
   >
@@ -78,7 +89,7 @@ export default defineComponent({
       </Button>
       <Button
         type="primary"
-        :disabled="newNoteDisabled"
+        :disabled="isInvalidNotebook"
         size="small"
         @click="createNote()"
         class="rounded-md mr-2"
@@ -91,7 +102,30 @@ export default defineComponent({
         <template #prefix><SearchOutlined /></template>
       </AInput>
     </div>
-    <List :dataSource="notes" class="border-none px-2 overflow-y-auto">
+    <div
+      v-if="!isInvalidNotebook"
+      class="px-3 border-gray-300 bg-gray-100 border-t border-b border-0 border-solid"
+    >
+      <Dropdown :trigger="['click']" class="mr-2" transitionName="none">
+        <template #overlay>
+          <SortMenu />
+        </template>
+        <button class="border-0 bg-transparent p-0 focus:outline-none">
+          <SortAscendingOutlined />
+          <CaretDownOutlined class="scale-75 transform" />
+        </button>
+      </Dropdown>
+      <Dropdown :trigger="['click']" transitionName="none">
+        <template #overlay>
+          <ViewModeMenu />
+        </template>
+        <button class="border-0 bg-transparent p-0 focus:outline-none">
+          <BarsOutlined />
+          <CaretDownOutlined class="scale-75 transform" />
+        </button>
+      </Dropdown>
+    </div>
+    <List :dataSource="notes" class="border-none px-2 overflow-y-auto mt-2">
       <template #renderItem="{ item }">
         <listItem
           draggable="true"

@@ -1,6 +1,6 @@
 import dayjs, { Dayjs } from 'dayjs';
 import { NIL } from 'uuid';
-import { ref, shallowRef } from '@vue/reactivity';
+import { computed, ref, shallowRef } from '@vue/reactivity';
 import type { Ref } from '@vue/reactivity';
 import {
   Do,
@@ -31,6 +31,40 @@ export class Notebook
 
   @Exclude()
   children: Ref<(Note | Notebook)[] | null> = shallowRef(null);
+
+  @Exclude()
+  sortedChildren = computed(() => {
+    if (!this.children.value) {
+      return [];
+    }
+
+    const copy = this.children.value.slice();
+    copy.sort((child1, child2) => {
+      const TOP = this.sortDirect.value === SortDirectEnums.Asc ? 1 : -1;
+      const BOTTOM = this.sortDirect.value === SortDirectEnums.Asc ? -1 : 1;
+
+      switch (this.sortBy.value) {
+        case SortByEnums.Title:
+          return child1.title.value > child2.title.value ? TOP : BOTTOM;
+        case SortByEnums.CreatedAt:
+          return child1.userCreatedAt.value.isAfter(child2.userCreatedAt.value)
+            ? TOP
+            : BOTTOM;
+        case SortByEnums.UpdatedAt:
+          return child1.userModifiedAt.value.isAfter(
+            child2.userModifiedAt.value,
+          )
+            ? TOP
+            : BOTTOM;
+        case SortByEnums.Custom:
+          return child1.sortOrder.value > child2.sortOrder.value ? TOP : BOTTOM;
+        default:
+          return 1;
+      }
+    });
+
+    return copy;
+  });
 
   @RefTransform
   readonly parentId: Ref<Notebook['id'] | null> = ref(ROOT_NOTEBOOK_ID);

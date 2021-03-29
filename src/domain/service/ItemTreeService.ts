@@ -10,6 +10,7 @@ import {
   Note,
 } from 'domain/entity';
 import { selfish } from 'utils/index';
+import { SortByEnums, SortDirectEnums } from 'domain/constant';
 
 export const token = Symbol();
 export class ItemTreeService {
@@ -113,5 +114,15 @@ export class ItemTreeService {
       default:
         return;
     }
+  }
+
+  setSortBy(notebook: Notebook, value: SortByEnums) {
+    notebook.sortBy.value = value;
+    this.notebookRepository.updateNotebook(notebook);
+  }
+
+  setDirect(notebook: Notebook, value: SortDirectEnums) {
+    notebook.sortDirect.value = value;
+    this.notebookRepository.updateNotebook(notebook);
   }
 }

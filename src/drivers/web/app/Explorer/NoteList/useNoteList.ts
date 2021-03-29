@@ -24,18 +24,18 @@ export function useNoteList() {
       return [];
     }
 
-    return selectedItem.value.children.value?.filter((child) => {
+    return selectedItem.value.sortedChildren.value?.filter((child) => {
       return Note.isA(child) && !child.isIndexNote;
     });
   });
 
-  const newNoteDisabled = computed(() => {
+  const isInvalidNotebook = computed(() => {
     return !Notebook.isA(selectedItem.value) || selectedItem.value.isRoot;
   });
 
   return {
     notes,
-    newNoteDisabled,
+    isInvalidNotebook,
     historyBack,
     isEmptyHistory,
     openInEditor,
