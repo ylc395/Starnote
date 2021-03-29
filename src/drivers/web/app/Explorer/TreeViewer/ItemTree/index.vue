@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, inject } from 'vue';
 import { Tree, Modal } from 'ant-design-vue';
 import {
   FolderOutlined,
@@ -13,7 +13,7 @@ import NotebookCreator from './NotebookCreator/index.vue';
 import { useNotebookCreator } from './NotebookCreator/useNotebookCreator';
 import Contextmenu from '../../Contextmenu/index.vue';
 import { useContextmenu as useCommonContextmenu } from 'drivers/web/components/Contextmenu/useContextmenu';
-import { useDraggable } from './useDraggable';
+import { token as dragToken } from '../../useDrag';
 import { useTreeData } from './useTreeData';
 
 export default defineComponent({
@@ -44,9 +44,9 @@ export default defineComponent({
       handleDragenter,
       handleDragend,
       handleDragleave,
-      handleDrop,
+      handleNotebookDrop,
       handleRootDrop,
-    } = useDraggable();
+    } = inject(dragToken)!;
 
     return {
       handleExpand,
@@ -55,7 +55,7 @@ export default defineComponent({
       startCreating,
       handleDragstart,
       handleDragenter,
-      handleDrop,
+      handleNotebookDrop,
       handleDragend,
       handleDragleave,
       handleRootDrop,
@@ -93,9 +93,9 @@ export default defineComponent({
       :selectedKeys="selectedKeys"
       @expand="handleExpand"
       @select="handleSelect"
-      @dragstart="handleDragstart"
-      @dragenter="handleDragenter"
-      @drop="handleDrop"
+      @dragstart="handleDragstart($event.event, $event.node.dataRef.item)"
+      @dragenter="handleDragenter($event.node.dataRef.item)"
+      @drop="handleNotebookDrop($event.node.dataRef.item)"
       @dragend="handleDragend"
       @dragleave="handleDragleave"
       @rightClick="openContextmenu($event.event, $event.node.dataRef.item)"

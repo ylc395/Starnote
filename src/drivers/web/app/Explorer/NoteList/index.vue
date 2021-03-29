@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, inject } from 'vue';
 import { List, Button, Input, Dropdown } from 'ant-design-vue';
 import {
   FileAddOutlined,
@@ -17,7 +17,7 @@ import { useNoteList } from './useNoteList';
 
 import Contextmenu from '../Contextmenu/index.vue';
 import { useContextmenu as useCommonContextmenu } from 'drivers/web/components/Contextmenu/useContextmenu';
-import { useDraggable } from './useDraggable';
+import { token as dragToken } from '../useDrag';
 import SortMenu from '../SortMenu/index.vue';
 import ViewModeMenu from './ViewModeMenu/index.vue';
 
@@ -50,7 +50,7 @@ export default defineComponent({
       createNote,
     } = useNoteList();
     const { open: openContextmenu } = useCommonContextmenu<Note>();
-    const { handleDragstart } = useDraggable();
+    const { handleDragstart } = inject(dragToken)!;
 
     return {
       EMPTY_TITLE,

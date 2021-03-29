@@ -28,7 +28,6 @@ export class ItemTree extends EventEmitter {
   });
   readonly selectedItem: Ref<Notebook | Note | null> = shallowRef(null);
   readonly expandedItems: Notebook[] = shallowReactive([]);
-  readonly movingItem: Ref<TreeItem | null> = shallowRef(null);
   constructor() {
     super();
     this.on(ItemTreeEvents.Selected, this.maintainHistory, this);
@@ -88,10 +87,7 @@ export class ItemTree extends EventEmitter {
     this.emit(ItemTreeEvents.Expanded, notebook);
   }
 
-  moveTo(parent: Notebook) {
-    const child = this.movingItem.value;
-    this.movingItem.value = null;
-
+  moveTo(child: TreeItem, parent: Notebook) {
     if (!child) {
       throw new Error('no item to move');
     }
