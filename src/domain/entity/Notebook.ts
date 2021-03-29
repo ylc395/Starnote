@@ -33,6 +33,9 @@ export class Notebook
   children: Ref<(Note | Notebook)[] | null> = shallowRef(null);
 
   @Exclude()
+  isChildrenLoaded = false;
+
+  @Exclude()
   sortedChildren = computed(() => {
     if (!this.children.value) {
       return [];
@@ -69,11 +72,11 @@ export class Notebook
   @RefTransform
   readonly parentId: Ref<Notebook['id'] | null> = ref(ROOT_NOTEBOOK_ID);
 
+  @Exclude({ toPlainOnly: true })
   @Type(() => Note)
   @Transform(({ value }) => shallowRef(value?.id ? value : null), {
     toClassOnly: true,
   })
-  @Transform(({ value }) => value.value, { toPlainOnly: true })
   readonly indexNote: Ref<Note | null> = shallowRef(null);
 
   @Expose()
@@ -167,7 +170,7 @@ export class Notebook
     });
   }
 
-  static from(dataObject: NotebookDo, parent?: Notebook, bidirectional = true) {
+  static from(dataObject: NotebookDo, parent?: Notebook) {
     const notebook = dataObjectToInstance(this, dataObject);
 
     if (notebook.indexNote.value) {
@@ -182,7 +185,7 @@ export class Notebook
       throw new Error('wrong parent, since two ids are not equal');
     }
 
-    notebook.setParent(parent, bidirectional);
+    notebook.setParent(parent, true);
 
     return notebook;
   }

@@ -26,14 +26,26 @@ export class NotebookRepository {
     return Promise.all([notebooks, notes]).then(([notebooks, notes]) => {
       const children = [
         ...notes
-          .filter((noteDo) => noteDo.id !== notebook.indexNoteId)
-          .map((noteDo) => Note.from(noteDo, notebook, false)),
-        ...notebooks.map((notebookDo) =>
-          Notebook.from(notebookDo, notebook, false),
-        ),
+          .filter((noteDo) => {
+            const isIndexNote = noteDo.id === notebook.indexNoteId;
+            const isAlreadyIn = notebook.children.value?.find(
+              (note) => note.id === noteDo.id,
+            );
+
+            return !isIndexNote && !isAlreadyIn;
+          })
+          .map((noteDo) => Note.from(noteDo, notebook)),
+        ...notebooks
+          .filter((notebookDo) => {
+            return !notebook.children.value?.find(
+              (notebook) => notebook.id === notebookDo.id,
+            );
+          })
+          .map((notebookDo) => Notebook.from(notebookDo, notebook)),
       ];
 
       notebook.children.value = children;
+      notebook.isChildrenLoaded = true;
       return children;
     });
   }

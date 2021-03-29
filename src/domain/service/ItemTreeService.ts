@@ -6,7 +6,6 @@ import {
   TreeItem,
   ItemTreeEvents,
   EntityEvents,
-  ViewMode,
   Note,
 } from 'domain/entity';
 import { selfish } from 'utils/index';
@@ -24,7 +23,7 @@ export class ItemTreeService {
     this.itemTree
       .on(EntityEvents.Sync, this.syncItem, this)
       .on(ItemTreeEvents.Expanded, this.loadChildrenOf, this)
-      .on(ItemTreeEvents.Selected, this.loadOnSelected, this);
+      .on(ItemTreeEvents.Selected, this.loadChildrenOf, this);
 
     this.initRoot();
   }
@@ -53,22 +52,12 @@ export class ItemTreeService {
     return target;
   }
 
-  private loadChildrenOf(notebook: Notebook) {
-    if (notebook.children.value) {
+  private loadChildrenOf(item: TreeItem) {
+    if (!Notebook.isA(item) || item.isChildrenLoaded) {
       return;
     }
 
-    this.notebookRepository.loadChildrenOf(notebook);
-  }
-
-  private loadOnSelected(item: TreeItem) {
-    if (!Notebook.isA(item)) {
-      return;
-    }
-
-    if (this.itemTree.mode.value === ViewMode.TwoColumn) {
-      this.loadChildrenOf(item);
-    }
+    this.notebookRepository.loadChildrenOf(item);
   }
 
   async createNote(parent?: Notebook) {

@@ -48,6 +48,7 @@ export class Note extends Hierarchic<Notebook> implements ListItem {
     return this.parent.value?.indexNote.value === this;
   }
 
+  // 和 index note 相关的调用，第三个参数一般是 false
   static from(dataObject: NoteDo, parent?: Notebook, bidirectional = true) {
     const note = dataObjectToInstance(this, dataObject);
 
