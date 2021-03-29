@@ -45,6 +45,9 @@ export function useSort() {
     handleClick,
     currentSortValue: computed(() => notebook.value.sortBy.value),
     currentDirectValue: computed(() => notebook.value.sortDirect.value),
+    allowDirect: computed(
+      () => notebook.value.sortBy.value !== SortByEnums.Custom,
+    ),
     sortOptions: [
       { key: SortByEnums.Title, title: '按标题' },
       { key: SortByEnums.UpdatedAt, title: '按修改日期' },

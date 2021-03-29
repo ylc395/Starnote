@@ -18,6 +18,7 @@ export default defineComponent({
       handleClick,
       currentSortValue,
       currentDirectValue,
+      allowDirect,
     } = useSort();
 
     return {
@@ -26,6 +27,7 @@ export default defineComponent({
       handleClick,
       currentSortValue,
       currentDirectValue,
+      allowDirect,
     };
   },
 });
@@ -35,6 +37,7 @@ export default defineComponent({
     <MenuItem
       v-for="option of sortOptions"
       :key="option.key"
+      :disabled="currentSortValue === option.key"
       @click="handleClick('sortBy', $event)"
       ><CheckSquareTwoTone
         :class="{
@@ -42,16 +45,19 @@ export default defineComponent({
         }"
       />{{ option.title }}</MenuItem
     >
-    <Divider />
-    <MenuItem
-      v-for="option of sortDirectOptions"
-      :key="option.key"
-      @click="handleClick('direct', $event)"
-      ><CheckSquareTwoTone
-        :class="{
-          invisible: currentDirectValue !== option.key,
-        }"
-      />{{ option.title }}</MenuItem
-    >
+    <template v-if="allowDirect">
+      <Divider />
+      <MenuItem
+        v-for="option of sortDirectOptions"
+        :key="option.key"
+        :disabled="currentDirectValue === option.key"
+        @click="handleClick('direct', $event)"
+      >
+        <CheckSquareTwoTone
+          :class="{ invisible: currentDirectValue !== option.key }"
+        />
+        {{ option.title }}
+      </MenuItem>
+    </template>
   </Menu>
 </template>
