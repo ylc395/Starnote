@@ -1,7 +1,7 @@
 /* eslint-env node */
 module.exports = {
   purge: { content: ['./public/**/*.html', './src/**/*.vue'] },
-  important: '#app',
+  important: '#app-body',
   theme: {
     extend: {
       colors: {
