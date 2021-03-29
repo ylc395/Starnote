@@ -14,7 +14,7 @@ export function useSort() {
   const {
     itemTree: { selectedItem },
     setSortBy,
-    setDirect,
+    setSortDirect,
   } = inject<ItemTreeService>(itemTreeToken)!;
 
   const { context } = inject<ReturnType<typeof useCommonContextmenu>>(
@@ -38,7 +38,7 @@ export function useSort() {
         setSortBy(notebook.value, key as SortByEnums);
         return;
       case 'direct':
-        setDirect(notebook.value, key as SortDirectEnums);
+        setSortDirect(notebook.value, key as SortDirectEnums);
         return;
       default:
         break;
