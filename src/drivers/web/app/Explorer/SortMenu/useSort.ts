@@ -4,6 +4,10 @@ import {
   token as itemTreeToken,
 } from 'domain/service/ItemTreeService';
 import {
+  SettingService,
+  token as settingToken,
+} from 'domain/service/SettingService';
+import {
   useContextmenu as useCommonContextmenu,
   token as contextmenuToken,
 } from 'drivers/web/components/Contextmenu/useContextmenu';
@@ -16,6 +20,7 @@ export function useSort() {
     setSortBy,
     setSortDirect,
   } = inject<ItemTreeService>(itemTreeToken)!;
+  const { get: getSetting } = inject<SettingService>(settingToken)!;
 
   const { context } = inject<ReturnType<typeof useCommonContextmenu>>(
     contextmenuToken,
@@ -47,12 +52,26 @@ export function useSort() {
 
   return {
     handleClick,
-    currentSortValue: computed(() =>
-      Notebook.isA(notebook.value) ? notebook.value.sortBy.value : '',
-    ),
-    currentDirectValue: computed(() =>
-      Notebook.isA(notebook.value) ? notebook.value.sortDirect.value : '',
-    ),
+    currentSortValue: computed(() => {
+      if (!Notebook.isA(notebook.value)) {
+        return;
+      }
+
+      const sortBy = notebook.value.sortBy.value;
+      return sortBy === SortByEnums.Default
+        ? getSetting('defaultSortBy')
+        : sortBy;
+    }),
+    currentDirectValue: computed(() => {
+      if (!Notebook.isA(notebook.value)) {
+        return;
+      }
+
+      const sortDirect = notebook.value.sortDirect.value;
+      return sortDirect === SortDirectEnums.Default
+        ? getSetting('defaultSortDirect')
+        : sortDirect;
+    }),
     allowDirect: computed(() =>
       Notebook.isA(notebook.value)
         ? notebook.value.sortBy.value !== SortByEnums.Custom

@@ -14,12 +14,16 @@ import { INDEX_NOTE_TITLE, SortByEnums, SortDirectEnums } from '../constant';
 import { ListItem } from './abstract/ListItem';
 import { Expose, Transform, Type } from 'class-transformer';
 import { without } from 'lodash';
+import { container } from 'tsyringe';
+import { Setting } from './Setting';
 
 export const ROOT_NOTEBOOK_ID: Notebook['id'] = NIL;
 
 export class Notebook
   extends Hierarchic<Notebook>
   implements ListItem, WithChildren {
+  setting = container.resolve(Setting);
+
   @RefTransform
   readonly title: Ref<string> = ref('untitled notebook');
 
@@ -41,10 +45,20 @@ export class Notebook
 
     const copy = this.children.value.slice();
     copy.sort((child1, child2) => {
-      const TOP = this.sortDirect.value === SortDirectEnums.Asc ? 1 : -1;
-      const BOTTOM = this.sortDirect.value === SortDirectEnums.Asc ? -1 : 1;
+      const sortBy =
+        this.sortBy.value === SortByEnums.Default
+          ? this.setting.defaultSortBy
+          : this.sortBy.value;
 
-      switch (this.sortBy.value) {
+      const sortDirect =
+        this.sortDirect.value === SortDirectEnums.Default
+          ? this.setting.defaultSortDirect
+          : this.sortDirect.value;
+
+      const TOP = sortDirect === SortDirectEnums.Asc ? 1 : -1;
+      const BOTTOM = sortDirect === SortDirectEnums.Asc ? -1 : 1;
+
+      switch (sortBy) {
         case SortByEnums.Title:
           return child1.title.value > child2.title.value ? TOP : BOTTOM;
         case SortByEnums.CreatedAt:

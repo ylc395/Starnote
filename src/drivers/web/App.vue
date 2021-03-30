@@ -10,6 +10,10 @@ import {
   ItemTreeService,
   token as itemTreeToken,
 } from 'domain/service/ItemTreeService';
+import {
+  SettingService,
+  token as settingToken,
+} from 'domain/service/SettingService';
 import { selfish } from 'utils/index';
 
 export default defineComponent({
@@ -17,9 +21,11 @@ export default defineComponent({
   setup() {
     const itemTreeService = selfish(new ItemTreeService());
     const editorService = selfish(new EditorService(itemTreeService));
+    const settingService = selfish(new SettingService());
 
     provide(itemTreeToken, itemTreeService);
     provide(editorToken, editorService);
+    provide(settingToken, settingService);
   },
 });
 </script>
