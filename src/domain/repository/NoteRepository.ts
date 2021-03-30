@@ -1,10 +1,16 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { singleton, inject } from 'tsyringe';
-import { Note, isWithId, NoteDo, NotebookDo } from 'domain/entity';
+import {
+  Note,
+  isWithId,
+  NoteDo,
+  NotebookDo,
+  ObjectWithId,
+} from 'domain/entity';
 import type { Dao } from './types';
 import { NOTE_DAO_TOKEN, NOTEBOOK_DAO_TOKEN } from './daoTokens';
 import { TIME_FORMAT } from 'domain/constant';
-import { isNil, omitBy } from 'lodash';
+import { has, isNil, omitBy, pick } from 'lodash';
 
 @singleton()
 export class NoteRepository {
@@ -37,19 +43,26 @@ export class NoteRepository {
     return note;
   }
 
-  updateNote(note: Note) {
-    const noteDo = omitBy(note.toDo(), isNil) as NoteDo;
+  updateNote(note: Note, fields?: (keyof NoteDo)[]) {
+    const payload = omitBy(
+      fields
+        ? (pick(note.toDo(), [...fields, 'id']) as NoteDo & ObjectWithId)
+        : note.toDo(),
+      isNil,
+    );
 
-    if (!isWithId(noteDo)) {
+    if (!isWithId(payload)) {
       throw new Error('no noteId when update');
     }
 
-    this.notebookDao!.update({
-      id: note.getParent().id,
-      userModifiedAt: note.userModifiedAt.value.format(TIME_FORMAT),
-    });
+    if (has(payload, 'title') || has(payload, 'content')) {
+      this.notebookDao!.update({
+        id: note.getParent().id,
+        userModifiedAt: note.userModifiedAt.value.format(TIME_FORMAT),
+      });
+    }
 
-    return this.noteDao!.update(noteDo);
+    return this.noteDao!.update(payload);
   }
 
   deleteNote(note: Note) {

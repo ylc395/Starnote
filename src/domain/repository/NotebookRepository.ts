@@ -5,10 +5,12 @@ import {
   ROOT_NOTEBOOK_ID,
   NoteDo,
   NotebookDo,
+  ObjectWithId,
 } from 'domain/entity';
 import type { Dao } from './types';
 import { NOTEBOOK_DAO_TOKEN, NOTE_DAO_TOKEN } from './daoTokens';
 import { singleton, inject } from 'tsyringe';
+import { pick } from 'lodash';
 
 @singleton()
 export class NotebookRepository {
@@ -75,8 +77,11 @@ export class NotebookRepository {
     return notebook;
   }
 
-  async updateNotebook(notebook: Notebook) {
-    await this.notebookDao!.update(notebook.toDo());
+  async updateNotebook(notebook: Notebook, fields?: (keyof NotebookDo)[]) {
+    const payload = fields
+      ? (pick(notebook.toDo(), [...fields, 'id']) as NotebookDo & ObjectWithId)
+      : notebook.toDo();
+    await this.notebookDao!.update(payload);
     return notebook;
   }
 

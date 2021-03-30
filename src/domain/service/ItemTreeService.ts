@@ -6,6 +6,8 @@ import {
   TreeItem,
   ItemTreeEvents,
   Note,
+  NotebookDo,
+  NoteDo,
 } from 'domain/entity';
 import { selfish } from 'utils/index';
 import { SortByEnums, SortDirectEnums } from 'domain/constant';
@@ -31,11 +33,14 @@ export class ItemTreeService {
     this.itemTree.loadRoot(rootNotebook);
   }
 
-  private syncItem(item: TreeItem) {
+  private syncItem(item: TreeItem, fields?: string[]) {
     if (Notebook.isA(item)) {
-      this.notebookRepository.updateNotebook(item);
+      return this.notebookRepository.updateNotebook(
+        item,
+        fields as (keyof NotebookDo)[],
+      );
     } else {
-      this.noteRepository.updateNote(item);
+      return this.noteRepository.updateNote(item, fields as (keyof NoteDo)[]);
     }
   }
 
@@ -60,12 +65,12 @@ export class ItemTreeService {
 
   moveTo(child: TreeItem, parent: Notebook) {
     this.itemTree.moveTo(child, parent);
-    this.syncItem(child);
+    this.syncItem(child, ['parentId']);
   }
 
   rename(item: TreeItem, title: string) {
     this.itemTree.rename(item, title);
-    this.syncItem(item);
+    this.syncItem(item, ['title']);
   }
 
   async createNote(parent?: Notebook) {
@@ -115,7 +120,7 @@ export class ItemTreeService {
 
   async setSortBy(notebook: Notebook, value: SortByEnums) {
     notebook.sortBy.value = value;
-    this.notebookRepository.updateNotebook(notebook);
+    this.notebookRepository.updateNotebook(notebook, ['sortBy']);
 
     if (value !== SortByEnums.Custom) {
       return;
@@ -124,20 +129,20 @@ export class ItemTreeService {
     return Promise.all(
       notebook.sortedChildren.value.map(async (item, index) => {
         item.sortOrder.value = index;
-
-        if (Notebook.isA(item)) {
-          return this.notebookRepository.updateNotebook(item);
-        }
-
-        if (Note.isA(item)) {
-          return this.noteRepository.updateNote(item);
-        }
+        return this.syncItem(item, ['sortOrder']);
       }),
     );
   }
 
   setSortDirect(notebook: Notebook, value: SortDirectEnums) {
     notebook.sortDirect.value = value;
-    this.notebookRepository.updateNotebook(notebook);
+    this.notebookRepository.updateNotebook(notebook, ['sortDirect']);
+  }
+
+  setSortOrders(items: TreeItem[]) {
+    items.forEach((item, index) => {
+      item.sortOrder.value = index + 1;
+      this.syncItem(item, ['sortOrder']);
+    });
   }
 }

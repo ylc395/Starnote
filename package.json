@@ -36,7 +36,8 @@
     "tsyringe": "^4.4.0",
     "uuid": "^8.3.2",
     "vue": "^3.0.9",
-    "vue-resizable": "^2.0.1"
+    "vue-resizable": "^2.0.1",
+    "vuedraggable": "^4.0.1"
   },
   "devDependencies": {
     "@types/electron-devtools-installer": "^2.2.0",

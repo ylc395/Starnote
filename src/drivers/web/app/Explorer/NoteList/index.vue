@@ -1,6 +1,7 @@
 <script lang="ts">
-import { defineComponent, inject } from 'vue';
-import { List, Button, Input, Dropdown } from 'ant-design-vue';
+import { defineComponent, inject, ref } from 'vue';
+import { Button, Input, Dropdown } from 'ant-design-vue';
+import DraggableList from 'vuedraggable';
 import {
   FileAddOutlined,
   SearchOutlined,
@@ -25,9 +26,8 @@ export default defineComponent({
     FileAddOutlined,
     SearchOutlined,
     Button,
-    List,
+    DraggableList,
     AInput: Input,
-    ListItem: List.Item,
     Contextmenu,
     Resizable,
     SortMenu,
@@ -44,9 +44,14 @@ export default defineComponent({
       openInEditor,
       isActive,
       createNote,
+      setSortOrders,
+      sortable,
     } = useNoteList();
     const { open: openContextmenu } = useCommonContextmenu<Note>();
     const { handleDragstart } = inject(dragToken)!;
+    const sorting = ref(false);
+    const handleSortStart = () => (sorting.value = true);
+    const handleSortEnd = () => (sorting.value = false);
 
     return {
       EMPTY_TITLE,
@@ -57,6 +62,11 @@ export default defineComponent({
       openContextmenu,
       handleDragstart,
       createNote,
+      setSortOrders,
+      sortable,
+      sorting,
+      handleSortStart,
+      handleSortEnd,
     };
   },
 });
@@ -108,23 +118,39 @@ export default defineComponent({
         </button>
       </Dropdown>
     </div>
-    <List :dataSource="notes" class="border-none px-2 overflow-y-auto mt-2">
-      <template #renderItem="{ item }">
-        <listItem
+    <DraggableList
+      tag="ol"
+      :modelValue="notes"
+      :sort="sortable"
+      ghostClass="sorting"
+      itemKey="id"
+      class="border-none px-2 overflow-y-auto mt-2 divide-solid divide-y-2 divide-gray-200"
+      @update:modelValue="setSortOrders"
+      @start="handleSortStart"
+      @end="handleSortEnd"
+    >
+      <template #item="{ element }">
+        <li
           draggable="true"
-          @dragstart="handleDragstart($event, item)"
-          @click="openInEditor(item)"
-          @contextmenu="openContextmenu($event, item)"
+          @dragstart="handleDragstart($event, element)"
+          @click="openInEditor(element)"
+          @contextmenu="openContextmenu($event, element)"
           :class="{
-            'bg-gray-200': isActive(item.id).value,
-            'bg-blue-50': item.withContextmenu.value,
+            'bg-gray-200': isActive(element.id).value,
+            'bg-blue-50': element.withContextmenu.value,
           }"
-          class="border-b-2 border-gray-200 px-3 hover:bg-blue-100"
+          class="list-none px-3 py-3 border-0 hover:bg-blue-100"
         >
-          {{ item.title.value || EMPTY_TITLE }}
-        </listItem>
+          {{ element.title.value || EMPTY_TITLE }}
+        </li>
       </template>
-    </List>
+    </DraggableList>
     <Contextmenu />
   </Resizable>
 </template>
+<style scoped>
+:deep(.sorting) {
+  opacity: 0.5;
+  background: #c8ebfb;
+}
+</style>

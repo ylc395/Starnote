@@ -8,11 +8,13 @@ import {
   token as editorToken,
 } from 'domain/service/EditorService';
 import { Note, Notebook } from 'domain/entity';
+import { SortByEnums } from 'domain/constant';
 
 export function useNoteList() {
   const {
     itemTree: { selectedItem },
     createNote,
+    setSortOrders,
   } = inject<ItemTreeService>(ItemTreeToken)!;
   const {
     openInEditor,
@@ -33,11 +35,20 @@ export function useNoteList() {
     return !Notebook.isA(selectedItem.value) || selectedItem.value.isRoot;
   });
 
+  const sortable = computed(() => {
+    return (
+      Notebook.isA(selectedItem.value) &&
+      selectedItem.value.sortBy.value === SortByEnums.Custom
+    );
+  });
+
   return {
     notes,
     isInvalidNotebook,
     openInEditor,
     isActive,
     createNote,
+    setSortOrders,
+    sortable,
   };
 }
