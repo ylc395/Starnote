@@ -9,7 +9,7 @@ import {
 } from 'domain/entity';
 import type { Dao } from './types';
 import { NOTE_DAO_TOKEN, NOTEBOOK_DAO_TOKEN } from './daoTokens';
-import { has, isNil, omitBy, pick } from 'lodash';
+import { has, pick } from 'lodash';
 
 @singleton()
 export class NoteRepository {
@@ -40,12 +40,9 @@ export class NoteRepository {
   }
 
   updateNote(note: Note, fields?: (keyof NoteDo)[]) {
-    const payload = omitBy(
-      fields
-        ? (pick(note.toDo(), [...fields, 'id']) as NoteDo & ObjectWithId)
-        : note.toDo(),
-      isNil,
-    );
+    const payload = fields
+      ? (pick(note.toDo(), [...fields, 'id']) as ObjectWithId)
+      : note.toDo();
 
     if (!isWithId(payload)) {
       throw new Error('no noteId when update');
