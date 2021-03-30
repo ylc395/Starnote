@@ -86,7 +86,3 @@ export const DayjsRefTransform = (target: Entity, propertyName: string) => {
   toPlain(target, propertyName);
   expose(target, propertyName);
 };
-
-export enum EntityEvents {
-  Sync = 'SYNC',
-}

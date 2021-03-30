@@ -5,7 +5,6 @@ import EventEmitter from 'eventemitter3';
 
 import { Note } from './Note';
 import { Notebook } from './Notebook';
-import { EntityEvents } from './abstract/Entity';
 
 export enum ItemTreeEvents {
   Selected = 'SELECTED',
@@ -78,7 +77,6 @@ export class ItemTree extends EventEmitter {
     }
 
     child.setParent(parent, true);
-    this.emit(EntityEvents.Sync, child);
   }
 
   private isExpanded(notebook: Notebook) {
@@ -93,7 +91,6 @@ export class ItemTree extends EventEmitter {
     }
 
     item.title.value = title;
-    this.emit(EntityEvents.Sync, item);
   }
 
   deleteItem(item: TreeItem) {

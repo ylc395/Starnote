@@ -5,7 +5,6 @@ import {
   ItemTree,
   TreeItem,
   ItemTreeEvents,
-  EntityEvents,
   Note,
 } from 'domain/entity';
 import { selfish } from 'utils/index';
@@ -21,7 +20,6 @@ export class ItemTreeService {
   }
   private async init() {
     this.itemTree
-      .on(EntityEvents.Sync, this.syncItem, this)
       .on(ItemTreeEvents.Expanded, this.loadChildrenOf, this)
       .on(ItemTreeEvents.Selected, this.loadChildrenOf, this);
 
@@ -58,6 +56,16 @@ export class ItemTreeService {
     }
 
     return this.notebookRepository.loadChildrenOf(item);
+  }
+
+  moveTo(child: TreeItem, parent: Notebook) {
+    this.itemTree.moveTo(child, parent);
+    this.syncItem(child);
+  }
+
+  rename(item: TreeItem, title: string) {
+    this.itemTree.rename(item, title);
+    this.syncItem(item);
   }
 
   async createNote(parent?: Notebook) {

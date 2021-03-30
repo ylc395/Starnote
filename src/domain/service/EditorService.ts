@@ -5,7 +5,7 @@ import {
   Notebook,
   Note,
   TreeItem,
-  EntityEvents,
+  EditorEvents,
   ItemTreeEvents,
   ItemTree,
 } from 'domain/entity';
@@ -34,7 +34,7 @@ export class EditorService {
 
   private keepSync() {
     this.editorManager.activeEditor.value?.on(
-      EntityEvents.Sync,
+      EditorEvents.Sync,
       debounce((note: Note) => this.noteRepository.updateNote(note), 500),
     );
   }

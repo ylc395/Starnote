@@ -4,7 +4,10 @@ import dayjs from 'dayjs';
 import EventEmitter from 'eventemitter3';
 import { uniqueId } from 'lodash';
 import { ListItem } from './abstract/ListItem';
-import { EntityEvents } from './abstract/Entity';
+
+export enum EditorEvents {
+  Sync = 'SYNC',
+}
 
 export class Editor extends EventEmitter implements ListItem {
   readonly withContextmenu = ref(false);
@@ -27,7 +30,7 @@ export class Editor extends EventEmitter implements ListItem {
     this._note.value!.userModifiedAt.value = dayjs();
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this._note.value!.isJustCreated = false;
-    this.emit(EntityEvents.Sync, this._note.value);
+    this.emit(EditorEvents.Sync, this._note.value);
   }
 
   constructor(note: Note) {
