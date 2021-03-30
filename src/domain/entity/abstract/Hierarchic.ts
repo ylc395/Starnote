@@ -7,7 +7,6 @@ export interface WithChildren extends Entity {
 }
 
 export abstract class Hierarchic<P extends WithChildren> extends Entity {
-  abstract readonly parentId: Ref<P['id'] | null>;
   protected abstract readonly parent: Ref<P | null>;
   // 一般 indexNote 会被置为单向
   setParent(newParent: P, bidirectional: boolean) {
@@ -18,7 +17,6 @@ export abstract class Hierarchic<P extends WithChildren> extends Entity {
     }
 
     this.parent.value = newParent;
-    this.parentId.value = newParent.id;
 
     if (!bidirectional) {
       return this;
@@ -63,9 +61,5 @@ export abstract class Hierarchic<P extends WithChildren> extends Entity {
 
   getParent() {
     return this.parent.value;
-  }
-
-  hasParent() {
-    return !!this.parentId.value;
   }
 }

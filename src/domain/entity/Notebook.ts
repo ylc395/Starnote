@@ -12,7 +12,7 @@ import { Hierarchic, WithChildren } from './abstract/Hierarchic';
 import { Note } from './Note';
 import { INDEX_NOTE_TITLE, SortByEnums, SortDirectEnums } from '../constant';
 import { ListItem } from './abstract/ListItem';
-import { Exclude, Expose, Transform, Type } from 'class-transformer';
+import { Expose, Transform, Type } from 'class-transformer';
 import { without } from 'lodash';
 
 export const ROOT_NOTEBOOK_ID: Notebook['id'] = NIL;
@@ -23,19 +23,16 @@ export class Notebook
   @RefTransform
   readonly title: Ref<string> = ref('untitled notebook');
 
-  @Exclude()
+  @Expose({ name: 'parentId', toPlainOnly: true })
+  @Transform(({ value }) => value.value?.id || null, { toPlainOnly: true })
   protected readonly parent: Ref<Notebook | null> = shallowRef(null);
 
-  @Exclude()
   readonly withContextmenu = ref(false);
 
-  @Exclude()
   children: Ref<(Note | Notebook)[] | null> = shallowRef(null);
 
-  @Exclude()
   isChildrenLoaded = false;
 
-  @Exclude()
   sortedChildren = computed(() => {
     if (!this.children.value) {
       return [];
@@ -69,20 +66,13 @@ export class Notebook
     return copy;
   });
 
-  @RefTransform
-  readonly parentId: Ref<Notebook['id'] | null> = ref(ROOT_NOTEBOOK_ID);
-
-  @Exclude({ toPlainOnly: true })
+  @Expose({ name: 'indexNoteId', toPlainOnly: true })
   @Type(() => Note)
   @Transform(({ value }) => shallowRef(value?.id ? value : null), {
     toClassOnly: true,
   })
+  @Transform(({ value }) => value.value?.id ?? null, { toPlainOnly: true })
   readonly indexNote: Ref<Note | null> = shallowRef(null);
-
-  @Expose()
-  get indexNoteId() {
-    return this.indexNote.value?.id ?? null;
-  }
 
   @RefTransform
   readonly sortBy: Ref<SortByEnums> = ref(SortByEnums.Default);
@@ -99,32 +89,15 @@ export class Notebook
   @DayjsRefTransform
   readonly userCreatedAt: Ref<Dayjs> = shallowRef(dayjs());
 
-  @Exclude()
-  private _noteJustCreated: Note | null = null;
-
-  get noteJustCreated() {
-    return this._noteJustCreated;
-  }
-
-  set noteJustCreated(val: Note | null) {
-    if (val && val?.getParent() !== this) {
-      throw new Error('can not set note to open');
-    }
-
-    this._noteJustCreated = val;
-  }
+  noteJustCreated: Note | null = null;
 
   get isRoot() {
     return this.id === ROOT_NOTEBOOK_ID;
   }
 
-  hasParent() {
-    return super.hasParent() && this.parentId.value !== ROOT_NOTEBOOK_ID;
-  }
-
   createSubNotebook(title: string) {
     const newNotebook = Notebook.from({ parentId: this.id, title }, this);
-    newNotebook.children.value = [];
+    newNotebook.isChildrenLoaded = true;
 
     return newNotebook;
   }
@@ -166,7 +139,6 @@ export class Notebook
     return this.from({
       id: ROOT_NOTEBOOK_ID,
       title: 'ROOT',
-      parentId: null,
     });
   }
 
@@ -181,7 +153,7 @@ export class Notebook
       return notebook;
     }
 
-    if (parent.id !== notebook.parentId.value) {
+    if (parent.id !== dataObject.parentId) {
       throw new Error('wrong parent, since two ids are not equal');
     }
 
@@ -190,4 +162,7 @@ export class Notebook
     return notebook;
   }
 }
-type NotebookDo = Omit<Do<Notebook>, 'children' | 'parent'>;
+export type NotebookDo = Omit<
+  Do<Notebook & { parentId: Notebook['id'] }>,
+  'children' | 'parent'
+>;

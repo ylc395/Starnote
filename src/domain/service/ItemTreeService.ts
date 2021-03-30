@@ -47,7 +47,7 @@ export class ItemTreeService {
     if (!Notebook.isA(target)) {
       throw new Error('sub notebook parent is not a notebook');
     }
-
+    await this.loadChildrenOf(target);
     await this.itemTree.expandNotebook(target);
     return target;
   }
@@ -57,7 +57,7 @@ export class ItemTreeService {
       return;
     }
 
-    this.notebookRepository.loadChildrenOf(item);
+    return this.notebookRepository.loadChildrenOf(item);
   }
 
   async createNote(parent?: Notebook) {

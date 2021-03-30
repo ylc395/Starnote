@@ -92,7 +92,7 @@ export class ItemTree extends EventEmitter {
       throw new Error('no item to move');
     }
 
-    if (child.parentId.value === parent.id) {
+    if (child.getParent()?.isEqual(parent)) {
       return;
     }
 

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { singleton, inject } from 'tsyringe';
-import { Note, Notebook, isWithId, NoteDo } from 'domain/entity';
+import { Note, isWithId, NoteDo, NotebookDo } from 'domain/entity';
 import type { Dao } from './types';
 import { NOTE_DAO_TOKEN, NOTEBOOK_DAO_TOKEN } from './daoTokens';
 import { TIME_FORMAT } from 'domain/constant';
@@ -9,8 +9,8 @@ import { isNil, omitBy } from 'lodash';
 @singleton()
 export class NoteRepository {
   constructor(
-    @inject(NOTE_DAO_TOKEN) protected noteDao?: Dao<Note>,
-    @inject(NOTEBOOK_DAO_TOKEN) protected notebookDao?: Dao<Notebook>,
+    @inject(NOTE_DAO_TOKEN) protected noteDao?: Dao<NoteDo>,
+    @inject(NOTEBOOK_DAO_TOKEN) protected notebookDao?: Dao<NotebookDo>,
   ) {}
   queryNoteById(id: Note['id']): Promise<Note | null>;
   queryNoteById(
@@ -29,7 +29,7 @@ export class NoteRepository {
 
   async createNote(note: Note) {
     this.notebookDao!.update({
-      id: note.parentId.value,
+      id: note.getParent()!.id,
       userModifiedAt: note.userCreatedAt.value.format(TIME_FORMAT),
     });
     await this.noteDao!.create(note.toDo());
@@ -45,7 +45,7 @@ export class NoteRepository {
     }
 
     this.notebookDao!.update({
-      id: note.parentId.value,
+      id: note.getParent().id,
       userModifiedAt: note.userModifiedAt.value.format(TIME_FORMAT),
     });
 

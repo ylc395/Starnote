@@ -1,5 +1,11 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Notebook, Note, ROOT_NOTEBOOK_ID } from 'domain/entity';
+import {
+  Notebook,
+  Note,
+  ROOT_NOTEBOOK_ID,
+  NoteDo,
+  NotebookDo,
+} from 'domain/entity';
 import type { Dao } from './types';
 import { NOTEBOOK_DAO_TOKEN, NOTE_DAO_TOKEN } from './daoTokens';
 import { singleton, inject } from 'tsyringe';
@@ -7,8 +13,8 @@ import { singleton, inject } from 'tsyringe';
 @singleton()
 export class NotebookRepository {
   constructor(
-    @inject(NOTE_DAO_TOKEN) protected noteDao?: Dao<Note>,
-    @inject(NOTEBOOK_DAO_TOKEN) protected notebookDao?: Dao<Notebook>,
+    @inject(NOTE_DAO_TOKEN) protected noteDao?: Dao<NoteDo>,
+    @inject(NOTEBOOK_DAO_TOKEN) protected notebookDao?: Dao<NotebookDo>,
   ) {}
 
   loadChildrenOf(notebook: Notebook): Promise<(Note | Notebook)[]> {
@@ -27,7 +33,7 @@ export class NotebookRepository {
       const children = [
         ...notes
           .filter((noteDo) => {
-            const isIndexNote = noteDo.id === notebook.indexNoteId;
+            const isIndexNote = noteDo.id === notebook.indexNote.value?.id;
             const isAlreadyIn = notebook.children.value?.find(
               (note) => note.id === noteDo.id,
             );

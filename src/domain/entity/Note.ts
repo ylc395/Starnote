@@ -10,9 +10,9 @@ import {
   DayjsRefTransform,
 } from 'domain/entity';
 import { Hierarchic } from './abstract/Hierarchic';
-import { Notebook, ROOT_NOTEBOOK_ID } from './Notebook';
+import { Notebook } from './Notebook';
 import { ListItem } from './abstract/ListItem';
-import { Exclude } from 'class-transformer';
+import { Expose, Transform } from 'class-transformer';
 
 dayjs.extend(customParseFormat);
 
@@ -30,22 +30,28 @@ export class Note extends Hierarchic<Notebook> implements ListItem {
   readonly userCreatedAt: Ref<Dayjs> = shallowRef(dayjs());
 
   @RefTransform
-  readonly parentId: Ref<Notebook['id']> = ref(ROOT_NOTEBOOK_ID);
-
-  @RefTransform
   readonly sortOrder: Ref<number> = ref(0);
 
-  @Exclude()
   readonly withContextmenu = ref(false);
 
-  @Exclude()
+  @Expose({ name: 'parentId', toPlainOnly: true })
+  @Transform(({ value }) => value.value.id, { toPlainOnly: true })
   protected readonly parent: Ref<Notebook | null> = shallowRef(null);
 
-  @Exclude({ toPlainOnly: true })
   isJustCreated = false;
 
   get isIndexNote() {
     return this.parent.value?.indexNote.value === this;
+  }
+
+  getParent() {
+    const parent = super.getParent();
+
+    if (!parent) {
+      throw new Error('no parent');
+    }
+
+    return parent;
   }
 
   // 和 index note 相关的调用，第三个参数一般是 false
@@ -87,4 +93,4 @@ export class Note extends Hierarchic<Notebook> implements ListItem {
   }
 }
 
-export type NoteDo = Do<Note>;
+export type NoteDo = Do<Note & { parentId: Notebook['id'] }>;
