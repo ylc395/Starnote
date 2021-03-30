@@ -1,5 +1,6 @@
 import { isElectron, isRenderer } from './utils';
 
+export const APP_NAME = 'cyl-note';
 export const IS_TEST = process.env.NODE_ENV === 'test';
 export const IS_DEVELOPMENT = process.env.NODE_ENV !== 'production';
 export const WEBPACK_DEV_SERVER_URL = process.env.WEBPACK_DEV_SERVER_URL;

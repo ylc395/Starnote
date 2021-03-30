@@ -12,4 +12,3 @@ export class Setting {
     return this[key].value;
   }
 }
-export const APP_NAME = 'cyl-note';
