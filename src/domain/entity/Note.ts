@@ -38,6 +38,7 @@ export class Note extends Hierarchic<Notebook> implements ListItem {
   @Transform(({ value }) => value.value.id, { toPlainOnly: true })
   protected readonly parent: Ref<Notebook | null> = shallowRef(null);
 
+  @Expose({ toClassOnly: true })
   isJustCreated = false;
 
   get isIndexNote() {

@@ -31,6 +31,7 @@ export class Notebook
 
   children: Ref<(Note | Notebook)[] | null> = shallowRef(null);
 
+  @Expose({ toClassOnly: true })
   isChildrenLoaded = false;
 
   sortedChildren = computed(() => {
@@ -96,8 +97,10 @@ export class Notebook
   }
 
   createSubNotebook(title: string) {
-    const newNotebook = Notebook.from({ parentId: this.id, title }, this);
-    newNotebook.isChildrenLoaded = true;
+    const newNotebook = Notebook.from(
+      { parentId: this.id, title, isChildrenLoaded: true },
+      this,
+    );
 
     return newNotebook;
   }
