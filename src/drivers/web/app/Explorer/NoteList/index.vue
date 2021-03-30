@@ -48,9 +48,6 @@ export default defineComponent({
     } = useNoteList();
     const { open: openContextmenu } = useCommonContextmenu<Note>();
     const { handleDragstart } = inject(dragToken)!;
-    const sorting = ref(false);
-    const handleSortStart = () => (sorting.value = true);
-    const handleSortEnd = () => (sorting.value = false);
 
     return {
       EMPTY_TITLE,
@@ -63,9 +60,6 @@ export default defineComponent({
       createNote,
       setSortOrders,
       sortable,
-      sorting,
-      handleSortStart,
-      handleSortEnd,
     };
   },
 });
@@ -125,8 +119,6 @@ export default defineComponent({
       itemKey="id"
       class="border-none px-2 overflow-y-auto mt-2 divide-solid divide-y-2 divide-gray-200"
       @update:modelValue="setSortOrders"
-      @start="handleSortStart"
-      @end="handleSortEnd"
     >
       <template #item="{ element }">
         <li

@@ -120,19 +120,21 @@ export class ItemTreeService {
   }
 
   async setSortBy(notebook: Notebook, value: SortByEnums) {
-    notebook.sortBy.value = value;
-    this.notebookRepository.updateNotebook(notebook, ['sortBy']);
+    let result;
 
-    if (value !== SortByEnums.Custom) {
-      return;
+    if (value === SortByEnums.Custom) {
+      result = Promise.all(
+        notebook.sortedChildren.value.map(async (item, index) => {
+          item.sortOrder.value = index + 1;
+          return this.syncItem(item, ['sortOrder']);
+        }),
+      );
     }
 
-    return Promise.all(
-      notebook.sortedChildren.value.map(async (item, index) => {
-        item.sortOrder.value = index;
-        return this.syncItem(item, ['sortOrder']);
-      }),
-    );
+    notebook.sortBy.value = value;
+    result = this.notebookRepository.updateNotebook(notebook, ['sortBy']);
+
+    return result;
   }
 
   setSortDirect(notebook: Notebook, value: SortDirectEnums) {
