@@ -4,7 +4,6 @@ import { List, Button, Input, Dropdown } from 'ant-design-vue';
 import {
   FileAddOutlined,
   SearchOutlined,
-  ArrowLeftOutlined,
   SortAscendingOutlined,
   CaretDownOutlined,
   BarsOutlined,
@@ -25,7 +24,6 @@ export default defineComponent({
   components: {
     FileAddOutlined,
     SearchOutlined,
-    ArrowLeftOutlined,
     Button,
     List,
     AInput: Input,
@@ -42,8 +40,6 @@ export default defineComponent({
   setup() {
     const {
       notes,
-      historyBack,
-      isEmptyHistory,
       isInvalidNotebook,
       openInEditor,
       isActive,
@@ -55,9 +51,7 @@ export default defineComponent({
     return {
       EMPTY_TITLE,
       notes,
-      historyBack,
       isInvalidNotebook,
-      isEmptyHistory,
       openInEditor,
       isActive,
       openContextmenu,
@@ -76,17 +70,6 @@ export default defineComponent({
     :active="['r']"
   >
     <div class="py-2 px-3 flex items-center">
-      <Button
-        @click="historyBack"
-        :disabled="isEmptyHistory"
-        type="primary"
-        size="small"
-        class="rounded-md mr-2"
-      >
-        <template #icon>
-          <ArrowLeftOutlined />
-        </template>
-      </Button>
       <Button
         type="primary"
         :disabled="isInvalidNotebook"

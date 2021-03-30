@@ -1,6 +1,6 @@
-import { shallowRef, computed, shallowReactive, ref } from '@vue/reactivity';
+import { shallowRef, shallowReactive, ref } from '@vue/reactivity';
 import type { Ref } from '@vue/reactivity';
-import { last, pull } from 'lodash';
+import { pull } from 'lodash';
 import EventEmitter from 'eventemitter3';
 
 import { Note } from './Note';
@@ -23,14 +23,10 @@ export class ItemTree extends EventEmitter {
   readonly root: Ref<Notebook | null> = shallowRef(null);
   private readonly history: Notebook[] = shallowReactive([]);
   readonly mode: Ref<ViewMode> = ref(ViewMode.TwoColumn);
-  readonly isEmptyHistory = computed(() => {
-    return this.history.length <= 1;
-  });
   readonly selectedItem: Ref<Notebook | Note | null> = shallowRef(null);
   readonly expandedItems: Notebook[] = shallowReactive([]);
   constructor() {
     super();
-    this.on(ItemTreeEvents.Selected, this.maintainHistory, this);
   }
 
   loadRoot(notebook: Notebook) {
@@ -53,25 +49,6 @@ export class ItemTree extends EventEmitter {
 
     this.selectedItem.value = _item;
     this.emit(ItemTreeEvents.Selected, _item);
-  }
-
-  private maintainHistory(item: TreeItem) {
-    if (Notebook.isA(item) && last(this.history) !== item) {
-      this.history.push(item);
-    }
-  }
-
-  historyBack() {
-    this.removeListener(ItemTreeEvents.Selected, this.maintainHistory);
-    this.history.pop();
-
-    const lastNotebook = this.history.pop();
-
-    if (lastNotebook) {
-      this.setSelectedItem(lastNotebook);
-    }
-
-    this.on(ItemTreeEvents.Selected, this.maintainHistory, this);
   }
 
   foldNotebook(notebook: Notebook) {
@@ -104,7 +81,7 @@ export class ItemTree extends EventEmitter {
     this.emit(EntityEvents.Sync, child);
   }
 
-  isExpanded(notebook: Notebook) {
+  private isExpanded(notebook: Notebook) {
     const isEqual = notebook.isEqual.bind(notebook);
 
     return this.expandedItems.findIndex(isEqual) >= 0;

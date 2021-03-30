@@ -11,7 +11,7 @@ import { Note, Notebook } from 'domain/entity';
 
 export function useNoteList() {
   const {
-    itemTree: { historyBack, isEmptyHistory, selectedItem },
+    itemTree: { selectedItem },
     createNote,
   } = inject<ItemTreeService>(ItemTreeToken)!;
   const {
@@ -36,8 +36,6 @@ export function useNoteList() {
   return {
     notes,
     isInvalidNotebook,
-    historyBack,
-    isEmptyHistory,
     openInEditor,
     isActive,
     createNote,
