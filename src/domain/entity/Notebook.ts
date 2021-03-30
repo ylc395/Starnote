@@ -58,7 +58,7 @@ export class Notebook
             ? TOP
             : BOTTOM;
         case SortByEnums.Custom:
-          return child1.sortOrder.value > child2.sortOrder.value ? TOP : BOTTOM;
+          return child1.sortOrder.value > child2.sortOrder.value ? 1 : -1;
         default:
           return 1;
       }

@@ -33,21 +33,22 @@ export class NotebookRepository {
       const children = [
         ...notes
           .filter((noteDo) => {
-            const isIndexNote = noteDo.id === notebook.indexNote.value?.id;
+            return noteDo.id !== notebook.indexNote.value?.id;
+          })
+          .map((noteDo) => {
             const isAlreadyIn = notebook.children.value?.find(
               (note) => note.id === noteDo.id,
             );
 
-            return !isIndexNote && !isAlreadyIn;
-          })
-          .map((noteDo) => Note.from(noteDo, notebook)),
-        ...notebooks
-          .filter((notebookDo) => {
-            return !notebook.children.value?.find(
-              (notebook) => notebook.id === notebookDo.id,
-            );
-          })
-          .map((notebookDo) => Notebook.from(notebookDo, notebook)),
+            return isAlreadyIn || Note.from(noteDo, notebook);
+          }),
+        ...notebooks.map((notebookDo) => {
+          const existed = notebook.children.value?.find(
+            (notebook) => notebook.id === notebookDo.id,
+          );
+
+          return existed || Notebook.from(notebookDo, notebook);
+        }),
       ];
 
       notebook.children.value = children;
