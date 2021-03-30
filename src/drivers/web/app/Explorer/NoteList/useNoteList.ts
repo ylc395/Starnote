@@ -4,6 +4,10 @@ import {
   token as ItemTreeToken,
 } from 'domain/service/ItemTreeService';
 import {
+  SettingService,
+  token as settingToken,
+} from 'domain/service/SettingService';
+import {
   EditorService,
   token as editorToken,
 } from 'domain/service/EditorService';
@@ -19,6 +23,9 @@ export function useNoteList() {
     openInEditor,
     editorManager: { isActive },
   } = inject<EditorService>(editorToken)!;
+  const {
+    setting: { get: getSetting },
+  } = inject<SettingService>(settingToken)!;
 
   const notes = computed(() => {
     if (!Notebook.isA(selectedItem.value)) {
@@ -49,5 +56,6 @@ export function useNoteList() {
     createNote,
     setSortOrders,
     sortable,
+    showingFields: computed(() => getSetting('noteListFields')),
   };
 }

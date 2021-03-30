@@ -45,6 +45,7 @@ export default defineComponent({
       createNote,
       setSortOrders,
       sortable,
+      showingFields,
     } = useNoteList();
     const { open: openContextmenu } = useCommonContextmenu<Note>();
     const { handleDragstart } = inject(dragToken)!;
@@ -60,6 +61,7 @@ export default defineComponent({
       createNote,
       setSortOrders,
       sortable,
+      showingFields,
     };
   },
 });
@@ -96,7 +98,7 @@ export default defineComponent({
         <template #overlay>
           <SortMenu />
         </template>
-        <button class="border-0 bg-transparent p-0 focus:outline-none">
+        <button class="note-list-button">
           <SortAscendingOutlined />
           <CaretDownOutlined class="scale-75 transform" />
         </button>
@@ -105,7 +107,7 @@ export default defineComponent({
         <template #overlay>
           <ViewModeMenu />
         </template>
-        <button class="border-0 bg-transparent p-0 focus:outline-none">
+        <button class="note-list-button">
           <BarsOutlined />
           <CaretDownOutlined class="scale-75 transform" />
         </button>
@@ -130,9 +132,23 @@ export default defineComponent({
             'bg-gray-200': isActive(element.id).value,
             'bg-blue-50': element.withContextmenu.value,
           }"
-          class="list-none px-3 py-3 border-0 hover:bg-blue-100"
+          class="list-none px-3 py-3 border-0 hover:bg-blue-100 flex flex-col"
         >
-          {{ element.title.value || EMPTY_TITLE }}
+          <span :class="{ 'mb-2': showingFields.length > 0 }">
+            {{ element.title.value || EMPTY_TITLE }}
+          </span>
+          <time
+            v-if="showingFields.includes('userCreatedAt')"
+            class="note-list-time"
+          >
+            创建于 {{ element.userCreatedAt.value.format('YYYY-MM-DD HH:m') }}
+          </time>
+          <time
+            v-if="showingFields.includes('userModifiedAt')"
+            class="note-list-time"
+          >
+            更新于 {{ element.userModifiedAt.value.format('YYYY-MM-DD HH:mm') }}
+          </time>
         </li>
       </template>
     </DraggableList>
@@ -143,5 +159,15 @@ export default defineComponent({
 :deep(.sorting) {
   opacity: 0.5;
   background: #c8ebfb;
+}
+
+@layer components {
+  :deep(.note-list-button) {
+    @apply border-0 bg-transparent p-0 focus:outline-none;
+  }
+
+  :deep(.note-list-time) {
+    @apply text-gray-400 text-xs;
+  }
 }
 </style>
