@@ -16,7 +16,7 @@ import { hasIn } from 'lodash';
 
 dayjs.extend(customParseFormat);
 
-type DataPropertyNames<T> = {
+export type DataPropertyNames<T> = {
   [K in keyof T]: K extends string
     ? // eslint-disable-next-line @typescript-eslint/ban-types
       T[K] extends Function | ComputedRef

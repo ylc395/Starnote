@@ -20,7 +20,9 @@ export function useSort() {
     setSortBy,
     setSortDirect,
   } = inject<ItemTreeService>(itemTreeToken)!;
-  const { get: getSetting } = inject<SettingService>(settingToken)!;
+  const {
+    setting: { get: getSetting },
+  } = inject<SettingService>(settingToken)!;
 
   const { context } = inject<ReturnType<typeof useCommonContextmenu>>(
     contextmenuToken,

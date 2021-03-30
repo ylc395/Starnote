@@ -1,10 +1,8 @@
 import { Setting } from 'domain/entity/Setting';
 import { container } from 'tsyringe';
+import { selfish } from 'utils/index';
 
 export const token = Symbol();
 export class SettingService {
-  private readonly setting = container.resolve(Setting);
-  get(key: keyof Setting) {
-    return this.setting[key].value;
-  }
+  readonly setting = selfish(container.resolve(Setting));
 }
