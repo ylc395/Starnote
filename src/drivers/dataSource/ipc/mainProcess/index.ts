@@ -1,7 +1,7 @@
 import { ipcMain } from 'electron';
 import type { Dao } from 'domain/repository';
 import { noteDao, notebookDao } from 'drivers/dataSource/sqlite';
-import { EntityTypes } from 'domain/constant';
+import { EntityTypes } from 'domain/entity';
 
 type DaoMethods = keyof Dao<never>;
 

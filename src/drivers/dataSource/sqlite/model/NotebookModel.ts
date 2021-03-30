@@ -1,7 +1,7 @@
 import { db } from '../db';
 import { DataTypes, UUIDV4, NOW } from 'sequelize';
 import { ROOT_NOTEBOOK_ID } from 'domain/entity';
-import { SortByEnums, SortDirectEnums } from 'domain/constant';
+import { SortByEnums, SortDirectEnums } from 'domain/entity';
 import { NoteModel } from './NoteModel';
 
 export const NotebookModel = db.define(
