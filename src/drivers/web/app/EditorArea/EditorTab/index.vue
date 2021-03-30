@@ -2,7 +2,7 @@
 import { defineComponent, inject } from 'vue';
 import { Tabs } from 'ant-design-vue';
 import { token, EditorService } from 'domain/service/EditorService';
-import { EMPTY_TITLE } from 'domain/constant';
+import { EMPTY_TITLE } from 'domain/entity';
 import { FileOutlined, FolderOutlined } from '@ant-design/icons-vue';
 
 export default defineComponent({

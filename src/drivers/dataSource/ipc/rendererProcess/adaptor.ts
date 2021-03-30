@@ -1,7 +1,6 @@
 import type { IpcRenderer } from 'electron';
-import { Entity } from 'domain/entity';
+import { Entity, EntityTypes } from 'domain/entity';
 import type { Dao } from 'domain/repository';
-import { EntityTypes } from 'domain/constant';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const ipcRender = (window as any).ipcRenderer as IpcRenderer;

@@ -9,7 +9,6 @@ import {
 } from 'domain/entity';
 import type { Dao } from './types';
 import { NOTE_DAO_TOKEN, NOTEBOOK_DAO_TOKEN } from './daoTokens';
-import { TIME_FORMAT } from 'domain/constant';
 import { has, isNil, omitBy, pick } from 'lodash';
 
 @singleton()
@@ -33,14 +32,11 @@ export class NoteRepository {
     return this.noteDao!.one({ id }, fields);
   }
 
-  async createNote(note: Note) {
-    this.notebookDao!.update({
-      id: note.getParent()!.id,
-      userModifiedAt: note.userCreatedAt.value.format(TIME_FORMAT),
-    });
-    await this.noteDao!.create(note.toDo());
-
-    return note;
+  createNote(note: Note) {
+    this.notebookDao!.update(
+      pick(note.getParent()!.toDo(), ['id', 'userModifiedAt']) as ObjectWithId,
+    );
+    this.noteDao!.create(note.toDo());
   }
 
   updateNote(note: Note, fields?: (keyof NoteDo)[]) {
@@ -56,10 +52,12 @@ export class NoteRepository {
     }
 
     if (has(payload, 'title') || has(payload, 'content')) {
-      this.notebookDao!.update({
-        id: note.getParent().id,
-        userModifiedAt: note.userModifiedAt.value.format(TIME_FORMAT),
-      });
+      this.notebookDao!.update(
+        pick(note.getParent()!.toDo(), [
+          'id',
+          'userModifiedAt',
+        ]) as ObjectWithId,
+      );
     }
 
     return this.noteDao!.update(payload);

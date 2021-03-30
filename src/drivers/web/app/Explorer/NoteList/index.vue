@@ -11,8 +11,7 @@ import {
 } from '@ant-design/icons-vue';
 import Resizable from 'vue-resizable';
 
-import type { Note } from 'domain/entity';
-import { EMPTY_TITLE } from 'domain/constant';
+import { Note, EMPTY_TITLE } from 'domain/entity';
 import { useNoteList } from './useNoteList';
 
 import Contextmenu from '../Contextmenu/index.vue';

@@ -1,6 +1,6 @@
 import os from 'os';
 import path from 'path';
-import { APP_NAME } from 'domain/constant';
+import { APP_NAME } from 'domain/entity';
 import { IS_DEVELOPMENT } from '../common/constants';
 
 export const OS_PLATFORM = process.platform;

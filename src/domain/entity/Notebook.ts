@@ -10,7 +10,6 @@ import {
 } from './abstract/Entity';
 import { Hierarchic, WithChildren } from './abstract/Hierarchic';
 import { Note } from './Note';
-import { INDEX_NOTE_TITLE, SortByEnums, SortDirectEnums } from '../constant';
 import { ListItem } from './abstract/ListItem';
 import { Expose, Transform, Type } from 'class-transformer';
 import { without } from 'lodash';
@@ -18,6 +17,21 @@ import { container } from 'tsyringe';
 import { Setting } from './Setting';
 
 export const ROOT_NOTEBOOK_ID: Notebook['id'] = NIL;
+export const INDEX_NOTE_TITLE = 'INDEX_NOTE';
+
+export enum SortByEnums {
+  CreatedAt = 'CREATED_AT',
+  UpdatedAt = 'UPDATED_AT',
+  Title = 'TITLE',
+  Custom = 'CUSTOM',
+  Default = 'DEFAULT',
+}
+
+export enum SortDirectEnums {
+  Default = 'DEFAULT',
+  Asc = 'ASC',
+  Desc = 'DESC',
+}
 
 export class Notebook
   extends Hierarchic<Notebook>
@@ -122,6 +136,7 @@ export class Notebook
   createNote() {
     const note = Note.createEmptyNote(this, true);
     this.noteJustCreated = note;
+    this.userModifiedAt.value = dayjs();
 
     return note;
   }
@@ -131,6 +146,7 @@ export class Notebook
       title: INDEX_NOTE_TITLE,
     });
     this.indexNote.value = newNote;
+    this.userModifiedAt.value = dayjs();
 
     return newNote;
   }

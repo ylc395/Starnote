@@ -15,6 +15,7 @@ import { ListItem } from './abstract/ListItem';
 import { Expose, Transform } from 'class-transformer';
 
 dayjs.extend(customParseFormat);
+export const EMPTY_TITLE = '(empty title)';
 
 export class Note extends Hierarchic<Notebook> implements ListItem {
   @RefTransform

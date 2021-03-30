@@ -11,8 +11,12 @@ import {
   useContextmenu as useCommonContextmenu,
   token as contextmenuToken,
 } from 'drivers/web/components/Contextmenu/useContextmenu';
-import { SortByEnums, SortDirectEnums } from 'domain/constant';
-import { Notebook, TreeItem } from 'domain/entity';
+import {
+  Notebook,
+  TreeItem,
+  SortByEnums,
+  SortDirectEnums,
+} from 'domain/entity';
 
 export function useSort() {
   const {

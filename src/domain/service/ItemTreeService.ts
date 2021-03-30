@@ -8,9 +8,10 @@ import {
   Note,
   NotebookDo,
   NoteDo,
+  SortByEnums,
+  SortDirectEnums,
 } from 'domain/entity';
 import { selfish } from 'utils/index';
-import { SortByEnums, SortDirectEnums } from 'domain/constant';
 
 export const token = Symbol();
 export class ItemTreeService {

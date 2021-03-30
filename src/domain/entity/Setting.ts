@@ -1,5 +1,5 @@
 import { ref } from '@vue/reactivity';
-import { SortByEnums, SortDirectEnums } from '../constant';
+import { SortByEnums, SortDirectEnums } from './Notebook';
 import { DataPropertyNames } from './abstract/Entity';
 import { singleton } from 'tsyringe';
 
@@ -12,3 +12,4 @@ export class Setting {
     return this[key].value;
   }
 }
+export const APP_NAME = 'cyl-note';

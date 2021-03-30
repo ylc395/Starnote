@@ -7,8 +7,7 @@ import {
   EditorService,
   token as editorToken,
 } from 'domain/service/EditorService';
-import { Note, Notebook } from 'domain/entity';
-import { SortByEnums } from 'domain/constant';
+import { Note, Notebook, SortByEnums } from 'domain/entity';
 
 export function useNoteList() {
   const {

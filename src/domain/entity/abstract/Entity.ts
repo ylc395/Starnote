@@ -11,7 +11,6 @@ import type { Dayjs } from 'dayjs';
 import { ref, shallowRef } from '@vue/reactivity';
 import type { ComputedRef, Ref, UnwrapRef } from '@vue/reactivity';
 import { Class } from 'utils/types';
-import { TIME_FORMAT } from 'domain/constant';
 import { hasIn } from 'lodash';
 
 dayjs.extend(customParseFormat);
@@ -40,6 +39,11 @@ export interface ObjectWithId {
 export function isWithId(obj: unknown): obj is ObjectWithId {
   return hasIn(obj, 'id');
 }
+export enum EntityTypes {
+  Notebook = 'NOTEBOOK',
+  Note = 'NOTE',
+}
+
 export abstract class Entity {
   @Expose()
   readonly id: string = uuid();
@@ -73,13 +77,18 @@ export const RefTransform = (target: Entity, propertyName: string) => {
 };
 
 export const DayjsRefTransform = (target: Entity, propertyName: string) => {
+  const TIME_DATA_FORMAT = 'YYYY-MM-DD HH:mm:ss.SSS Z';
   const toClass = Transform(
-    ({ value }) => shallowRef(dayjs(value, TIME_FORMAT)),
+    ({ value }) => shallowRef(dayjs(value, TIME_DATA_FORMAT)),
     { toClassOnly: true },
   );
-  const toPlain = Transform(({ value }) => value.value.format(TIME_FORMAT), {
-    toPlainOnly: true,
-  });
+
+  const toPlain = Transform(
+    ({ value }) => value.value.format(TIME_DATA_FORMAT),
+    {
+      toPlainOnly: true,
+    },
+  );
   const expose = Expose();
 
   toClass(target, propertyName);
