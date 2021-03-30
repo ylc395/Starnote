@@ -35,7 +35,15 @@ export class EditorService {
   private keepSync() {
     this.editorManager.activeEditor.value?.on(
       EditorEvents.Sync,
-      debounce((note: Note) => this.noteRepository.updateNote(note), 500),
+      debounce(
+        (note: Note) =>
+          this.noteRepository.updateNote(note, [
+            'title',
+            'content',
+            'userModifiedAt',
+          ]),
+        500,
+      ),
     );
   }
   private async loadContentOf(note: Note, forced = false) {
