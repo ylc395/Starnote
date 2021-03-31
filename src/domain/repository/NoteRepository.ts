@@ -8,7 +8,7 @@ import {
 } from 'domain/entity';
 import type { Dao } from './types';
 import { NOTE_DAO_TOKEN, NOTEBOOK_DAO_TOKEN } from './daoTokens';
-import { has, pick } from 'lodash';
+import { pick } from 'lodash';
 
 @singleton()
 export class NoteRepository {
@@ -50,20 +50,8 @@ export class NoteRepository {
       ? pick(note.toDataObject(), [...fields, 'id'])
       : note.toDataObject();
 
-    const parent = pick(note.getParent().toDataObject(), [
-      'id',
-      'userModifiedAt',
-    ]);
-
     if (!isWithId(payload)) {
       throw new Error('no noteId when update');
-    }
-
-    if (
-      isWithId(parent) &&
-      (has(payload, 'title') || has(payload, 'content'))
-    ) {
-      this.notebookDao!.update(parent);
     }
 
     return this.noteDao!.update(payload);

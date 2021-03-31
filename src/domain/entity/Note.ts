@@ -1,6 +1,5 @@
 import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
-import customParseFormat from 'dayjs/plugin/customParseFormat';
 import { ref, shallowRef } from '@vue/reactivity';
 import type { Ref } from '@vue/reactivity';
 import {
@@ -17,7 +16,6 @@ import { ListItem } from './abstract/ListItem';
 import { Expose, Transform } from 'class-transformer';
 import { staticImplements } from 'utils/types';
 
-dayjs.extend(customParseFormat);
 export const EMPTY_TITLE = '(empty title)';
 
 @staticImplements<DataMapperStatic<NoteDataObject>>()
