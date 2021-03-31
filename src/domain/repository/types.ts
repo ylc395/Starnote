@@ -1,7 +1,8 @@
 import type { ObjectWithId } from 'domain/entity/abstract/Entity';
 
 export type Query<T> = {
-  [K in keyof T]?: string | number;
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  [K in keyof T]?: T[K] extends object ? never : T[K];
 };
 
 export interface Dao<T> {

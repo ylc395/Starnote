@@ -1,28 +1,14 @@
-import { Note, Notebook } from 'domain/entity';
-import { daoAdaptor } from './adaptor';
-import { NoteModel } from './model/NoteModel';
-import { NotebookModel, IndexNote } from './model/NotebookModel';
-import { db } from './db';
-import { IS_DEVELOPMENT } from 'drivers/platform/common/constants';
+import { NoteDataObject, NotebookDataObject, EntityTypes } from 'domain/entity';
+import { DataAccessObject } from './DataAccessObject';
+import { NoteTable, NotebookTable } from './table';
 
-export const noteDao = daoAdaptor<Note>(NoteModel);
-export const notebookDao = daoAdaptor<Notebook>(NotebookModel, {
-  onFind: {
-    include: {
-      model: NoteModel,
-      as: 'indexNote',
-      attributes: { exclude: ['content'] },
-      required: false,
-    },
+export const noteDao = new DataAccessObject<NoteDataObject>(EntityTypes.Note);
+export const notebookDao = new DataAccessObject<NotebookDataObject>(
+  EntityTypes.Notebook,
+  {
+    entity: EntityTypes.Note,
+    foreignKey: NotebookTable.COLUMNS.INDEX_NOTE_ID,
+    reference: NoteTable.COLUMNS.ID,
+    as: 'indexNote',
   },
-  onCreate: {
-    include: [
-      {
-        association: IndexNote,
-        as: 'indexNote',
-      },
-    ],
-  },
-});
-
-db.sync({ force: IS_DEVELOPMENT });
+);

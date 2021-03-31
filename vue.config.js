@@ -25,7 +25,7 @@ module.exports = {
         });
       },
       // @see https://github.com/nklayman/vue-cli-plugin-electron-builder/issues/578#issuecomment-561972824
-      externals: ['sequelize'],
+      externals: ['knex'],
       mainProcessFile: 'src/drivers/electron/main.ts',
       mainProcessWatch: ['src/drivers/electron/*'],
       mainProcessArgs: ['--arg-name', 'arg-value'],
