@@ -1,8 +1,8 @@
 import { EntityTypes, SortByEnums, SortDirectEnums } from 'domain/entity';
-import { db } from './db';
+import type { TableBuilder } from './db';
 import { COLUMNS as NOTE_COLUMNS } from './NoteTable';
 
-const TABLE_NAME = EntityTypes.Notebook;
+export const TABLE_NAME = EntityTypes.Notebook;
 export const COLUMNS = {
   ID: 'id',
   VALID: 'valid',
@@ -16,7 +16,7 @@ export const COLUMNS = {
   USER_MODIFIED_AT: 'userModifiedAt',
 } as const;
 
-export const table = db.schema.createTableIfNotExists(TABLE_NAME, (table) => {
+export const builder: TableBuilder = (table) => {
   table.uuid(COLUMNS.ID).primary();
   table.enum(COLUMNS.VALID, [0, 1]).notNullable().defaultTo(1);
   table.text(COLUMNS.TITLE).notNullable();
@@ -26,7 +26,7 @@ export const table = db.schema.createTableIfNotExists(TABLE_NAME, (table) => {
       SortByEnums.Title,
       SortByEnums.CreatedAt,
       SortByEnums.UpdatedAt,
-      SortByEnums.Default,
+      SortByEnums.Custom,
     ])
     .notNullable();
   table.uuid(COLUMNS.PARENT_ID);
@@ -45,4 +45,4 @@ export const table = db.schema.createTableIfNotExists(TABLE_NAME, (table) => {
   table.integer(COLUMNS.SORT_ORDER).notNullable();
   table.dateTime(COLUMNS.USER_CREATED_AT).notNullable();
   table.dateTime(COLUMNS.USER_MODIFIED_AT).notNullable();
-});
+};

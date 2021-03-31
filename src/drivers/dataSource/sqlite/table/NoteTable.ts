@@ -1,8 +1,8 @@
-import { db } from './db';
+import type { TableBuilder } from './db';
 import { COLUMNS as NOTEBOOK_COLUMNS } from './NotebookTable';
 import { EntityTypes } from 'domain/entity';
 
-const TABLE_NAME = EntityTypes.Note;
+export const TABLE_NAME = EntityTypes.Note;
 export const COLUMNS = {
   ID: 'id',
   VALID: 'valid',
@@ -14,7 +14,7 @@ export const COLUMNS = {
   USER_MODIFIED_AT: 'userModifiedAt',
 } as const;
 
-export const table = db.schema.createTableIfNotExists(TABLE_NAME, (table) => {
+export const builder: TableBuilder = (table) => {
   table.uuid(COLUMNS.ID).primary();
   table.enum(COLUMNS.VALID, [0, 1]).notNullable().defaultTo(1);
   table.text(COLUMNS.TITLE).notNullable();
@@ -27,4 +27,4 @@ export const table = db.schema.createTableIfNotExists(TABLE_NAME, (table) => {
   table.integer(COLUMNS.SORT_ORDER).notNullable();
   table.dateTime(COLUMNS.USER_CREATED_AT).notNullable();
   table.dateTime(COLUMNS.USER_MODIFIED_AT).notNullable();
-});
+};

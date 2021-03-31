@@ -1,13 +1,14 @@
 import * as NoteTable from './NoteTable';
 import * as NotebookTable from './NotebookTable';
 import { IS_DEVELOPMENT } from 'drivers/platform/common/constants';
-import { db } from './db';
+import { createTableIfNotExists, db } from './db';
 import { EntityTypes } from 'domain/entity';
 
-const createTables = () => {
-  NoteTable.table.then();
-  NotebookTable.table.then();
-};
+const createTables = () =>
+  Promise.all([
+    createTableIfNotExists(NoteTable.TABLE_NAME, NoteTable.builder),
+    createTableIfNotExists(NotebookTable.TABLE_NAME, NotebookTable.builder),
+  ]);
 
 if (IS_DEVELOPMENT) {
   Promise.all([

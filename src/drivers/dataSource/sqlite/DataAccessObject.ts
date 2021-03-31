@@ -1,6 +1,6 @@
 import { EntityTypes, ObjectWithId } from 'domain/entity';
 import type { Dao, Query } from 'domain/repository';
-import { difference, mapKeys, omitBy, pickBy } from 'lodash';
+import { difference, mapKeys, omit, omitBy, pickBy } from 'lodash';
 import { db, NoteTable, NotebookTable } from './table';
 
 interface HasOneConfig {
@@ -79,7 +79,7 @@ export class DataAccessObject<T> implements Dao<T> {
   one<K extends keyof Query<T>>(where: Query<T>, attributes?: K[]) {
     let query = db(this.tableName)
       .select(...(attributes || ['*']))
-      .where(this.getFullWhere.bind(this));
+      .where(this.getFullWhere(where));
 
     query = this.getQueryWithAssociation(query, attributes);
     return query.first().then(this.processAssociation.bind(this));
@@ -95,7 +95,7 @@ export class DataAccessObject<T> implements Dao<T> {
     } else {
       query = query
         .select(...(attributes || ['*']))
-        .where(this.getFullWhere.bind(this));
+        .where(this.getFullWhere(where));
     }
 
     query = this.getQueryWithAssociation(query, attributes);
@@ -113,7 +113,7 @@ export class DataAccessObject<T> implements Dao<T> {
   update(dataObject: T & ObjectWithId) {
     return db(this.tableName)
       .where({ id: dataObject.id })
-      .update(dataObject)
+      .update(omit(dataObject, ['id']))
       .then(() => undefined);
   }
 
