@@ -1,9 +1,12 @@
 import { Ref, ref } from '@vue/reactivity';
 import { SortByEnums, SortDirectEnums } from './Notebook';
-import { DataPropertyNames } from './abstract/Entity';
 import { singleton } from 'tsyringe';
 import { Note } from './Note';
 import { pull } from 'lodash';
+
+type SettingField = {
+  [index in keyof Setting]: Setting[index] extends Ref ? index : never;
+}[keyof Setting];
 
 @singleton()
 export class Setting {
@@ -11,12 +14,12 @@ export class Setting {
   readonly defaultSortDirect = ref(SortDirectEnums.Asc);
   readonly noteListFields: Ref<(keyof Note)[]> = ref([]);
 
-  get(key: DataPropertyNames<Setting>) {
+  get(key: SettingField) {
     return this[key].value;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  toggle(key: DataPropertyNames<Setting>, value: any) {
+  toggle(key: SettingField, value: any) {
     const _value = this[key].value;
 
     if (!Array.isArray(_value)) {

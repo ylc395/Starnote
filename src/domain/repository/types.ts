@@ -1,7 +1,7 @@
 import type { ObjectWithId } from 'domain/entity/abstract/Entity';
 
 export type Query<T> = {
-  [K in keyof T]?: string | number | (string | number)[];
+  [K in keyof T]?: string | number;
 };
 
 export interface Dao<T> {

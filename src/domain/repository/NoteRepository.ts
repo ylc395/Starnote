@@ -45,7 +45,7 @@ export class NoteRepository {
     this.noteDao!.create(note.toDataObject());
   }
 
-  updateNote(note: Note, fields?: (keyof NoteDataObject)[]) {
+  updateNote<T extends keyof NoteDataObject>(note: Note, fields?: T[]) {
     const payload = fields
       ? pick(note.toDataObject(), [...fields, 'id'])
       : note.toDataObject();

@@ -6,10 +6,10 @@ import {
   TreeItem,
   ItemTreeEvents,
   Note,
-  NotebookDo,
-  NoteDo,
   SortByEnums,
   SortDirectEnums,
+  NotebookDataObject,
+  NoteDataObject,
 } from 'domain/entity';
 import { selfish } from 'utils/index';
 
@@ -34,14 +34,14 @@ export class ItemTreeService {
     this.itemTree.loadRoot(rootNotebook);
   }
 
-  private syncItem(item: TreeItem, fields?: string[]) {
+  private syncItem<T extends keyof (NotebookDataObject | NoteDataObject)>(
+    item: TreeItem,
+    fields?: T[],
+  ) {
     if (Notebook.isA(item)) {
-      return this.notebookRepository.updateNotebook(
-        item,
-        fields as (keyof NotebookDo)[],
-      );
+      return this.notebookRepository.updateNotebook(item, fields);
     } else {
-      return this.noteRepository.updateNote(item, fields as (keyof NoteDo)[]);
+      return this.noteRepository.updateNote(item, fields);
     }
   }
 

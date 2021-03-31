@@ -77,9 +77,9 @@ export class NotebookRepository {
     return notebook;
   }
 
-  async updateNotebook(
+  async updateNotebook<T extends keyof NotebookDataObject>(
     notebook: Notebook,
-    fields?: (keyof NotebookDataObject)[],
+    fields?: T[],
   ) {
     const payload = fields
       ? pick(notebook.toDataObject(), [...fields, 'id'])
