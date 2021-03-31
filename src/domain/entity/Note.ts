@@ -4,20 +4,26 @@ import customParseFormat from 'dayjs/plugin/customParseFormat';
 import { ref, shallowRef } from '@vue/reactivity';
 import type { Ref } from '@vue/reactivity';
 import {
-  Do,
   dataObjectToInstance,
+  DataMapper,
   RefTransform,
   DayjsRefTransform,
-} from 'domain/entity';
+  instanceToDataObject,
+  DataMapperStatic,
+} from './abstract/DataMapper';
 import { Hierarchic } from './abstract/Hierarchic';
 import { Notebook } from './Notebook';
 import { ListItem } from './abstract/ListItem';
 import { Expose, Transform } from 'class-transformer';
+import { staticImplements } from 'utils/types';
 
 dayjs.extend(customParseFormat);
 export const EMPTY_TITLE = '(empty title)';
 
-export class Note extends Hierarchic<Notebook> implements ListItem {
+@staticImplements<DataMapperStatic<NoteDataObject>>()
+export class Note
+  extends Hierarchic<Notebook>
+  implements ListItem, DataMapper<NoteDataObject> {
   @RefTransform
   title: Ref<string> = ref('untitled note');
 
@@ -39,7 +45,6 @@ export class Note extends Hierarchic<Notebook> implements ListItem {
   @Transform(({ value }) => value.value.id, { toPlainOnly: true })
   protected readonly parent: Ref<Notebook | null> = shallowRef(null);
 
-  @Expose({ toClassOnly: true })
   isJustCreated = false;
 
   get isIndexNote() {
@@ -56,8 +61,16 @@ export class Note extends Hierarchic<Notebook> implements ListItem {
     return parent;
   }
 
+  toDataObject() {
+    return instanceToDataObject<this, NoteDataObject>(this);
+  }
+
   // 和 index note 相关的调用，第三个参数一般是 false
-  static from(dataObject: NoteDo, parent?: Notebook, bidirectional = true) {
+  static from(
+    dataObject: NoteDataObject,
+    parent?: Notebook,
+    bidirectional = true,
+  ) {
     const note = dataObjectToInstance(this, dataObject);
 
     if (!parent) {
@@ -80,19 +93,25 @@ export class Note extends Hierarchic<Notebook> implements ListItem {
   static createEmptyNote(
     parent: Notebook,
     bidirectional: boolean,
-    note: NoteDo = {},
+    note: NoteDataObject = {},
   ) {
-    return Note.from(
-      {
-        title: 'untitled note',
-        content: '',
-        ...note,
-        isJustCreated: true,
-      },
+    const newNote = Note.from(
+      { title: 'untitled note', content: '', ...note },
       parent,
       bidirectional,
     );
+
+    newNote.isJustCreated = true;
+    return newNote;
   }
 }
 
-export type NoteDo = Do<Note & { parentId: Notebook['id'] }>;
+export interface NoteDataObject {
+  readonly id?: string;
+  readonly title?: string;
+  readonly content?: string;
+  readonly userModifiedAt?: string;
+  readonly userCreatedAt?: string;
+  readonly parentId?: string;
+  readonly sortOrder?: number;
+}

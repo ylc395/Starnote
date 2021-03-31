@@ -3,9 +3,9 @@ import {
   Notebook,
   Note,
   ROOT_NOTEBOOK_ID,
-  NoteDo,
-  NotebookDo,
-  ObjectWithId,
+  NoteDataObject,
+  NotebookDataObject,
+  isWithId,
 } from 'domain/entity';
 import type { Dao } from './types';
 import { NOTEBOOK_DAO_TOKEN, NOTE_DAO_TOKEN } from './daoTokens';
@@ -15,8 +15,8 @@ import { pick } from 'lodash';
 @singleton()
 export class NotebookRepository {
   constructor(
-    @inject(NOTE_DAO_TOKEN) protected noteDao?: Dao<NoteDo>,
-    @inject(NOTEBOOK_DAO_TOKEN) protected notebookDao?: Dao<NotebookDo>,
+    @inject(NOTE_DAO_TOKEN) protected noteDao?: Dao<NoteDataObject>,
+    @inject(NOTEBOOK_DAO_TOKEN) protected notebookDao?: Dao<NotebookDataObject>,
   ) {}
 
   loadChildrenOf(notebook: Notebook): Promise<(Note | Notebook)[]> {
@@ -73,14 +73,22 @@ export class NotebookRepository {
   }
 
   async createNotebook(notebook: Notebook) {
-    await this.notebookDao!.create(notebook.toDo());
+    await this.notebookDao!.create(notebook.toDataObject());
     return notebook;
   }
 
-  async updateNotebook(notebook: Notebook, fields?: (keyof NotebookDo)[]) {
+  async updateNotebook(
+    notebook: Notebook,
+    fields?: (keyof NotebookDataObject)[],
+  ) {
     const payload = fields
-      ? (pick(notebook.toDo(), [...fields, 'id']) as NotebookDo & ObjectWithId)
-      : notebook.toDo();
+      ? pick(notebook.toDataObject(), [...fields, 'id'])
+      : notebook.toDataObject();
+
+    if (!isWithId(payload)) {
+      throw new Error('no id when update notebook');
+    }
+
     await this.notebookDao!.update(payload);
     return notebook;
   }

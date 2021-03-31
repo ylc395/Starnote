@@ -3,11 +3,13 @@ import { NIL } from 'uuid';
 import { computed, ref, shallowRef } from '@vue/reactivity';
 import type { Ref } from '@vue/reactivity';
 import {
-  Do,
   dataObjectToInstance,
+  instanceToDataObject,
+  DataMapper,
+  DataMapperStatic,
   RefTransform,
   DayjsRefTransform,
-} from './abstract/Entity';
+} from './abstract/DataMapper';
 import { Hierarchic, WithChildren } from './abstract/Hierarchic';
 import { Note } from './Note';
 import { ListItem } from './abstract/ListItem';
@@ -15,6 +17,7 @@ import { Expose, Transform, Type } from 'class-transformer';
 import { without } from 'lodash';
 import { container } from 'tsyringe';
 import { Setting } from './Setting';
+import { staticImplements } from 'utils/types';
 
 export const ROOT_NOTEBOOK_ID: Notebook['id'] = NIL;
 export const INDEX_NOTE_TITLE = 'INDEX_NOTE';
@@ -33,9 +36,10 @@ export enum SortDirectEnums {
   Desc = 'DESC',
 }
 
+@staticImplements<DataMapperStatic<NotebookDataObject>>()
 export class Notebook
   extends Hierarchic<Notebook>
-  implements ListItem, WithChildren {
+  implements ListItem, WithChildren, DataMapper<NotebookDataObject> {
   setting = container.resolve(Setting);
 
   @RefTransform
@@ -49,7 +53,6 @@ export class Notebook
 
   children: Ref<(Note | Notebook)[] | null> = shallowRef(null);
 
-  @Expose({ toClassOnly: true })
   isChildrenLoaded = false;
 
   sortedChildren = computed(() => {
@@ -124,11 +127,13 @@ export class Notebook
     return this.id === ROOT_NOTEBOOK_ID;
   }
 
+  toDataObject() {
+    return instanceToDataObject<this, NotebookDataObject>(this);
+  }
+
   createSubNotebook(title: string) {
-    const newNotebook = Notebook.from(
-      { parentId: this.id, title, isChildrenLoaded: true },
-      this,
-    );
+    const newNotebook = Notebook.from({ parentId: this.id, title }, this);
+    newNotebook.isChildrenLoaded = true;
 
     return newNotebook;
   }
@@ -175,7 +180,7 @@ export class Notebook
     });
   }
 
-  static from(dataObject: NotebookDo, parent?: Notebook) {
+  static from(dataObject: NotebookDataObject, parent?: Notebook) {
     const notebook = dataObjectToInstance(this, dataObject);
 
     if (notebook.indexNote.value) {
@@ -195,7 +200,15 @@ export class Notebook
     return notebook;
   }
 }
-export type NotebookDo = Omit<
-  Do<Notebook & { parentId: Notebook['id'] }>,
-  'children' | 'parent'
->;
+export interface NotebookDataObject {
+  readonly id?: string;
+  readonly title?: string;
+  readonly parentId?: string;
+  readonly sortBy?: SortByEnums;
+  readonly sortDirect?: SortDirectEnums;
+  readonly sortOrder?: number;
+  readonly userModifiedAt?: string;
+  readonly userCreatedAt?: string;
+  readonly indexNote?: NotebookDataObject | null;
+  readonly indexNoteId?: string | null;
+}
