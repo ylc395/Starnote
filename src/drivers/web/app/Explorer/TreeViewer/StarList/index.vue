@@ -1,6 +1,10 @@
 <script lang="ts">
 import { defineComponent, inject } from 'vue';
-import { StarOutlined, FileOutlined } from '@ant-design/icons-vue';
+import {
+  StarOutlined,
+  FileOutlined,
+  CloseOutlined,
+} from '@ant-design/icons-vue';
 import { StarService, token as starToken } from 'domain/service/StarService';
 import {
   EditorService,
@@ -11,19 +15,22 @@ import DraggableList from 'vuedraggable';
 export default defineComponent({
   components: {
     StarOutlined,
+    CloseOutlined,
     FileOutlined,
     DraggableList,
   },
   setup() {
-    const { sortedStars: stars, setSortOrders } = inject<StarService>(
-      starToken,
-    )!;
+    const {
+      sortedStars: stars,
+      setSortOrders,
+      removeStar,
+    } = inject<StarService>(starToken)!;
 
     const {
       editorManager: { isActive, openInEditor },
     } = inject<EditorService>(editorToken)!;
 
-    return { stars, isActive, openInEditor, setSortOrders };
+    return { stars, isActive, openInEditor, setSortOrders, removeStar };
   },
 });
 </script>
@@ -45,12 +52,16 @@ export default defineComponent({
     >
       <template #item="{ element }">
         <li
-          class="list-none pl-5 py-2"
+          class="group list-none pl-5 py-2"
           :class="{ 'bg-gray-900': isActive(element.entity.value).value }"
           @click="openInEditor(element.entity.value)"
         >
           <FileOutlined class="mr-1" />
           {{ element.entity.value.title.value }}
+          <CloseOutlined
+            class="group-hover:visible ml-10 cursor-pointer invisible"
+            @click.stop="removeStar(element)"
+          />
         </li>
       </template>
     </DraggableList>

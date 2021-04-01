@@ -1,7 +1,7 @@
 import { StarRepository } from 'domain/repository/StarRepository';
 import { container } from 'tsyringe';
 
-import { ItemTree, Star, Note, TreeItem, ItemTreeEvents } from 'domain/entity';
+import { ItemTree, Star, Note, ItemTreeEvents } from 'domain/entity';
 import { StarList } from 'domain/entity/StarList';
 import { pull } from 'lodash';
 
@@ -24,7 +24,6 @@ export class StarService {
   }
 
   private async initStar() {
-    this.itemTree.on(ItemTreeEvents.Deleted, this.removeStar, this);
     this.stars.push(...(await this.starRepository.fetchAll()));
   }
 
@@ -35,17 +34,9 @@ export class StarService {
     return this.starRepository.createStar(newStar);
   }
 
-  removeStar(item: TreeItem) {
-    const starToRemove = this.stars.find((star) =>
-      star.entity.value?.isEqual(item),
-    );
-
-    if (!starToRemove) {
-      return;
-    }
-
-    this.starRepository.deleteStar(starToRemove);
-    pull(this.stars, starToRemove);
+  removeStar(star: Star) {
+    this.starRepository.deleteStar(star);
+    pull(this.stars, star);
   }
 
   setSortOrders(items: Star[]) {
