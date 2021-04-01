@@ -75,10 +75,7 @@ export default defineComponent({
         <FolderOutlined class="tree-viewer-icon" ref="notebookIconRef" />
         Notebooks
       </h1>
-      <button
-        @click="startCreating()"
-        class="bg-transparent border-none cursor-pointer focus:outline-none"
-      >
+      <button @click="startCreating()">
         <PlusOutlined />
       </button>
     </div>

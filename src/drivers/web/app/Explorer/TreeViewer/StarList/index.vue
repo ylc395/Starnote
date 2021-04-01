@@ -52,16 +52,17 @@ export default defineComponent({
     >
       <template #item="{ element }">
         <li
-          class="group list-none pl-5 py-2 relative"
+          class="group pl-5 py-2 relative"
           :class="{ 'bg-gray-900': isActive(element.entity.value).value }"
           @click="openInEditor(element.entity.value)"
         >
           <FileOutlined class="mr-1" />
           {{ element.entity.value.title.value }}
-          <CloseOutlined
+          <button
             class="group-hover:visible absolute right-5 top-1/2 transform -translate-y-1/2 cursor-pointer invisible"
-            @click.stop="removeStar(element)"
-          />
+          >
+            <CloseOutlined @click.stop="removeStar(element)" />
+          </button>
         </li>
       </template>
     </DraggableList>

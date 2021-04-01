@@ -3,3 +3,14 @@
 @tailwind components;
 
 @tailwind utilities;
+
+@layer base {
+  button {
+    @apply bg-transparent border-none cursor-pointer focus:outline-none;
+  }
+
+  ol,
+  ul {
+    @apply list-none;
+  }
+}

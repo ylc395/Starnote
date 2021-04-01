@@ -132,7 +132,7 @@ export default defineComponent({
             'bg-gray-200': isActive(element).value,
             'bg-blue-50': element.withContextmenu.value,
           }"
-          class="list-none px-3 py-3 border-0 hover:bg-blue-100 flex flex-col"
+          class="px-3 py-3 border-0 hover:bg-blue-100 flex flex-col"
         >
           <span :class="{ 'mb-2': showingFields.length > 0 }">
             {{ element.title.value || EMPTY_TITLE }}
@@ -163,7 +163,7 @@ export default defineComponent({
 
 @layer components {
   :deep(.note-list-button) {
-    @apply border-0 bg-transparent p-0 focus:outline-none;
+    @apply p-0;
   }
 
   :deep(.note-list-time) {
