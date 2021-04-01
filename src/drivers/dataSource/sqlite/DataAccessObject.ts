@@ -1,19 +1,33 @@
 import { EntityTypes, ObjectWithId } from 'domain/entity';
 import type { Dao, Query } from 'domain/repository';
-import { difference, mapKeys, omit, omitBy, pickBy } from 'lodash';
+import {
+  difference,
+  isEmpty,
+  map,
+  mapKeys,
+  omit,
+  omitBy,
+  partialRight,
+  pickBy,
+  without,
+} from 'lodash';
 import { db, NoteTable, NotebookTable, StarTable } from './table';
 
 interface Config {
-  hasOne?: {
+  belongsTo?: {
     entity: EntityTypes;
-    foreignKey: string;
-    reference: string;
+    foreignKey: string; // 本表的外键
+    reference: string; // 目标表的主键
     as: string;
     excludes?: string[];
     required?: boolean;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     scope?: Record<string, any>;
   };
+  hasMany?: {
+    entity: EntityTypes;
+    foreignKey: string; // 目标表的外键
+  }[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   scope?: Record<string, any>;
 }
@@ -41,7 +55,7 @@ export class DataAccessObject<T> implements Dao<T> {
   }
 
   private getQueryWithAssociation<K>(query: QueryBuilder, attributes?: K[]) {
-    if (!this.config?.hasOne) {
+    if (!this.config?.belongsTo) {
       return query;
     }
 
@@ -54,7 +68,7 @@ export class DataAccessObject<T> implements Dao<T> {
       excludes = [],
       required = false,
       scope = {},
-    } = this.config.hasOne;
+    } = this.config.belongsTo;
 
     const keysInTable = attributes
       ? attributes.map(mapTableFields)
@@ -80,11 +94,11 @@ export class DataAccessObject<T> implements Dao<T> {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private processAssociation(rows: any) {
-    if (!this.config?.hasOne || !rows) {
+    if (!this.config?.belongsTo || !rows) {
       return rows;
     }
 
-    const { as } = this.config.hasOne;
+    const { as } = this.config.belongsTo;
     const isAssociation = (_: never, key: string) => key.startsWith(`${as}.`);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -127,11 +141,54 @@ export class DataAccessObject<T> implements Dao<T> {
     return query.then(this.processAssociation.bind(this));
   }
 
-  deleteById(id: string) {
-    return db(this.tableName)
-      .where({ id })
-      .update({ valid: 0 })
-      .then(() => undefined);
+  private async deleteByIds(
+    ids: string[],
+    lastStep = false,
+    tableName?: EntityTypes,
+  ) {
+    if (!this.config?.hasMany || lastStep) {
+      return db(tableName || this.tableName)
+        .whereIn('id', ids)
+        .update({ valid: 0 })
+        .then(() => undefined);
+    }
+
+    const idsMap = {
+      [this.tableName]: ids,
+    } as Record<EntityTypes, string[]>;
+    const self = this.config.hasMany.find(
+      ({ entity }) => entity === this.tableName,
+    );
+
+    const getIds = (tableName: EntityTypes, reference: string, ids: string[]) =>
+      db(tableName)
+        .select('id')
+        .whereIn(reference, ids)
+        .then(partialRight(map, 'id')) as Promise<string[]>;
+
+    if (self) {
+      const { foreignKey } = self;
+      let subIds: string[] = ids;
+
+      do {
+        subIds = await getIds(this.tableName, foreignKey, subIds);
+        idsMap[this.tableName] = idsMap[this.tableName].concat(subIds);
+      } while (!isEmpty(subIds));
+    }
+
+    for (const assc of without(this.config.hasMany, self)) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const { entity, foreignKey } = assc!;
+      idsMap[entity] = await getIds(entity, foreignKey, idsMap[this.tableName]);
+    }
+
+    for (const [entity, ids] of Object.entries(idsMap)) {
+      this.deleteByIds(ids, true, entity as EntityTypes);
+    }
+  }
+
+  async deleteById(id: string) {
+    return this.deleteByIds([id]);
   }
 
   update(dataObject: T & ObjectWithId) {

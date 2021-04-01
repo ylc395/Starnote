@@ -13,7 +13,7 @@ export const noteDao = new DataAccessObject<NoteDataObject>(EntityTypes.Note, {
 export const notebookDao = new DataAccessObject<NotebookDataObject>(
   EntityTypes.Notebook,
   {
-    hasOne: {
+    belongsTo: {
       entity: EntityTypes.Note,
       foreignKey: NotebookTable.COLUMNS.INDEX_NOTE_ID,
       reference: NoteTable.COLUMNS.ID,
@@ -21,12 +21,22 @@ export const notebookDao = new DataAccessObject<NotebookDataObject>(
       excludes: ['content'],
       scope: { valid: 1 },
     },
+    hasMany: [
+      {
+        entity: EntityTypes.Notebook,
+        foreignKey: 'parentId',
+      },
+      {
+        entity: EntityTypes.Note,
+        foreignKey: 'parentId',
+      },
+    ],
     scope: { valid: 1 },
   },
 );
 
 export const starDao = new DataAccessObject<StarDataObject>(EntityTypes.Star, {
-  hasOne: {
+  belongsTo: {
     entity: EntityTypes.Note,
     foreignKey: StarTable.COLUMNS.ENTITY_ID,
     reference: NoteTable.COLUMNS.ID,
