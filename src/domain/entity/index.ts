@@ -5,3 +5,4 @@ export * from './Editor';
 export * from './EditorManager';
 export * from './ItemTree';
 export * from './Setting';
+export * from './Star';

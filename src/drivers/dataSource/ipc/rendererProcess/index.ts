@@ -1,5 +1,9 @@
 import { container } from 'tsyringe';
-import { NOTE_DAO_TOKEN, NOTEBOOK_DAO_TOKEN } from 'domain/repository';
+import {
+  NOTE_DAO_TOKEN,
+  NOTEBOOK_DAO_TOKEN,
+  STAR_DAO_TOKEN,
+} from 'domain/repository';
 import { daoAdaptor } from './adaptor';
 import { EntityTypes } from 'domain/entity';
 
@@ -9,3 +13,5 @@ container.registerInstance(
   NOTEBOOK_DAO_TOKEN,
   daoAdaptor(EntityTypes.Notebook),
 );
+
+container.registerInstance(STAR_DAO_TOKEN, daoAdaptor(EntityTypes.Star));

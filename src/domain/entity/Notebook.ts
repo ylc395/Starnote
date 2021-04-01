@@ -98,13 +98,17 @@ export class Notebook
     return copy;
   });
 
-  @Expose({ name: 'indexNoteId', toPlainOnly: true })
   @Type(() => Note)
+  @Expose({ toClassOnly: true })
   @Transform(({ value }) => shallowRef(value?.id ? value : null), {
     toClassOnly: true,
   })
-  @Transform(({ value }) => value.value?.id ?? null, { toPlainOnly: true })
   readonly indexNote: Ref<Note | null> = shallowRef(null);
+
+  @Expose({ toPlainOnly: true })
+  get indexNoteId() {
+    return this.indexNote.value?.id || null;
+  }
 
   @RefTransform
   readonly sortBy: Ref<SortByEnums> = ref(SortByEnums.Default);

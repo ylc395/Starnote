@@ -129,7 +129,7 @@ export default defineComponent({
           @click="openInEditor(element)"
           @contextmenu="openContextmenu($event, element)"
           :class="{
-            'bg-gray-200': isActive(element.id).value,
+            'bg-gray-200': isActive(element).value,
             'bg-blue-50': element.withContextmenu.value,
           }"
           class="list-none px-3 py-3 border-0 hover:bg-blue-100 flex flex-col"

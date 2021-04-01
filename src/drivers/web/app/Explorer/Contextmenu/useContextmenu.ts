@@ -7,7 +7,7 @@ import {
 } from 'drivers/web/components/Contextmenu/useContextmenu';
 import { token as notebookCreatorToken } from '../TreeViewer/ItemTree/NotebookCreator/useNotebookCreator';
 import { token as renameToken } from '../TreeViewer/ItemTree/Renamer/useRename';
-import { Notebook, TreeItem, ViewMode } from 'domain/entity';
+import { Notebook, Note, TreeItem, ViewMode } from 'domain/entity';
 import {
   ItemTreeService,
   token as itemTreeToken,
@@ -21,6 +21,7 @@ export function useContextmenu() {
     createNote,
     createIndexNote,
     deleteItem,
+    addStar,
     itemTree: { mode },
   } = inject<ItemTreeService>(itemTreeToken)!;
 
@@ -64,6 +65,9 @@ export function useContextmenu() {
             deleteItem((_context as Notebook).indexNote.value!);
           },
         });
+        return;
+      case 'star':
+        addStar(_context as Note);
         return;
       default:
         break;

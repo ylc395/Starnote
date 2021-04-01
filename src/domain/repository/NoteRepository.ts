@@ -32,16 +32,6 @@ export class NoteRepository {
   }
 
   createNote(note: Note) {
-    const parent = pick(note.getParent().toDataObject(), [
-      'id',
-      'userModifiedAt',
-    ]);
-
-    if (!isWithId(parent)) {
-      throw new Error('wrong parent');
-    }
-
-    this.notebookDao!.update(parent);
     this.noteDao!.create(note.toDataObject());
   }
 

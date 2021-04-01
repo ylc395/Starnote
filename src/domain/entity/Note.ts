@@ -13,7 +13,7 @@ import {
 import { Hierarchic } from './abstract/Hierarchic';
 import { Notebook } from './Notebook';
 import { ListItem } from './abstract/ListItem';
-import { Expose, Transform } from 'class-transformer';
+import { Expose } from 'class-transformer';
 import { staticImplements } from 'utils/types';
 
 export const EMPTY_TITLE = '(empty title)';
@@ -39,9 +39,15 @@ export class Note
 
   readonly withContextmenu = ref(false);
 
-  @Expose({ name: 'parentId', toPlainOnly: true })
-  @Transform(({ value }) => value.value.id, { toPlainOnly: true })
   protected readonly parent: Ref<Notebook | null> = shallowRef(null);
+
+  @Expose({ name: 'parentId', toClassOnly: true })
+  initialParentId: Notebook['id'] | null = null;
+
+  @Expose({ toPlainOnly: true })
+  get parentId() {
+    return this.parent.value?.id || this.initialParentId;
+  }
 
   isJustCreated = false;
 

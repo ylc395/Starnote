@@ -11,7 +11,7 @@ export default defineComponent({
 <template>
   <aside>
     <Resizable
-      class="tree-viewer h-full"
+      class="tree-viewer h-full pt-4"
       :active="['r']"
       :disableAttributes="['h']"
       :minWidth="180"

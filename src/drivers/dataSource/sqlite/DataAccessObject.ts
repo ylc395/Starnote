@@ -1,7 +1,7 @@
 import { EntityTypes, ObjectWithId } from 'domain/entity';
 import type { Dao, Query } from 'domain/repository';
 import { difference, mapKeys, omit, omitBy, pickBy } from 'lodash';
-import { db, NoteTable, NotebookTable } from './table';
+import { db, NoteTable, NotebookTable, StarTable } from './table';
 
 interface HasOneConfig {
   entity: EntityTypes;
@@ -16,6 +16,7 @@ type QueryBuilder = ReturnType<typeof db>;
 const COLUMNS_MAP = {
   [EntityTypes.Note]: NoteTable.COLUMNS,
   [EntityTypes.Notebook]: NotebookTable.COLUMNS,
+  [EntityTypes.Star]: StarTable.COLUMNS,
 } as const;
 
 export class DataAccessObject<T> implements Dao<T> {
@@ -68,7 +69,7 @@ export class DataAccessObject<T> implements Dao<T> {
       const main = omitBy(row, isAssociation);
       const association = pickBy(row, isAssociation);
 
-      main[as] = association;
+      main[as] = mapKeys(association, (_, key) => key.replace(`${as}.`, ''));
 
       return main;
     };
@@ -120,6 +121,13 @@ export class DataAccessObject<T> implements Dao<T> {
   create(dataObject: T & ObjectWithId) {
     return db(this.tableName)
       .insert(dataObject)
+      .then(() => undefined);
+  }
+
+  hardDeleteById(id: string) {
+    return db(this.tableName)
+      .where({ id })
+      .del()
       .then(() => undefined);
   }
 }

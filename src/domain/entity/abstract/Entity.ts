@@ -12,6 +12,7 @@ export function isWithId(obj: unknown): obj is ObjectWithId {
 export enum EntityTypes {
   Notebook = 'Notebook',
   Note = 'Note',
+  Star = 'Star',
 }
 
 export abstract class Entity implements ObjectWithId {

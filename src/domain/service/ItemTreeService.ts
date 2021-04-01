@@ -6,18 +6,24 @@ import {
   TreeItem,
   ItemTreeEvents,
   Note,
+  Star,
   SortByEnums,
   SortDirectEnums,
   NotebookDataObject,
   NoteDataObject,
 } from 'domain/entity';
 import { selfish } from 'utils/index';
+import { StarRepository } from 'domain/repository/StarRepository';
+import { shallowRef } from '@vue/reactivity';
+import type { Ref } from '@vue/reactivity';
 
 export const token = Symbol();
 export class ItemTreeService {
   private readonly notebookRepository = container.resolve(NotebookRepository);
   private readonly noteRepository = container.resolve(NoteRepository);
+  private readonly starRepository = container.resolve(StarRepository);
   readonly itemTree = selfish(new ItemTree());
+  readonly stars: Ref<Star[]> = shallowRef([]);
   constructor() {
     this.init();
   }
@@ -27,11 +33,16 @@ export class ItemTreeService {
       .on(ItemTreeEvents.Selected, this.loadChildrenOf, this);
 
     this.initRoot();
+    this.initStar();
   }
 
   private async initRoot() {
     const rootNotebook = await this.notebookRepository.queryOrCreateRootNotebook();
     this.itemTree.loadRoot(rootNotebook);
+  }
+
+  private async initStar() {
+    this.stars.value = await this.starRepository.fetchAll();
   }
 
   private syncItem<T extends keyof (NotebookDataObject | NoteDataObject)>(
@@ -60,6 +71,13 @@ export class ItemTreeService {
     if (!Notebook.isA(item) || item.isChildrenLoaded) {
       return;
     }
+
+    const notebookId = item.id;
+    this.stars.value.forEach((star) => {
+      if (star.entity.value?.parentId === notebookId) {
+        star.entity.value.setParent(item, true);
+      }
+    });
 
     return this.notebookRepository.loadChildrenOf(item);
   }
@@ -99,7 +117,7 @@ export class ItemTreeService {
   async createIndexNote(parent: Notebook) {
     const newNote = parent.createIndexNote();
 
-    await this.notebookRepository.updateNotebook(parent);
+    await this.notebookRepository.updateNotebook(parent, ['indexNoteId']);
     await this.noteRepository.createNote(newNote);
     this.itemTree.setSelectedItem(parent);
 
@@ -147,5 +165,12 @@ export class ItemTreeService {
       item.sortOrder.value = index + 1;
       this.syncItem(item, ['sortOrder']);
     });
+  }
+
+  addStar(note: Note) {
+    const newStar = new Star(note);
+    this.stars.value = [...this.stars.value, newStar];
+
+    return this.starRepository.createStar(newStar);
   }
 }

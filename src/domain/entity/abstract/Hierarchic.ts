@@ -12,6 +12,10 @@ export abstract class Hierarchic<P extends WithChildren> extends Entity {
   setParent(newParent: P, bidirectional: boolean) {
     const oldParent = this.parent.value;
 
+    if (oldParent?.isEqual(newParent)) {
+      return this;
+    }
+
     if (oldParent?.children?.value) {
       oldParent.children.value = without(oldParent.children.value, this);
     }

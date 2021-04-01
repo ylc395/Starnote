@@ -16,7 +16,7 @@ export interface DataMapper<T> {
 }
 
 export interface DataMapperStatic<T> {
-  new (): DataMapper<T>;
+  new (...args: any[]): DataMapper<T>;
   from(dataObject: T): DataMapper<T>;
 }
 

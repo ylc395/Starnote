@@ -22,5 +22,13 @@ export function daoAdaptor<E extends Entity>(entityName: EntityTypes): Dao<E> {
     deleteById(...args) {
       return ipcRender.invoke('dataFetch', entityName, 'deleteById', ...args);
     },
+    hardDeleteById(...args) {
+      return ipcRender.invoke(
+        'dataFetch',
+        entityName,
+        'hardDeleteById',
+        ...args,
+      );
+    },
   };
 }

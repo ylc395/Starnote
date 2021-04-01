@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron';
 import type { Dao } from 'domain/repository';
-import { noteDao, notebookDao } from 'drivers/dataSource/sqlite';
+import { noteDao, notebookDao, starDao } from 'drivers/dataSource/sqlite';
 import { EntityTypes } from 'domain/entity';
 
 type DaoMethods = keyof Dao<never>;
@@ -8,6 +8,7 @@ type DaoMethods = keyof Dao<never>;
 const sqliteSourceMap = {
   [EntityTypes.Note]: noteDao,
   [EntityTypes.Notebook]: notebookDao,
+  [EntityTypes.Star]: starDao,
 };
 
 ipcMain.handle(

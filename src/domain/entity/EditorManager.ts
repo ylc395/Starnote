@@ -91,9 +91,9 @@ export class EditorManager extends EventEmitter {
     compactEditors.forEach(({ id }) => this.closeEditorById(id));
   }
 
-  isActive(noteId: Note['id']) {
+  isActive(note: Note) {
     return computed(() => {
-      return this.activeEditor.value?.note.value?.id === noteId;
+      return this.activeEditor.value?.note.value?.isEqual(note);
     });
   }
 
