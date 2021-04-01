@@ -2,8 +2,8 @@ import { computed, createVNode, inject, provide } from 'vue';
 import { Modal } from 'ant-design-vue';
 import { WarningFilled } from '@ant-design/icons-vue';
 import { useContextmenu as useCommonContextmenu } from 'drivers/web/components/Contextmenu/useContextmenu';
-import { token as notebookCreatorToken } from '../TreeViewer/ItemTree/NotebookCreator/useNotebookCreator';
-import { token as renameToken } from '../TreeViewer/ItemTree/Renamer/useRename';
+import { useNotebookCreator } from '../TreeViewer/ItemTree/NotebookCreator/useNotebookCreator';
+import { useRename } from '../TreeViewer/ItemTree/Renamer/useRename';
 import { Notebook, Note, TreeItem, ViewMode } from 'domain/entity';
 import {
   ItemTreeService,
@@ -13,9 +13,10 @@ import { StarService, token as starToken } from 'domain/service/StarService';
 
 export const token = Symbol();
 
-export function useContextmenu<T extends TreeItem>() {
-  const notebookCreator = inject(notebookCreatorToken, null); // 在 NoteList 中时，将得到 null
-  const renamer = inject(renameToken, null);
+export function useContextmenu<T extends TreeItem>(
+  notebookCreator?: ReturnType<typeof useNotebookCreator>,
+  notebookRenamer?: ReturnType<typeof useRename>,
+) {
   const { open, context } = useCommonContextmenu<T>();
   const {
     createNote,
@@ -51,7 +52,7 @@ export function useContextmenu<T extends TreeItem>() {
         createIndexNote(_context as Notebook);
         return;
       case 'rename':
-        renamer?.startEditing(_context as TreeItem);
+        notebookRenamer?.startEditing(_context as TreeItem);
         return;
       case 'delete':
         useModal(() => deleteItem(_context as TreeItem));

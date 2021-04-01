@@ -27,10 +27,11 @@ export default defineComponent({
     Contextmenu,
   },
   setup() {
-    const { isCreating, startCreating } = useNotebookCreator();
-    const { renamingItem } = useRename();
-    const { open: openContextmenu } = useContextmenu();
-
+    const creator = useNotebookCreator();
+    const renamer = useRename();
+    const { renamingItem } = renamer;
+    const { isCreating, startCreating } = creator;
+    const { open: openContextmenu } = useContextmenu(creator, renamer);
     const {
       treeData,
       handleExpand,
