@@ -27,7 +27,7 @@ export class EditorService {
     itemTree.on(ItemTreeEvents.Selected, this.openInEditor, this);
     itemTree.on(
       ItemTreeEvents.Deleted,
-      this.editorManager.closeNote,
+      this.editorManager.closeEditorOf,
       this.editorManager,
     );
   }

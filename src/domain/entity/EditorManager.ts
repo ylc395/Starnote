@@ -76,7 +76,7 @@ export class EditorManager extends EventEmitter {
     }
   }
 
-  closeNote(item: Note | Notebook) {
+  closeEditorOf(item: Note | Notebook) {
     const editors = Note.isA(item)
       ? [this._editors.find((editor) => editor.note.value?.isEqual(item))]
       : this._editors.filter((editor) =>
