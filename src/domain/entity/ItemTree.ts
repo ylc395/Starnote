@@ -109,8 +109,15 @@ export class ItemTree extends EventEmitter {
       parent.removeChild(item);
     }
 
-    if (this.selectedItem.value?.isEqual(item)) {
-      this.setSelectedItem(parent);
+    const selected = this.selectedItem.value;
+
+    if (selected) {
+      const isSelfRemoved = selected.isEqual(item);
+      const isAscRemoved = Notebook.isA(item) && selected.isDescendenceOf(item);
+
+      if (isSelfRemoved || isAscRemoved) {
+        this.setSelectedItem(parent);
+      }
     }
 
     this.emit(ItemTreeEvents.Deleted, item);
