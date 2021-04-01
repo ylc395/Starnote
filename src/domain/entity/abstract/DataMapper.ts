@@ -16,6 +16,7 @@ export interface DataMapper<T> {
 }
 
 export interface DataMapperStatic<T> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   new (...args: any[]): DataMapper<T>;
   from(dataObject: T): DataMapper<T>;
 }
