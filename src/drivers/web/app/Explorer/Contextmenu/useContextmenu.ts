@@ -27,14 +27,17 @@ export function useContextmenu<T extends TreeItem>() {
 
   const handleClick = ({ key }: { key: string }) => {
     const _context = context.value;
-    const modalConfig = {
-      title: `确认删除？`,
-      okType: 'danger' as const,
-      icon: createVNode(WarningFilled),
-      okText: '确认',
-      cancelText: '取消',
-      width: 300,
-      closable: false,
+    const useModal = (callback: () => void) => {
+      Modal.confirm({
+        title: `确认删除？`,
+        okType: 'danger' as const,
+        icon: createVNode(WarningFilled),
+        okText: '确认',
+        cancelText: '取消',
+        width: 300,
+        closable: false,
+        onOk: callback,
+      });
     };
 
     switch (key) {
@@ -51,20 +54,10 @@ export function useContextmenu<T extends TreeItem>() {
         renamer?.startEditing(_context as TreeItem);
         return;
       case 'delete':
-        Modal.confirm({
-          ...modalConfig,
-          onOk() {
-            deleteItem(_context as TreeItem);
-          },
-        });
+        useModal(() => deleteItem(_context as TreeItem));
         return;
       case 'deleteIndexNote':
-        Modal.confirm({
-          ...modalConfig,
-          onOk() {
-            deleteItem((_context as Notebook).indexNote.value!);
-          },
-        });
+        useModal(() => deleteItem((_context as Notebook).indexNote.value!));
         return;
       case 'star':
         addStar(_context as Note);
