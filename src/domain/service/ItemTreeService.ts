@@ -16,6 +16,7 @@ import { selfish } from 'utils/index';
 import { StarRepository } from 'domain/repository/StarRepository';
 import { shallowRef } from '@vue/reactivity';
 import type { Ref } from '@vue/reactivity';
+import { without } from 'lodash';
 
 export const token = Symbol();
 export class ItemTreeService {
@@ -30,7 +31,8 @@ export class ItemTreeService {
   private async init() {
     this.itemTree
       .on(ItemTreeEvents.Expanded, this.loadChildrenOf, this)
-      .on(ItemTreeEvents.Selected, this.loadChildrenOf, this);
+      .on(ItemTreeEvents.Selected, this.loadChildrenOf, this)
+      .on(ItemTreeEvents.Deleted, this.removeStar, this);
 
     this.initRoot();
     this.initStar();
@@ -72,6 +74,7 @@ export class ItemTreeService {
       return;
     }
 
+    item.isChildrenLoaded = true;
     const notebookId = item.id;
     this.stars.value.forEach((star) => {
       if (star.entity.value?.parentId === notebookId) {
@@ -172,5 +175,18 @@ export class ItemTreeService {
     this.stars.value = [...this.stars.value, newStar];
 
     return this.starRepository.createStar(newStar);
+  }
+
+  removeStar(item: TreeItem) {
+    const starToRemove = this.stars.value.find((star) =>
+      star.entity.value?.isEqual(item),
+    );
+
+    if (!starToRemove) {
+      return;
+    }
+
+    this.starRepository.deleteStar(starToRemove);
+    this.stars.value = without(this.stars.value, starToRemove);
   }
 }

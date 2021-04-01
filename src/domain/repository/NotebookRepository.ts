@@ -54,7 +54,6 @@ export class NotebookRepository {
       ];
 
       notebook.children.value = children;
-      notebook.isChildrenLoaded = true;
       return children;
     });
   }
