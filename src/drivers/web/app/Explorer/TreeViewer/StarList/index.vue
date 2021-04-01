@@ -1,10 +1,7 @@
 <script lang="ts">
 import { defineComponent, inject } from 'vue';
 import { StarOutlined, FileOutlined } from '@ant-design/icons-vue';
-import {
-  ItemTreeService,
-  token as itemTreeToken,
-} from 'domain/service/ItemTreeService';
+import { StarService, token as starToken } from 'domain/service/StarService';
 import {
   EditorService,
   token as editorToken,
@@ -18,11 +15,15 @@ export default defineComponent({
     DraggableList,
   },
   setup() {
-    const { stars } = inject<ItemTreeService>(itemTreeToken)!;
+    const { sortedStars: stars, setSortOrders } = inject<StarService>(
+      starToken,
+    )!;
+
     const {
       editorManager: { isActive, openInEditor },
     } = inject<EditorService>(editorToken)!;
-    return { stars, isActive, openInEditor };
+
+    return { stars, isActive, openInEditor, setSortOrders };
   },
 });
 </script>
@@ -36,7 +37,9 @@ export default defineComponent({
     </div>
     <DraggableList
       tag="ol"
-      v-model="stars"
+      :modelValue="stars"
+      ghostClass="sorting"
+      @update:modelValue="setSortOrders"
       itemKey="id"
       class="pl-0 text-gray-200 mt-2"
     >
@@ -53,3 +56,9 @@ export default defineComponent({
     </DraggableList>
   </div>
 </template>
+<style scoped>
+:deep(.sorting) {
+  opacity: 0.5;
+  background: #5c5c5c;
+}
+</style>

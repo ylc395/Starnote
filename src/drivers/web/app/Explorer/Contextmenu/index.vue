@@ -27,12 +27,19 @@ export default defineComponent({
     SortMenu,
   },
   setup() {
-    const { type, handleClick, context, showSortMenu } = useContextmenu();
+    const {
+      type,
+      handleClick,
+      isWithIndexNote,
+      isStar,
+      showSortMenu,
+    } = useContextmenu();
 
     return {
       type,
+      isStar,
       handleClick,
-      context,
+      isWithIndexNote,
       showSortMenu,
     };
   },
@@ -43,7 +50,7 @@ export default defineComponent({
     <template v-if="type === 'notebook'">
       <MenuItem key="createNotebook"><FolderAddOutlined />新建笔记本</MenuItem>
       <MenuItem key="createNote"><FileAddOutlined />新建笔记</MenuItem>
-      <MenuItem key="createIndexNote" v-if="!context.indexNote.value"
+      <MenuItem key="createIndexNote" v-if="!isWithIndexNote"
         ><EditOutlined />编写目录笔记</MenuItem
       >
       <MenuItem key="deleteIndexNote" v-else
@@ -51,7 +58,9 @@ export default defineComponent({
       >
       <MenuItem key="rename"><EditOutlined />重命名</MenuItem>
     </template>
-    <MenuItem v-if="type === 'note'" key="star"> <StarOutlined />收藏</MenuItem>
+    <MenuItem v-if="type === 'note' && !isStar" key="star">
+      <StarOutlined />收藏</MenuItem
+    >
     <MenuItem key="delete">
       <DeleteOutlined class="text-red-400" />删除</MenuItem
     >

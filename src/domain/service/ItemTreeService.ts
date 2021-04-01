@@ -6,45 +6,34 @@ import {
   TreeItem,
   ItemTreeEvents,
   Note,
-  Star,
   SortByEnums,
   SortDirectEnums,
   NotebookDataObject,
   NoteDataObject,
 } from 'domain/entity';
 import { selfish } from 'utils/index';
-import { StarRepository } from 'domain/repository/StarRepository';
-import { shallowRef } from '@vue/reactivity';
-import type { Ref } from '@vue/reactivity';
-import { without } from 'lodash';
+import { StarList } from 'domain/entity/StarList';
 
 export const token = Symbol();
 export class ItemTreeService {
   private readonly notebookRepository = container.resolve(NotebookRepository);
   private readonly noteRepository = container.resolve(NoteRepository);
-  private readonly starRepository = container.resolve(StarRepository);
   readonly itemTree = selfish(container.resolve(ItemTree));
-  readonly stars: Ref<Star[]> = shallowRef([]);
+  private readonly starList = container.resolve(StarList);
   constructor() {
     this.init();
   }
   private async init() {
     this.itemTree
       .on(ItemTreeEvents.Expanded, this.loadChildrenOf, this)
-      .on(ItemTreeEvents.Selected, this.loadChildrenOf, this)
-      .on(ItemTreeEvents.Deleted, this.removeStar, this);
+      .on(ItemTreeEvents.Selected, this.loadChildrenOf, this);
 
     this.initRoot();
-    this.initStar();
   }
 
   private async initRoot() {
     const rootNotebook = await this.notebookRepository.queryOrCreateRootNotebook();
     this.itemTree.loadRoot(rootNotebook);
-  }
-
-  private async initStar() {
-    this.stars.value = await this.starRepository.fetchAll();
   }
 
   private syncItem<T extends keyof (NotebookDataObject | NoteDataObject)>(
@@ -76,7 +65,7 @@ export class ItemTreeService {
 
     item.isChildrenLoaded = true;
     const notebookId = item.id;
-    this.stars.value.forEach((star) => {
+    this.starList.stars.forEach((star) => {
       if (star.entity.value?.parentId === notebookId) {
         star.entity.value.setParent(item, true);
       }
@@ -168,25 +157,5 @@ export class ItemTreeService {
       item.sortOrder.value = index + 1;
       this.syncItem(item, ['sortOrder']);
     });
-  }
-
-  addStar(note: Note) {
-    const newStar = new Star(note);
-    this.stars.value = [...this.stars.value, newStar];
-
-    return this.starRepository.createStar(newStar);
-  }
-
-  removeStar(item: TreeItem) {
-    const starToRemove = this.stars.value.find((star) =>
-      star.entity.value?.isEqual(item),
-    );
-
-    if (!starToRemove) {
-      return;
-    }
-
-    this.starRepository.deleteStar(starToRemove);
-    this.stars.value = without(this.stars.value, starToRemove);
   }
 }

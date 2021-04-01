@@ -12,6 +12,7 @@ import {
   ItemTreeService,
   token as itemTreeToken,
 } from 'domain/service/ItemTreeService';
+import { StarService, token as starToken } from 'domain/service/StarService';
 
 export function useContextmenu() {
   const notebookCreator = inject(notebookCreatorToken, null); // 在 NoteList 中时，将得到 null
@@ -21,9 +22,9 @@ export function useContextmenu() {
     createNote,
     createIndexNote,
     deleteItem,
-    addStar,
     itemTree: { mode },
   } = inject<ItemTreeService>(itemTreeToken)!;
+  const { addStar, isStar } = inject<StarService>(starToken)!;
 
   const handleClick = ({ key }: { key: string }) => {
     const _context = context.value;
@@ -76,14 +77,13 @@ export function useContextmenu() {
 
   return {
     type: computed(() => {
-      if (Notebook.isA(context.value)) {
-        return 'notebook';
-      }
-
-      return 'note';
+      return Notebook.isA(context.value) ? 'notebook' : 'note';
     }),
-    context,
     handleClick,
     showSortMenu: computed(() => mode.value === ViewMode.OneColumn),
+    isWithIndexNote: computed(() => {
+      return Notebook.isA(context.value) && !!context.value.indexNote.value;
+    }),
+    isStar: computed(() => Note.isA(context.value) && isStar(context.value)),
   };
 }

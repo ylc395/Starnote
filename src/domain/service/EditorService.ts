@@ -17,7 +17,7 @@ export const token = Symbol();
 export class EditorService {
   readonly editorManager = selfish(new EditorManager());
   private readonly noteRepository = container.resolve(NoteRepository);
-  readonly itemTree = selfish(container.resolve(ItemTree));
+  private readonly itemTree = selfish(container.resolve(ItemTree));
   constructor() {
     effect(this.keepSync.bind(this));
     this.monitorItemTree(this.itemTree);
