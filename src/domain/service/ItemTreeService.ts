@@ -23,7 +23,7 @@ export class ItemTreeService {
   private readonly notebookRepository = container.resolve(NotebookRepository);
   private readonly noteRepository = container.resolve(NoteRepository);
   private readonly starRepository = container.resolve(StarRepository);
-  readonly itemTree = selfish(new ItemTree());
+  readonly itemTree = selfish(container.resolve(ItemTree));
   readonly stars: Ref<Star[]> = shallowRef([]);
   constructor() {
     this.init();

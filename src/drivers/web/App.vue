@@ -19,13 +19,9 @@ import { selfish } from 'utils/index';
 export default defineComponent({
   components: { Explorer, EditorArea },
   setup() {
-    const itemTreeService = selfish(new ItemTreeService());
-    const editorService = selfish(new EditorService(itemTreeService));
-    const settingService = selfish(new SettingService());
-
-    provide(itemTreeToken, itemTreeService);
-    provide(editorToken, editorService);
-    provide(settingToken, settingService);
+    provide(itemTreeToken, selfish(new ItemTreeService()));
+    provide(editorToken, selfish(new EditorService()));
+    provide(settingToken, selfish(new SettingService()));
   },
 });
 </script>

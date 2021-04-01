@@ -9,7 +9,6 @@ import {
   ItemTreeEvents,
   ItemTree,
 } from 'domain/entity';
-import { ItemTreeService } from './ItemTreeService';
 import { effect } from '@vue/reactivity';
 import { debounce, isNull } from 'lodash';
 import { selfish } from 'utils/index';
@@ -18,9 +17,10 @@ export const token = Symbol();
 export class EditorService {
   readonly editorManager = selfish(new EditorManager());
   private readonly noteRepository = container.resolve(NoteRepository);
-  constructor(itemTreeService: ItemTreeService) {
+  readonly itemTree = selfish(container.resolve(ItemTree));
+  constructor() {
     effect(this.keepSync.bind(this));
-    this.monitorItemTree(itemTreeService.itemTree);
+    this.monitorItemTree(this.itemTree);
   }
 
   private monitorItemTree(itemTree: ItemTree) {

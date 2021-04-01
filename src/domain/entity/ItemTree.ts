@@ -5,6 +5,7 @@ import EventEmitter from 'eventemitter3';
 
 import { Note } from './Note';
 import { Notebook } from './Notebook';
+import { singleton } from 'tsyringe';
 
 export enum ItemTreeEvents {
   Selected = 'SELECTED',
@@ -18,6 +19,8 @@ export enum ViewMode {
 }
 
 export type TreeItem = Notebook | Note;
+
+@singleton()
 export class ItemTree extends EventEmitter {
   readonly root: Ref<Notebook | null> = shallowRef(null);
   private readonly history: Notebook[] = shallowReactive([]);
