@@ -52,14 +52,14 @@ export default defineComponent({
     >
       <template #item="{ element }">
         <li
-          class="group list-none pl-5 py-2"
+          class="group list-none pl-5 py-2 relative"
           :class="{ 'bg-gray-900': isActive(element.entity.value).value }"
           @click="openInEditor(element.entity.value)"
         >
           <FileOutlined class="mr-1" />
           {{ element.entity.value.title.value }}
           <CloseOutlined
-            class="group-hover:visible ml-10 cursor-pointer invisible"
+            class="group-hover:visible absolute right-5 top-1/2 transform -translate-y-1/2 cursor-pointer invisible"
             @click.stop="removeStar(element)"
           />
         </li>
