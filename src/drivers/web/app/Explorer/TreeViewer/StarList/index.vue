@@ -59,7 +59,7 @@ export default defineComponent({
           <FileOutlined class="mr-1" />
           {{ element.entity.value.title.value }}
           <button
-            class="group-hover:visible absolute right-5 top-1/2 transform -translate-y-1/2 cursor-pointer invisible"
+            class="group-hover:visible absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer invisible"
           >
             <CloseOutlined @click.stop="removeStar(element)" />
           </button>
