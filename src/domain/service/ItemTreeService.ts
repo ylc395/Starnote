@@ -13,11 +13,13 @@ import {
 } from 'domain/entity';
 import { selfish } from 'utils/index';
 import { StarList } from 'domain/entity/StarList';
+import { AppEventBus, AppEvents } from './AppEventBus';
 
 export const token = Symbol();
 export class ItemTreeService {
   private readonly notebookRepository = container.resolve(NotebookRepository);
   private readonly noteRepository = container.resolve(NoteRepository);
+  private readonly appEventBus = container.resolve(AppEventBus);
   readonly itemTree = selfish(container.resolve(ItemTree));
   private readonly starList = container.resolve(StarList);
   constructor() {
@@ -65,7 +67,7 @@ export class ItemTreeService {
 
     item.isChildrenLoaded = true;
     const notebookId = item.id;
-    this.starList.stars.forEach((star) => {
+    this.starList.stars.value.forEach((star) => {
       if (star.entity.value?.parentId === notebookId) {
         star.entity.value.setParent(item, true);
       }
@@ -116,17 +118,20 @@ export class ItemTreeService {
     return newNote;
   }
 
-  deleteItem(item: TreeItem) {
+  async deleteItem(item: TreeItem) {
     this.itemTree.deleteItem(item);
 
     switch (true) {
       case Note.isA(item):
-        return this.noteRepository.deleteNote(item as Note);
+        await this.noteRepository.deleteNote(item as Note);
+        break;
       case Notebook.isA(item):
-        return this.notebookRepository.deleteNotebook(item as Notebook);
+        await this.notebookRepository.deleteNotebook(item as Notebook);
+        break;
       default:
-        return;
+        break;
     }
+    this.appEventBus.emit(AppEvents.ITEM_DELETED);
   }
 
   async setSortBy(notebook: Notebook, value: SortByEnums) {

@@ -96,7 +96,7 @@ export class ItemTree extends EventEmitter {
     item.title.value = title;
   }
 
-  deleteItem(item: TreeItem) {
+  deleteItem(item: TreeItem, deletedPromise?: Promise<void>) {
     const parent = item.getParent();
 
     if (!parent) {

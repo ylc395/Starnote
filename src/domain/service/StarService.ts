@@ -1,18 +1,20 @@
 import { StarRepository } from 'domain/repository/StarRepository';
 import { container } from 'tsyringe';
 
-import { ItemTree, Star, Note, ItemTreeEvents } from 'domain/entity';
+import { Star, Note } from 'domain/entity';
 import { StarList } from 'domain/entity/StarList';
-import { pull } from 'lodash';
+import { without } from 'lodash';
+import { computed } from '@vue/reactivity';
+import { AppEventBus, AppEvents } from './AppEventBus';
 
 export const token = Symbol();
 export class StarService {
-  private readonly itemTree = container.resolve(ItemTree);
+  private readonly appEventBus = container.resolve(AppEventBus);
   private readonly starRepository = container.resolve(StarRepository);
   private readonly starList = container.resolve(StarList);
 
   get stars() {
-    return this.starList.stars;
+    return computed(() => this.starList.stars.value);
   }
 
   get sortedStars() {
@@ -20,23 +22,23 @@ export class StarService {
   }
 
   constructor() {
-    this.initStar();
+    this.loadStars();
+    this.appEventBus.on(AppEvents.ITEM_DELETED, this.loadStars, this);
   }
 
-  private async initStar() {
-    this.stars.push(...(await this.starRepository.fetchAll()));
+  private async loadStars() {
+    this.starList.stars.value = await this.starRepository.fetchAll();
   }
 
   addStar(note: Note) {
     const newStar = new Star(note);
-    this.stars.push(newStar);
-
+    this.starList.stars.value = [...this.starList.stars.value, newStar];
     return this.starRepository.createStar(newStar);
   }
 
   removeStar(star: Star) {
     this.starRepository.deleteStar(star);
-    pull(this.stars, star);
+    this.starList.stars.value = without(this.starList.stars.value, star);
   }
 
   setSortOrders(items: Star[]) {
