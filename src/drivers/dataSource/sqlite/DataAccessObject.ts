@@ -3,12 +3,19 @@ import type { Dao, Query } from 'domain/repository';
 import { difference, mapKeys, omit, omitBy, pickBy } from 'lodash';
 import { db, NoteTable, NotebookTable, StarTable } from './table';
 
-interface HasOneConfig {
-  entity: EntityTypes;
-  foreignKey: string;
-  reference: string;
-  as: string;
-  excludes?: string[];
+interface Config {
+  hasOne?: {
+    entity: EntityTypes;
+    foreignKey: string;
+    reference: string;
+    as: string;
+    excludes?: string[];
+    required?: boolean;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    scope?: Record<string, any>;
+  };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  scope?: Record<string, any>;
 }
 
 type QueryBuilder = ReturnType<typeof db>;
@@ -22,19 +29,32 @@ const COLUMNS_MAP = {
 export class DataAccessObject<T> implements Dao<T> {
   constructor(
     private readonly tableName: EntityTypes,
-    private readonly hasOne?: HasOneConfig,
+    private readonly config?: Config,
   ) {}
   private getFullWhere(where: Query<T>) {
-    return mapKeys(where, (_, key) => `${this.tableName}.${key}`);
+    const scope = this.config?.scope || {};
+
+    return mapKeys(
+      { ...scope, ...where },
+      (_, key) => `${this.tableName}.${key}`,
+    );
   }
 
   private getQueryWithAssociation<K>(query: QueryBuilder, attributes?: K[]) {
-    if (!this.hasOne) {
+    if (!this.config?.hasOne) {
       return query;
     }
 
     const mapTableFields = (key: K | string) => `${this.tableName}.${key}`;
-    const { entity, as, foreignKey, reference, excludes = [] } = this.hasOne;
+    const {
+      entity,
+      as,
+      foreignKey,
+      reference,
+      excludes = [],
+      required = false,
+      scope = {},
+    } = this.config.hasOne;
 
     const keysInTable = attributes
       ? attributes.map(mapTableFields)
@@ -45,23 +65,26 @@ export class DataAccessObject<T> implements Dao<T> {
       excludes,
     ).map((key) => `${as}.${key} as ${as}.${key}`);
 
-    return query
+    const joinQuery = query
       .clear('select')
-      .select(...keysInTable, ...keysInAssoc)
-      .leftJoin(
-        { [as]: entity },
-        `${this.tableName}.${foreignKey}`,
-        `${as}.${reference}`,
-      );
+      .select(...keysInTable, ...keysInAssoc);
+
+    return joinQuery[required ? 'join' : 'leftJoin'](
+      { [as]: entity }, // set alias for joined table
+      {
+        ...mapKeys(scope, (_, key) => `${as}.${key}`),
+        [`${this.tableName}.${foreignKey}`]: `${as}.${reference}`,
+      },
+    );
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private processAssociation(rows: any) {
-    if (!this.hasOne || !rows) {
+    if (!this.config?.hasOne || !rows) {
       return rows;
     }
 
-    const { as } = this.hasOne;
+    const { as } = this.config.hasOne;
     const isAssociation = (_: never, key: string) => key.startsWith(`${as}.`);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
