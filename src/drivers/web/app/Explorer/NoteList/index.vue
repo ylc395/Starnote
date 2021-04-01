@@ -15,7 +15,7 @@ import { Note, EMPTY_TITLE } from 'domain/entity';
 import { useNoteList } from './useNoteList';
 
 import Contextmenu from '../Contextmenu/index.vue';
-import { useContextmenu as useCommonContextmenu } from 'drivers/web/components/Contextmenu/useContextmenu';
+import { useContextmenu } from '../Contextmenu/useContextmenu';
 import { token as dragToken } from '../useDrag';
 import SortMenu from '../SortMenu/index.vue';
 import ViewModeMenu from './ViewModeMenu/index.vue';
@@ -47,7 +47,7 @@ export default defineComponent({
       sortable,
       showingFields,
     } = useNoteList();
-    const { open: openContextmenu } = useCommonContextmenu<Note>();
+    const { open: openContextmenu } = useContextmenu<Note>();
     const { handleDragstart } = inject(dragToken)!;
 
     return {

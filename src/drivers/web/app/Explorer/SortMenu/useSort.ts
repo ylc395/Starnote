@@ -7,10 +7,7 @@ import {
   SettingService,
   token as settingToken,
 } from 'domain/service/SettingService';
-import {
-  useContextmenu as useCommonContextmenu,
-  token as contextmenuToken,
-} from 'drivers/web/components/Contextmenu/useContextmenu';
+import { token as contextmenuToken } from '../Contextmenu/useContextmenu';
 import {
   Notebook,
   TreeItem,
@@ -28,9 +25,7 @@ export function useSort() {
     setting: { get: getSetting },
   } = inject<SettingService>(settingToken)!;
 
-  const { context } = inject<ReturnType<typeof useCommonContextmenu>>(
-    contextmenuToken,
-  )!;
+  const { context } = inject(contextmenuToken)!;
   const notebook = computed(
     () => (context.value || selectedItem.value) as TreeItem,
   );

@@ -6,13 +6,12 @@ import {
   PlusOutlined,
   FileOutlined,
 } from '@ant-design/icons-vue';
-import { TreeItem } from 'domain/entity';
 import Renamer from './Renamer/index.vue';
 import { useRename } from './Renamer/useRename';
 import NotebookCreator from './NotebookCreator/index.vue';
 import { useNotebookCreator } from './NotebookCreator/useNotebookCreator';
 import Contextmenu from '../../Contextmenu/index.vue';
-import { useContextmenu as useCommonContextmenu } from 'drivers/web/components/Contextmenu/useContextmenu';
+import { useContextmenu } from '../../Contextmenu/useContextmenu';
 import { token as dragToken } from '../../useDrag';
 import { useTreeData } from './useTreeData';
 
@@ -30,7 +29,7 @@ export default defineComponent({
   setup() {
     const { isCreating, startCreating } = useNotebookCreator();
     const { renamingItem } = useRename();
-    const { open: openContextmenu } = useCommonContextmenu<TreeItem>();
+    const { open: openContextmenu } = useContextmenu();
 
     const {
       treeData,

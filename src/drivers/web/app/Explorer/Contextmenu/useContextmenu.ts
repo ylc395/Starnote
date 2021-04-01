@@ -1,10 +1,7 @@
-import { computed, createVNode, inject } from 'vue';
+import { computed, createVNode, inject, provide } from 'vue';
 import { Modal } from 'ant-design-vue';
 import { WarningFilled } from '@ant-design/icons-vue';
-import {
-  useContextmenu as useCommonContextmenu,
-  token,
-} from 'drivers/web/components/Contextmenu/useContextmenu';
+import { useContextmenu as useCommonContextmenu } from 'drivers/web/components/Contextmenu/useContextmenu';
 import { token as notebookCreatorToken } from '../TreeViewer/ItemTree/NotebookCreator/useNotebookCreator';
 import { token as renameToken } from '../TreeViewer/ItemTree/Renamer/useRename';
 import { Notebook, Note, TreeItem, ViewMode } from 'domain/entity';
@@ -14,10 +11,12 @@ import {
 } from 'domain/service/ItemTreeService';
 import { StarService, token as starToken } from 'domain/service/StarService';
 
-export function useContextmenu() {
+export const token = Symbol();
+
+export function useContextmenu<T extends TreeItem>() {
   const notebookCreator = inject(notebookCreatorToken, null); // 在 NoteList 中时，将得到 null
   const renamer = inject(renameToken, null);
-  const { context } = inject<ReturnType<typeof useCommonContextmenu>>(token)!;
+  const { open, context } = useCommonContextmenu<T>();
   const {
     createNote,
     createIndexNote,
@@ -75,7 +74,9 @@ export function useContextmenu() {
     }
   };
 
-  return {
+  const service = {
+    open,
+    context,
     type: computed(() => {
       return Notebook.isA(context.value) ? 'notebook' : 'note';
     }),
@@ -86,4 +87,8 @@ export function useContextmenu() {
     }),
     isStar: computed(() => Note.isA(context.value) && isStar(context.value)),
   };
+
+  provide(token, service);
+
+  return service;
 }

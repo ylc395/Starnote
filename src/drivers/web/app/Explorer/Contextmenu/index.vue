@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, inject } from 'vue';
 import { Menu } from 'ant-design-vue';
 import {
   FolderAddOutlined,
@@ -11,7 +11,7 @@ import {
 } from '@ant-design/icons-vue';
 import CommonContextmenu from 'drivers/web/components/Contextmenu/index.vue';
 import SortMenu from '../SortMenu/index.vue';
-import { useContextmenu } from './useContextmenu';
+import { token } from './useContextmenu';
 
 export default defineComponent({
   components: {
@@ -27,13 +27,9 @@ export default defineComponent({
     SortMenu,
   },
   setup() {
-    const {
-      type,
-      handleClick,
-      isWithIndexNote,
-      isStar,
-      showSortMenu,
-    } = useContextmenu();
+    const { type, handleClick, isWithIndexNote, isStar, showSortMenu } = inject(
+      token,
+    )!;
 
     return {
       type,
