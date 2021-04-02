@@ -8,7 +8,7 @@ export default defineComponent({
 });
 </script>
 <template>
-  <section>
+  <section class="flex-grow">
     <EditorTab />
     <Editor />
   </section>

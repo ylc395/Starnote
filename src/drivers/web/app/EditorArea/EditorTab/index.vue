@@ -46,3 +46,8 @@ export default defineComponent({
     </TabPane>
   </Tabs>
 </template>
+<style scoped>
+:deep(.ant-tabs-bar) {
+  margin-bottom: 0;
+}
+</style>

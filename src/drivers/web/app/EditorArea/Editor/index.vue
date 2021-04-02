@@ -27,11 +27,15 @@ export default defineComponent({
 </script>
 <template>
   <div v-if="activeEditor">
-    <input
-      ref="titleRef"
-      v-model="activeEditor.title.value"
-      v-if="!activeEditor.note.value.isIndexNote"
-    />
+    <div>
+      <input
+        ref="titleRef"
+        v-model="activeEditor.title.value"
+        v-if="!activeEditor.note.value.isIndexNote"
+        class="w-full border-0 text-xl py-2 px-4 focus:outline-none"
+        placeholder="笔记标题"
+      />
+    </div>
     <textarea ref="contentRef" v-model="activeEditor.content.value"></textarea>
   </div>
 </template>
