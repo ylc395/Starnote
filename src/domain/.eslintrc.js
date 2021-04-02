@@ -17,13 +17,7 @@ module.exports = {
       },
     ],
   },
-  globals: {
-    setInterval: 'readonly',
-    clearInterval: 'readonly',
-    console: 'readonly',
-  },
   env: {
-    browser: false,
-    node: false,
+    'shared-node-browser': true,
   },
 };
