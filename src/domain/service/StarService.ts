@@ -3,7 +3,7 @@ import { container } from 'tsyringe';
 
 import { Star, Note } from 'domain/entity';
 import { StarList } from 'domain/entity/StarList';
-import { without } from 'lodash';
+import { intersectionBy, unionBy, without } from 'lodash';
 import { computed } from '@vue/reactivity';
 import { AppEventBus, AppEvents } from './AppEventBus';
 
@@ -27,7 +27,14 @@ export class StarService {
   }
 
   private async loadStars() {
-    this.starList.stars.value = await this.starRepository.fetchAll();
+    const allStars = await this.starRepository.fetchAll();
+    const existedStars = this.starList.stars.value;
+
+    this.starList.stars.value = unionBy(
+      intersectionBy(existedStars, allStars, 'entityId'),
+      allStars,
+      'entityId',
+    );
   }
 
   addStar(note: Note) {
