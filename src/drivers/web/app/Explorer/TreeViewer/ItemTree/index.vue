@@ -177,7 +177,6 @@ export default defineComponent({
 
 :deep(.item-tree-root) {
   position: relative;
-  left: -10px;
   top: -30px;
   z-index: 5;
 }
