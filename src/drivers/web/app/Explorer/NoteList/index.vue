@@ -8,10 +8,12 @@ import {
   SortAscendingOutlined,
   CaretDownOutlined,
   BarsOutlined,
+  StarFilled,
 } from '@ant-design/icons-vue';
 import Resizable from 'vue-resizable';
 
 import { Note, EMPTY_TITLE } from 'domain/entity';
+import { StarService, token as starToken } from 'domain/service/StarService';
 import { useNoteList } from './useNoteList';
 
 import Contextmenu from '../Contextmenu/index.vue';
@@ -33,6 +35,7 @@ export default defineComponent({
     SortAscendingOutlined,
     CaretDownOutlined,
     BarsOutlined,
+    StarFilled,
     Dropdown,
     ViewModeMenu,
   },
@@ -49,6 +52,7 @@ export default defineComponent({
     } = useNoteList();
     const { open: openContextmenu } = useContextmenu<Note>();
     const { handleDragstart } = inject(dragToken)!;
+    const { isStar } = inject<StarService>(starToken)!;
 
     return {
       EMPTY_TITLE,
@@ -62,6 +66,7 @@ export default defineComponent({
       setSortOrders,
       sortable,
       showingFields,
+      isStar,
     };
   },
 });
@@ -134,9 +139,13 @@ export default defineComponent({
           }"
           class="px-3 py-3 border-0 hover:bg-blue-100 flex flex-col"
         >
-          <span :class="{ 'mb-2': showingFields.length > 0 }">
-            {{ element.title.value || EMPTY_TITLE }}
-          </span>
+          <div
+            :class="{ 'mb-2': showingFields.length > 0 }"
+            class="flex justify-between items-center"
+          >
+            <span>{{ element.title.value || EMPTY_TITLE }}</span>
+            <StarFilled v-if="isStar(element).value" class="text-yellow-300" />
+          </div>
           <time
             v-if="showingFields.includes('userCreatedAt')"
             class="note-list-time"

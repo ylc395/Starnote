@@ -79,7 +79,9 @@ export function useContextmenu<T extends TreeItem>(
     isWithIndexNote: computed(() => {
       return Notebook.isA(context.value) && !!context.value.indexNote.value;
     }),
-    isStar: computed(() => Note.isA(context.value) && isStar(context.value)),
+    isStar: computed(
+      () => Note.isA(context.value) && isStar(context.value).value,
+    ),
   };
 
   provide(token, service);

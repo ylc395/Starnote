@@ -56,6 +56,6 @@ export class StarService {
   }
 
   isStar(entity: Note) {
-    return this.starList.contains(entity);
+    return computed(() => this.starList.contains(entity));
   }
 }
