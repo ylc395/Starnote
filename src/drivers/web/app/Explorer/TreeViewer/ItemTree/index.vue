@@ -178,7 +178,11 @@ export default defineComponent({
 :deep(.item-tree-root) {
   position: relative;
   left: -10px;
-  top: -25px;
+  top: -30px;
   z-index: 5;
+}
+
+:deep(.item-tree-root > .ant-tree-node-content-wrapper) {
+  margin-bottom: 5px;
 }
 </style>
