@@ -17,6 +17,8 @@
   "dependencies": {
     "@ant-design/icons-vue": "^6.0.1",
     "@codemirror/commands": "^0.18.0",
+    "@codemirror/highlight": "^0.18.3",
+    "@codemirror/lang-markdown": "^0.18.1",
     "@codemirror/state": "^0.18.3",
     "@codemirror/view": "^0.18.3",
     "@tailwindcss/postcss7-compat": "^2.0.2",
