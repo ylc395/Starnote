@@ -43,6 +43,7 @@ export default defineComponent({
           {{ editor.title.value || EMPTY_TITLE }}
         </span>
       </template>
+      <slot :editor="editor"></slot>
     </TabPane>
   </Tabs>
 </template>

@@ -1,41 +1,29 @@
 <script lang="ts">
-import { defineComponent, inject, Ref, ref, watchEffect } from 'vue';
-import { token, EditorService } from 'domain/service/EditorService';
+import { defineComponent } from 'vue';
+import { Editor } from 'domain/entity';
+import { useEditor } from './useEditor';
 
 export default defineComponent({
-  setup() {
-    const {
-      editorManager: { activeEditor },
-    } = inject<EditorService>(token)!;
-
-    const titleRef: Ref<HTMLInputElement | null> = ref(null);
-    const contentRef: Ref<HTMLElement | null> = ref(null);
-
-    watchEffect(() => {
-      const isNewNote = activeEditor.value?.note.value!.isJustCreated;
-
-      if (isNewNote && titleRef.value) {
-        titleRef.value.select();
-      } else {
-        contentRef.value?.focus();
-      }
-    });
-
-    return { activeEditor, titleRef, contentRef };
+  props: {
+    editor: { type: Editor, required: true },
+  },
+  setup({ editor }) {
+    const { titleRef, editorRef } = useEditor(editor);
+    return { titleRef, editorRef };
   },
 });
 </script>
 <template>
-  <div v-if="activeEditor">
+  <div>
     <div>
       <input
         ref="titleRef"
-        v-model="activeEditor.title.value"
-        v-if="!activeEditor.note.value.isIndexNote"
+        v-model="editor.title.value"
+        v-if="!editor.note.value.isIndexNote"
         class="w-full border-0 text-xl py-2 px-4 focus:outline-none"
         placeholder="笔记标题"
       />
     </div>
-    <textarea ref="contentRef" v-model="activeEditor.content.value"></textarea>
+    <div ref="editorRef"></div>
   </div>
 </template>

@@ -9,7 +9,10 @@ export default defineComponent({
 </script>
 <template>
   <section class="flex-grow">
-    <EditorTab />
-    <Editor />
+    <EditorTab>
+      <template v-slot="{ editor }">
+        <Editor :editor="editor" />
+      </template>
+    </EditorTab>
   </section>
 </template>
