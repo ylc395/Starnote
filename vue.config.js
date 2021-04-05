@@ -1,5 +1,7 @@
 const path = require('path');
-const webAppEntry = 'src/drivers/web/main.ts';
+const WorkerPlugin = require('worker-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
+
 const alias = {
   domain: path.resolve(__dirname, 'src/domain'),
   drivers: path.resolve(__dirname, 'src/drivers'),
@@ -9,12 +11,22 @@ const alias = {
 module.exports = {
   pages: {
     index: {
-      entry: webAppEntry,
+      entry: 'src/drivers/web/main.ts',
       template: 'src/drivers/web/assets/index.html',
     },
   },
+  chainWebpack(config) {
+    config
+      .plugin('copy')
+      .use(CopyPlugin)
+      .tap((args) => {
+        args[0] = [{ from: 'wasm-git/*.@(js|wasm)', context: 'node_modules' }];
+        return args;
+      });
+  },
   configureWebpack: {
     resolve: { alias },
+    plugins: [new WorkerPlugin()],
   },
   pluginOptions: {
     electronBuilder: {

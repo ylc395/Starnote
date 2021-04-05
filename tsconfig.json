@@ -13,13 +13,19 @@
     "emitDecoratorMetadata": true,
     "sourceMap": true,
     "baseUrl": ".",
-    "types": ["webpack-env"],
+    "types": ["webpack-env", "emscripten"],
     "paths": {
       "utils/*": ["src/utils/*"],
       "domain/*": ["src/domain/*"],
       "drivers/*": ["src/drivers/*"]
     },
-    "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
+    "lib": [
+      "esnext",
+      "dom",
+      "dom.iterable",
+      "scripthost",
+      "WebWorker.ImportScripts"
+    ]
   },
   "include": [
     "src/**/*.ts",
