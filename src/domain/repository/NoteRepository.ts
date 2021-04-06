@@ -1,21 +1,12 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { singleton, inject } from 'tsyringe';
-import {
-  Note,
-  isWithId,
-  NoteDataObject,
-  NotebookDataObject,
-} from 'domain/entity';
-import type { Dao } from './types';
-import { NOTE_DAO_TOKEN, NOTEBOOK_DAO_TOKEN } from './daoTokens';
+import { singleton, container } from 'tsyringe';
+import { Note, isWithId, NoteDataObject } from 'domain/entity';
+import { NOTE_DAO_TOKEN } from './daoTokens';
 import { pick } from 'lodash';
 
 @singleton()
 export class NoteRepository {
-  constructor(
-    @inject(NOTE_DAO_TOKEN) protected noteDao?: Dao<NoteDataObject>,
-    @inject(NOTEBOOK_DAO_TOKEN) protected notebookDao?: Dao<NotebookDataObject>,
-  ) {}
+  private readonly noteDao = container.resolve(NOTE_DAO_TOKEN);
   queryNoteById(id: Note['id']): Promise<Note | null>;
   queryNoteById(
     id: Note['id'],

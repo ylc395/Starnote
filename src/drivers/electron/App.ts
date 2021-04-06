@@ -1,17 +1,16 @@
-import { app, protocol, BrowserWindow } from 'electron';
+import { app, protocol, BrowserWindow, ipcMain } from 'electron';
+import type { App as ElectronApp } from 'electron';
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
-import path from 'path';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import installExtension from 'electron-devtools-installer';
 import {
   IS_DEVELOPMENT,
   IS_TEST,
   WEBPACK_DEV_SERVER_URL,
-  OS_PLATFORM,
-} from 'drivers/platform/os/constants';
+} from 'drivers/constants';
+import { camelCase, isFunction } from 'lodash';
 
 export class App {
   private readonly electronApp = app;
+  private readonly ipcMain = ipcMain;
   start() {
     // Scheme must be registered before the app is ready
     protocol.registerSchemesAsPrivileged([
@@ -20,7 +19,7 @@ export class App {
 
     // Exit cleanly on request from parent process in development mode.
     if (IS_DEVELOPMENT) {
-      if (OS_PLATFORM === 'win32') {
+      if (process.platform === 'win32') {
         process.on('message', (data) => {
           if (data === 'graceful-exit') {
             this.electronApp.quit();
@@ -36,7 +35,7 @@ export class App {
     this.electronApp.on('window-all-closed', () => {
       // On macOS it is common for applications and their menu bar
       // to stay active until the user quits explicitly with Cmd + Q
-      if (OS_PLATFORM !== 'darwin') {
+      if (process.platform !== 'darwin') {
         this.electronApp.quit();
       }
     });
@@ -49,21 +48,17 @@ export class App {
       }
     });
 
-    // This method will be called when Electron has finished
-    // initialization and is ready to create browser windows.
-    // Some APIs can only be used after this event occurs.
-    // this.electronApp.on('ready', async () => {
-    //   if (IS_DEVELOPMENT && !IS_TEST) {
-    // Install Vue Devtools
-    // try {
-    // https://chrome.google.com/webstore/detail/vuejs-devtools/ljjemllljcmogpfapbkkighbhhppjdbg?hl=en
-    //         const VUEJS_DEVTOOLS = 'ljjemllljcmogpfapbkkighbhhppjdbg';
-    //         await installExtension(VUEJS_DEVTOOLS);
-    //       } catch (e) {
-    //         console.error('Vue Devtools failed to install:', e.toString());
-    //       }
-    //     }
-    //   });
+    this.ipcMain.on('getAppInfo', (event, infoField: string, ...args) => {
+      const methodName = camelCase(`get-${infoField}`) as keyof ElectronApp;
+
+      if (!isFunction(this.electronApp[methodName])) {
+        throw new Error(`${methodName} is invalid`);
+      }
+
+      event.returnValue = (this.electronApp[methodName] as (
+        ...args: unknown[]
+      ) => unknown)(...args);
+    });
   }
 
   static async createWindow(devPath = '', prodPath = 'index.html') {
@@ -71,8 +66,10 @@ export class App {
       width: 800,
       height: 600,
       webPreferences: {
-        preload: path.join(__dirname, 'preload.js'), // see file: vue.config.js
         webSecurity: false, // disabled same-site policy for git
+        nodeIntegration: true,
+        nodeIntegrationInWorker: true,
+        contextIsolation: false,
       },
     });
 

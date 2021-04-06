@@ -3,21 +3,17 @@ import {
   Notebook,
   Note,
   ROOT_NOTEBOOK_ID,
-  NoteDataObject,
   NotebookDataObject,
   isWithId,
 } from 'domain/entity';
-import type { Dao } from './types';
 import { NOTEBOOK_DAO_TOKEN, NOTE_DAO_TOKEN } from './daoTokens';
-import { singleton, inject } from 'tsyringe';
+import { singleton, container } from 'tsyringe';
 import { pick } from 'lodash';
 
 @singleton()
 export class NotebookRepository {
-  constructor(
-    @inject(NOTE_DAO_TOKEN) protected noteDao?: Dao<NoteDataObject>,
-    @inject(NOTEBOOK_DAO_TOKEN) protected notebookDao?: Dao<NotebookDataObject>,
-  ) {}
+  private readonly noteDao = container.resolve(NOTE_DAO_TOKEN);
+  private readonly notebookDao = container.resolve(NOTEBOOK_DAO_TOKEN);
 
   loadChildrenOf(notebook: Notebook): Promise<(Note | Notebook)[]> {
     const notebookId = notebook.id;

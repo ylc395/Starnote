@@ -1,8 +1,10 @@
 import 'reflect-metadata';
-import './main.css';
-import 'drivers/dataSource/ipc/rendererProcess';
+import { dbReady } from 'drivers/db';
 
 import { createApp } from 'vue';
 import App from './App.vue';
+import './main.css';
 
-createApp(App).mount('#app');
+dbReady.then(() => {
+  createApp(App).mount('#app');
+});
