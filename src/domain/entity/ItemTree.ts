@@ -23,7 +23,6 @@ export type TreeItem = Notebook | Note;
 @singleton()
 export class ItemTree extends EventEmitter {
   readonly root: Ref<Notebook | null> = shallowRef(null);
-  private readonly history: Notebook[] = shallowReactive([]);
   readonly mode: Ref<ViewMode> = ref(ViewMode.TwoColumn);
   readonly selectedItem: Ref<Notebook | Note | null> = shallowRef(null);
   readonly expandedItems: Notebook[] = shallowReactive([]);

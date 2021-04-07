@@ -2,11 +2,13 @@ import { Entity } from './Entity';
 import { without } from 'lodash';
 import type { Ref } from '@vue/reactivity';
 
-export interface WithChildren extends Entity {
-  readonly children: Ref<Entity[] | null>;
+export interface WithChildren<T extends Entity> extends Entity {
+  readonly children: Ref<T[] | null>;
 }
 
-export abstract class Hierarchic<P extends WithChildren> extends Entity {
+export abstract class Hierarchic<
+  P extends WithChildren<Entity>
+> extends Entity {
   protected abstract readonly parent: Ref<P | null>;
   // 一般 indexNote 会被置为单向
   setParent(newParent: P, bidirectional: boolean) {
@@ -42,22 +44,19 @@ export abstract class Hierarchic<P extends WithChildren> extends Entity {
     return this;
   }
 
-  isDescendenceOf(entity: WithChildren) {
-    // eslint-disable-next-line
-    let node: any = this;
+  isDescendenceOf<T extends Entity>(entity: WithChildren<T>) {
+    let node: P | null = this.getParent();
 
     while (node) {
-      const parent = node?.getParent();
-
-      if (!parent) {
-        return false;
-      }
-
-      if (entity.isEqual(parent)) {
+      if (entity.isEqual(node)) {
         return true;
       }
 
-      node = parent;
+      if (node instanceof Hierarchic) {
+        node = node.getParent();
+      } else {
+        break;
+      }
     }
 
     return false;

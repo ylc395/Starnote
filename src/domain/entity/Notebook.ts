@@ -39,7 +39,10 @@ export enum SortDirectEnums {
 @staticImplements<DataMapperStatic<NotebookDataObject>>()
 export class Notebook
   extends Hierarchic<Notebook>
-  implements ListItem, WithChildren, DataMapper<NotebookDataObject> {
+  implements
+    ListItem,
+    WithChildren<Note | Notebook>,
+    DataMapper<NotebookDataObject> {
   setting = container.resolve(Setting);
 
   @RefTransform
