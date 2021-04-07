@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { EntityTypes, ObjectWithId } from 'domain/entity';
 import type { Dao, Query } from 'domain/repository';
 import {
@@ -11,7 +12,7 @@ import {
   pickBy,
   without,
 } from 'lodash';
-import { db, NoteTable, NotebookTable, StarTable } from './table';
+import { db, NoteTable, NotebookTable, StarTable } from '../table';
 
 interface Config {
   belongsTo?: {
@@ -21,14 +22,12 @@ interface Config {
     as: string;
     excludes?: string[];
     required?: boolean;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     scope?: Record<string, any>;
   };
   hasMany?: {
     entity: EntityTypes;
     foreignKey: string; // 目标表的外键
   }[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   scope?: Record<string, any>;
 }
 
@@ -92,7 +91,6 @@ export class DataAccessObject<T> implements Dao<T> {
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private processAssociation(rows: any) {
     if (!this.config?.belongsTo || !rows) {
       return rows;
@@ -101,7 +99,6 @@ export class DataAccessObject<T> implements Dao<T> {
     const { as } = this.config.belongsTo;
     const isAssociation = (_: never, key: string) => key.startsWith(`${as}.`);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const associate = (row: any) => {
       const main = omitBy(row, isAssociation);
       const association = pickBy(row, isAssociation);
@@ -115,12 +112,13 @@ export class DataAccessObject<T> implements Dao<T> {
   }
 
   one<K extends keyof Query<T>>(where: Query<T>, attributes?: K[]) {
-    let query = db(this.tableName)
+    const query = db(this.tableName)
       .select(...(attributes || ['*']))
       .where(this.getFullWhere(where));
 
-    query = this.getQueryWithAssociation(query, attributes);
-    return query.first().then(this.processAssociation.bind(this));
+    return this.getQueryWithAssociation(query, attributes)
+      .first()
+      .then(this.processAssociation.bind(this));
   }
 
   all<K extends keyof Query<T>>(where?: Query<T> | K[], attributes?: K[]) {
@@ -136,9 +134,9 @@ export class DataAccessObject<T> implements Dao<T> {
         .where(this.getFullWhere(where));
     }
 
-    query = this.getQueryWithAssociation(query, attributes);
-
-    return query.then(this.processAssociation.bind(this));
+    return this.getQueryWithAssociation(query, attributes).then(
+      this.processAssociation.bind(this),
+    );
   }
 
   private async deleteByIds(

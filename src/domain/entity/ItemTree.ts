@@ -21,7 +21,7 @@ export enum ViewMode {
 export type TreeItem = Notebook | Note;
 
 @singleton()
-export class ItemTree extends EventEmitter {
+export class ItemTree extends EventEmitter<ItemTreeEvents> {
   readonly root: Ref<Notebook | null> = shallowRef(null);
   readonly mode: Ref<ViewMode> = ref(ViewMode.TwoColumn);
   readonly selectedItem: Ref<Notebook | Note | null> = shallowRef(null);
