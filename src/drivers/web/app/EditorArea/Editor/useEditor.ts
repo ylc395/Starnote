@@ -11,8 +11,8 @@ export function useEditor(editor: Editor) {
     codeMirrorEditor = codemirrorEditor(editor, editorRef.value!);
     const isNewNote = editor.note.value!.isJustCreated;
 
-    if (isNewNote) {
-      titleRef.value!.select();
+    if (isNewNote && titleRef.value) {
+      titleRef.value.select();
     } else {
       codeMirrorEditor.focus();
     }
