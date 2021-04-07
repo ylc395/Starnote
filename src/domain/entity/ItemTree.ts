@@ -4,13 +4,13 @@ import { pull } from 'lodash';
 import EventEmitter from 'eventemitter3';
 
 import { Note } from './Note';
-import { Notebook } from './Notebook';
+import { Notebook, ROOT_NOTEBOOK_ID } from './Notebook';
 import { singleton } from 'tsyringe';
 
 export enum ItemTreeEvents {
   Selected = 'SELECTED',
-  Expanded = 'EXPANDED',
   Deleted = 'DELETED',
+  Updated = 'UPDATED',
 }
 
 export enum ViewMode {
@@ -22,7 +22,10 @@ export type TreeItem = Notebook | Note;
 
 @singleton()
 export class ItemTree extends EventEmitter<ItemTreeEvents> {
-  readonly root: Ref<Notebook | null> = shallowRef(null);
+  readonly root: Notebook = Notebook.from({
+    id: ROOT_NOTEBOOK_ID,
+    title: 'ROOT',
+  });
   readonly mode: Ref<ViewMode> = ref(ViewMode.TwoColumn);
   readonly selectedItem: Ref<Notebook | Note | null> = shallowRef(null);
   readonly expandedItems: Notebook[] = shallowReactive([]);
@@ -30,9 +33,8 @@ export class ItemTree extends EventEmitter<ItemTreeEvents> {
     super();
   }
 
-  loadRoot(notebook: Notebook) {
-    this.root.value = notebook;
-    this.expandNotebook(notebook);
+  loadTree(rootItems: TreeItem[]) {
+    this.root.children.value = rootItems;
   }
 
   setSelectedItem(item: TreeItem) {
@@ -62,10 +64,9 @@ export class ItemTree extends EventEmitter<ItemTreeEvents> {
     }
 
     this.expandedItems.push(notebook);
-    this.emit(ItemTreeEvents.Expanded, notebook);
   }
 
-  moveTo(child: TreeItem, parent: Notebook) {
+  moveTo(child: TreeItem, parent: Notebook | null) {
     if (!child) {
       throw new Error('no item to move');
     }
@@ -74,11 +75,12 @@ export class ItemTree extends EventEmitter<ItemTreeEvents> {
       return;
     }
 
-    if (Note.isA(child) && parent.isRoot) {
+    if (Note.isA(child) && !parent) {
       return;
     }
 
-    child.setParent(parent, true);
+    child.setParent(parent || this.root, true);
+    this.emit(ItemTreeEvents.Updated, child, ['parentId']);
   }
 
   private isExpanded(notebook: Notebook) {
@@ -93,6 +95,7 @@ export class ItemTree extends EventEmitter<ItemTreeEvents> {
     }
 
     item.title.value = title;
+    this.emit(ItemTreeEvents.Updated, item, ['title']);
   }
 
   deleteItem(item: TreeItem) {

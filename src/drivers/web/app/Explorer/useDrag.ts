@@ -14,8 +14,7 @@ export const token: InjectionKey<ReturnType<typeof useDrag>> = Symbol();
 
 export function useDrag() {
   const {
-    itemTree: { foldNotebook, expandNotebook, root },
-    moveTo,
+    itemTree: { foldNotebook, expandNotebook, moveTo },
   } = inject<ItemTreeService>(itemTreeToken)!;
   const { noteIconRef, notebookIconRef } = useDragIcon();
 
@@ -75,7 +74,7 @@ export function useDrag() {
     },
 
     handleRootDrop() {
-      moveTo(movingItem!, root.value!);
+      moveTo(movingItem!, null);
       movingItem = null;
     },
 

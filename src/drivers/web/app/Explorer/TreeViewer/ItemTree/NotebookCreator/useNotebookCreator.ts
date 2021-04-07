@@ -22,9 +22,7 @@ export function useNotebookCreator() {
     const path = [];
 
     while (Notebook.isA(node)) {
-      if (!node.isRoot) {
-        path.push(node.title.value);
-      }
+      path.push(node.title.value);
       node = node.getParent();
     }
 

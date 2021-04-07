@@ -81,7 +81,7 @@ export default defineComponent({
     </div>
     <Tree
       draggable
-      class="overflow-y-auto"
+      class="overflow-y-auto pl-3"
       :treeData="treeData"
       :showIcon="false"
       openAnimation="none"
@@ -173,15 +173,5 @@ export default defineComponent({
 
 :deep(.drag-over .ant-tree-node-content-wrapper) {
   background-color: inherit !important;
-}
-
-:deep(.item-tree-root) {
-  position: relative;
-  top: -30px;
-  z-index: 5;
-}
-
-:deep(.item-tree-root > .ant-tree-node-content-wrapper) {
-  margin-bottom: 5px;
 }
 </style>

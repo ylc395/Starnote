@@ -13,7 +13,6 @@ import {
 import { Hierarchic } from './abstract/Hierarchic';
 import { Notebook } from './Notebook';
 import { ListItem } from './abstract/ListItem';
-import { Expose } from 'class-transformer';
 import { staticImplements } from 'utils/types';
 
 export const EMPTY_TITLE = '(empty title)';
@@ -41,14 +40,6 @@ export class Note
 
   protected readonly parent: Ref<Notebook | null> = shallowRef(null);
 
-  @Expose({ name: 'parentId', toClassOnly: true })
-  initialParentId: Notebook['id'] | null = null;
-
-  @Expose({ toPlainOnly: true })
-  get parentId() {
-    return this.parent.value?.id || this.initialParentId;
-  }
-
   isJustCreated = false;
 
   get isIndexNote() {
@@ -75,7 +66,7 @@ export class Note
     parent?: Notebook,
     bidirectional = true,
   ) {
-    const note = dataObjectToInstance(this, dataObject);
+    const note = dataObjectToInstance(Note, dataObject);
 
     if (!parent) {
       return note;

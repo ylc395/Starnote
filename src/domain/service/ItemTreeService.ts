@@ -4,15 +4,14 @@ import {
   Notebook,
   ItemTree,
   TreeItem,
-  ItemTreeEvents,
   Note,
   SortByEnums,
   SortDirectEnums,
   NotebookDataObject,
   NoteDataObject,
+  ItemTreeEvents,
 } from 'domain/entity';
 import { selfish } from 'utils/index';
-import { StarList } from 'domain/entity/StarList';
 import { AppEventBus, AppEvents } from './AppEventBus';
 
 export const token = Symbol();
@@ -21,21 +20,14 @@ export class ItemTreeService {
   private readonly noteRepository = container.resolve(NoteRepository);
   private readonly appEventBus = container.resolve(AppEventBus);
   readonly itemTree = selfish(container.resolve(ItemTree));
-  private readonly starList = container.resolve(StarList);
   constructor() {
-    this.init();
-  }
-  private async init() {
-    this.itemTree
-      .on(ItemTreeEvents.Expanded, this.loadChildrenOf, this)
-      .on(ItemTreeEvents.Selected, this.loadChildrenOf, this);
-
-    this.initRoot();
+    this.initTree();
   }
 
-  private async initRoot() {
-    const rootNotebook = await this.notebookRepository.queryOrCreateRootNotebook();
-    this.itemTree.loadRoot(rootNotebook);
+  private async initTree() {
+    const items = await this.notebookRepository.fetchTree();
+    this.itemTree.loadTree(items);
+    this.itemTree.on(ItemTreeEvents.Updated, this.syncItem, this);
   }
 
   private syncItem<T extends keyof (NotebookDataObject | NoteDataObject)>(
@@ -47,43 +39,6 @@ export class ItemTreeService {
     } else {
       return this.noteRepository.updateNote(item, fields);
     }
-  }
-
-  private async prepareTarget(parent: unknown) {
-    const target = parent || this.itemTree.root.value;
-
-    if (!Notebook.isA(target)) {
-      throw new Error('sub notebook parent is not a notebook');
-    }
-    await this.loadChildrenOf(target);
-    await this.itemTree.expandNotebook(target);
-    return target;
-  }
-
-  private loadChildrenOf(item: TreeItem) {
-    if (!Notebook.isA(item) || item.isChildrenLoaded) {
-      return;
-    }
-
-    item.isChildrenLoaded = true;
-    const notebookId = item.id;
-    this.starList.stars.value.forEach((star) => {
-      if (star.entity.value?.parentId === notebookId) {
-        star.entity.value.setParent(item, true);
-      }
-    });
-
-    return this.notebookRepository.loadChildrenOf(item);
-  }
-
-  moveTo(child: TreeItem, parent: Notebook) {
-    this.itemTree.moveTo(child, parent);
-    this.syncItem(child, ['parentId']);
-  }
-
-  rename(item: TreeItem, title: string) {
-    this.itemTree.rename(item, title);
-    this.syncItem(item, ['title']);
   }
 
   async createNote(parent?: Notebook) {
@@ -99,8 +54,13 @@ export class ItemTreeService {
   }
 
   async createSubNotebook(title: string, parent: Notebook | null) {
-    const target = await this.prepareTarget(parent);
-    const newNotebook = target.createSubNotebook(title);
+    const newNotebook = parent
+      ? parent.createSubNotebook(title)
+      : this.itemTree.root.createSubNotebook(title);
+
+    if (parent) {
+      this.itemTree.expandNotebook(parent);
+    }
 
     await this.notebookRepository.createNotebook(newNotebook);
     this.itemTree.setSelectedItem(newNotebook);

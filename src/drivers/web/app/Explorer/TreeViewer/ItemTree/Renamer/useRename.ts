@@ -8,7 +8,9 @@ import {
 export const token: InjectionKey<ReturnType<typeof useRename>> = Symbol();
 
 export function useRename() {
-  const { rename } = inject<ItemTreeService>(itemTreeToken)!;
+  const {
+    itemTree: { rename },
+  } = inject<ItemTreeService>(itemTreeToken)!;
 
   const title = ref('');
   const renamingItem: Ref<TreeItem | null> = shallowRef(null);

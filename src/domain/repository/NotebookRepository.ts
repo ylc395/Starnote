@@ -1,70 +1,54 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
   Notebook,
-  Note,
-  ROOT_NOTEBOOK_ID,
   NotebookDataObject,
   isWithId,
+  Note,
+  ROOT_NOTEBOOK_ID,
 } from 'domain/entity';
 import { NOTEBOOK_DAO_TOKEN, NOTE_DAO_TOKEN } from './daoTokens';
 import { singleton, container } from 'tsyringe';
-import { pick } from 'lodash';
+import { groupBy, pick, unary } from 'lodash';
 
 @singleton()
 export class NotebookRepository {
   private readonly noteDao = container.resolve(NOTE_DAO_TOKEN);
   private readonly notebookDao = container.resolve(NOTEBOOK_DAO_TOKEN);
 
-  loadChildrenOf(notebook: Notebook): Promise<(Note | Notebook)[]> {
-    const notebookId = notebook.id;
-    const notebooks = this.notebookDao!.all({ parentId: notebookId });
-    const notes = this.noteDao!.all({ parentId: notebookId }, [
-      'id',
-      'title',
-      'sortOrder',
-      'userCreatedAt',
-      'userModifiedAt',
-      'parentId',
-    ]);
+  async fetchTree() {
+    const treeItems = await Promise.all([
+      this.notebookDao!.all().then((objs) => objs.map(unary(Notebook.from))),
+      this.noteDao!.all([
+        'id',
+        'title',
+        'sortOrder',
+        'userCreatedAt',
+        'userModifiedAt',
+        'parentId',
+      ]).then((objs) => objs.map(unary(Note.from))),
+    ]).then(([notebooks, notes]) => [...notebooks, ...notes]);
 
-    return Promise.all([notebooks, notes]).then(([notebooks, notes]) => {
-      const children = [
-        ...notes
-          .filter((noteDo) => {
-            return noteDo.id !== notebook.indexNote.value?.id;
-          })
-          .map((noteDo) => {
-            const isAlreadyIn = notebook.children.value?.find(
-              (note) => note.id === noteDo.id,
-            );
+    const indexedItem = groupBy(treeItems, 'id');
+    const itemsInRoot = [];
 
-            return isAlreadyIn || Note.from(noteDo, notebook);
-          }),
-        ...notebooks.map((notebookDo) => {
-          const existed = notebook.children.value?.find(
-            (notebook) => notebook.id === notebookDo.id,
-          );
+    for (const item of treeItems) {
+      const parentId = item.parentId;
 
-          return existed || Notebook.from(notebookDo, notebook);
-        }),
-      ];
+      if (!parentId || item.parentId === ROOT_NOTEBOOK_ID) {
+        itemsInRoot.push(item);
+        continue;
+      }
 
-      notebook.children.value = children;
-      return children;
-    });
-  }
+      const parent = indexedItem[parentId][0] as Notebook;
 
-  async queryOrCreateRootNotebook() {
-    const root = await this.notebookDao!.one({ id: ROOT_NOTEBOOK_ID });
-    const rootNotebook = root
-      ? Notebook.from(root)
-      : Notebook.createRootNotebook();
+      if (item.id === parent.indexNoteId) {
+        continue;
+      }
 
-    if (!root) {
-      await this.createNotebook(rootNotebook);
+      item.setParent(parent, true);
     }
 
-    return rootNotebook;
+    return itemsInRoot;
   }
 
   async createNotebook(notebook: Notebook) {

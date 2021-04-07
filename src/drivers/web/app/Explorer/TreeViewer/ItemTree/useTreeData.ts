@@ -14,7 +14,7 @@ import { map } from 'lodash';
 export function useTreeData() {
   const {
     itemTree: {
-      root: _root,
+      root,
       mode,
       setSelectedItem,
       selectedItem,
@@ -25,13 +25,7 @@ export function useTreeData() {
   } = inject<ItemTreeService>(itemTreeToken)!;
 
   return {
-    treeData: computed<TreeDataItem>(() => {
-      const root = _root.value;
-
-      if (!root || !root.children.value) {
-        return [];
-      }
-
+    treeData: computed<TreeDataItem[]>(() => {
       const notebookFilter = (item: TreeItem) => {
         if (mode.value === ViewMode.OneColumn) {
           return true;
@@ -40,29 +34,20 @@ export function useTreeData() {
         return Notebook.isA(item);
       };
 
-      return [
-        {
-          item: root,
-          key: root.id,
-          class: 'item-tree-root', // set class property to make rt reactive
-          children: root.children.value
-            .filter(notebookFilter)
-            .map(function mapper(item): TreeDataItem {
-              return {
-                item,
-                class: item.withContextmenu.value ? 'with-contextmenu' : '', // set class property to make rt reactive
-                key: item.id,
-                slots: { title: 'title' },
-                isLeaf: !Notebook.isA(item),
-                children: Notebook.isA(item)
-                  ? item.sortedChildren.value
-                      ?.filter(notebookFilter)
-                      .map(mapper)
-                  : undefined,
-              };
-            }),
-        },
-      ];
+      const mapper = (item: TreeItem): TreeDataItem => {
+        return {
+          item,
+          class: item.withContextmenu.value ? 'with-contextmenu' : '',
+          key: item.id,
+          slots: { title: 'title' },
+          isLeaf: !Notebook.isA(item),
+          children: Notebook.isA(item)
+            ? item.sortedChildren.value?.filter(notebookFilter).map(mapper)
+            : undefined,
+        };
+      };
+
+      return root.children.value?.filter(notebookFilter).map(mapper) || [];
     }),
 
     selectedKeys: computed(() => [selectedItem.value?.id]),

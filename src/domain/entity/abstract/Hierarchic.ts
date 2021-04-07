@@ -1,5 +1,6 @@
 import { Entity } from './Entity';
 import { without } from 'lodash';
+import { Expose } from 'class-transformer';
 import type { Ref } from '@vue/reactivity';
 
 export interface WithChildren<T extends Entity> extends Entity {
@@ -10,6 +11,15 @@ export abstract class Hierarchic<
   P extends WithChildren<Entity>
 > extends Entity {
   protected abstract readonly parent: Ref<P | null>;
+
+  @Expose({ name: 'parentId', toClassOnly: true })
+  private initialParentId: Entity['id'] | null = null;
+
+  @Expose({ toPlainOnly: true })
+  get parentId() {
+    return this.parent.value?.id || this.initialParentId;
+  }
+
   // 一般 indexNote 会被置为单向
   setParent(newParent: P, bidirectional: boolean) {
     const oldParent = this.parent.value;

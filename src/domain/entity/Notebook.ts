@@ -21,7 +21,6 @@ import { staticImplements } from 'utils/types';
 
 export const ROOT_NOTEBOOK_ID: Notebook['id'] = NIL;
 export const INDEX_NOTE_TITLE = 'INDEX_NOTE';
-
 export enum SortByEnums {
   CreatedAt = 'CREATED_AT',
   UpdatedAt = 'UPDATED_AT',
@@ -55,8 +54,6 @@ export class Notebook
   readonly withContextmenu = ref(false);
 
   children: Ref<(Note | Notebook)[] | null> = shallowRef(null);
-
-  isChildrenLoaded = false;
 
   sortedChildren = computed(() => {
     if (!this.children.value) {
@@ -130,18 +127,12 @@ export class Notebook
 
   noteJustCreated: Note | null = null;
 
-  get isRoot() {
-    return this.id === ROOT_NOTEBOOK_ID;
-  }
-
   toDataObject() {
     return instanceToDataObject<this, NotebookDataObject>(this);
   }
 
   createSubNotebook(title: string) {
-    const newNotebook = Notebook.from({ parentId: this.id, title }, this);
-    newNotebook.isChildrenLoaded = true;
-
+    const newNotebook = Notebook.from({ title }, this);
     return newNotebook;
   }
 
@@ -180,15 +171,8 @@ export class Notebook
     return instance instanceof Notebook;
   }
 
-  static createRootNotebook() {
-    return this.from({
-      id: ROOT_NOTEBOOK_ID,
-      title: 'ROOT',
-    });
-  }
-
   static from(dataObject: NotebookDataObject, parent?: Notebook) {
-    const notebook = dataObjectToInstance(this, dataObject);
+    const notebook = dataObjectToInstance(Notebook, dataObject);
 
     if (notebook.indexNote.value) {
       notebook.indexNote.value.setParent(notebook, false);
@@ -198,7 +182,7 @@ export class Notebook
       return notebook;
     }
 
-    if (parent.id !== dataObject.parentId) {
+    if (dataObject.parentId && parent.id !== dataObject.parentId) {
       throw new Error('wrong parent, since two ids are not equal');
     }
 
