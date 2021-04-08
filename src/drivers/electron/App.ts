@@ -12,6 +12,10 @@ export class App {
   private readonly electronApp = app;
   private readonly ipcMain = ipcMain;
   start() {
+    // @see https://github.com/electron/electron/issues/22119
+    // when this issue closed, remove this line
+    this.electronApp.allowRendererProcessReuse = false;
+
     // Scheme must be registered before the app is ready
     protocol.registerSchemesAsPrivileged([
       { scheme: 'app', privileges: { secure: true, standard: true } },
