@@ -72,23 +72,6 @@ export abstract class Hierarchic<
     return false;
   }
 
-  getAncestors() {
-    const path = [];
-    let node: P | null = this.getParent();
-
-    while (node) {
-      path.push(node);
-
-      if (node instanceof Hierarchic) {
-        node = node.getParent();
-      } else {
-        break;
-      }
-    }
-
-    return path;
-  }
-
   getParent() {
     return this.parent.value;
   }

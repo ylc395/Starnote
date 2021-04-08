@@ -36,7 +36,7 @@ export function useNoteList() {
   });
 
   const isInvalidNotebook = computed(() => {
-    return !Notebook.isA(selectedItem.value) || !selectedItem.value.getParent();
+    return !Notebook.isA(selectedItem.value) || selectedItem.value.isRoot;
   });
 
   const sortable = computed(() => {

@@ -127,6 +127,10 @@ export class Notebook
 
   noteJustCreated: Note | null = null;
 
+  get isRoot() {
+    return this.id === ROOT_NOTEBOOK_ID;
+  }
+
   toDataObject() {
     return instanceToDataObject<this, NotebookDataObject>(this);
   }
