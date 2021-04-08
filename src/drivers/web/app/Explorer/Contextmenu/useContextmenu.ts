@@ -24,7 +24,9 @@ export function useContextmenu<T extends TreeItem>(
     deleteItem,
     itemTree: { mode },
   } = inject<ItemTreeService>(itemTreeToken)!;
-  const { addStar, isStar } = inject<StarService>(starToken)!;
+  const { addStar, isStar, removeStarsByEntity } = inject<StarService>(
+    starToken,
+  )!;
 
   const handleClick = ({ key }: { key: string }) => {
     const _context = context.value;
@@ -62,6 +64,9 @@ export function useContextmenu<T extends TreeItem>(
         return;
       case 'star':
         addStar(_context as Note);
+        return;
+      case 'removeStar':
+        removeStarsByEntity(_context as Note);
         return;
       default:
         break;
