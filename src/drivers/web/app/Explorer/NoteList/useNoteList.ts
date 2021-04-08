@@ -32,9 +32,7 @@ export function useNoteList() {
       return [];
     }
 
-    return selectedItem.value.sortedChildren.value?.filter((child) => {
-      return Note.isA(child) && !child.isIndexNote;
-    });
+    return selectedItem.value.sortedChildren.value.filter(Note.isA);
   });
 
   const isInvalidNotebook = computed(() => {
