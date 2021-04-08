@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
   Notebook,
   NotebookDataObject,
@@ -17,15 +16,17 @@ export class NotebookRepository {
 
   async fetchTree() {
     const treeItems = await Promise.all([
-      this.notebookDao!.all().then((objs) => objs.map(unary(Notebook.from))),
-      this.noteDao!.all([
-        'id',
-        'title',
-        'sortOrder',
-        'userCreatedAt',
-        'userModifiedAt',
-        'parentId',
-      ]).then((objs) => objs.map(unary(Note.from))),
+      this.notebookDao.all().then((objs) => objs.map(unary(Notebook.from))),
+      this.noteDao
+        .all([
+          'id',
+          'title',
+          'sortOrder',
+          'userCreatedAt',
+          'userModifiedAt',
+          'parentId',
+        ])
+        .then((objs) => objs.map(unary(Note.from))),
     ]).then(([notebooks, notes]) => [...notebooks, ...notes]);
 
     const indexedItem = groupBy(treeItems, 'id');
@@ -52,7 +53,7 @@ export class NotebookRepository {
   }
 
   async createNotebook(notebook: Notebook) {
-    await this.notebookDao!.create(notebook.toDataObject());
+    await this.notebookDao.create(notebook.toDataObject());
     return notebook;
   }
 
@@ -68,11 +69,11 @@ export class NotebookRepository {
       throw new Error('no id when update notebook');
     }
 
-    await this.notebookDao!.update(payload);
+    await this.notebookDao.update(payload);
     return notebook;
   }
 
   deleteNotebook(notebook: Notebook) {
-    return this.notebookDao!.deleteById(notebook.id);
+    return this.notebookDao.deleteById(notebook.id);
   }
 }

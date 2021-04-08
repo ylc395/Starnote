@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { singleton, container } from 'tsyringe';
 import { Note, isWithId, NoteDataObject } from 'domain/entity';
 import { NOTE_DAO_TOKEN } from './daoTokens';
@@ -14,16 +13,16 @@ export class NoteRepository {
   ): Promise<NoteDataObject | null>;
   queryNoteById(id: Note['id'], fields?: (keyof NoteDataObject)[]) {
     if (!fields) {
-      return this.noteDao!.one({ id }).then((note) =>
-        note ? Note.from(note) : note,
-      );
+      return this.noteDao
+        .one({ id })
+        .then((note) => (note ? Note.from(note) : note));
     }
 
-    return this.noteDao!.one({ id }, fields);
+    return this.noteDao.one({ id }, fields);
   }
 
   createNote(note: Note) {
-    this.noteDao!.create(note.toDataObject());
+    this.noteDao.create(note.toDataObject());
   }
 
   updateNote<T extends keyof NoteDataObject>(note: Note, fields?: T[]) {
@@ -35,10 +34,10 @@ export class NoteRepository {
       throw new Error('no noteId when update');
     }
 
-    return this.noteDao!.update(payload);
+    return this.noteDao.update(payload);
   }
 
   deleteNote(note: Note) {
-    return this.noteDao!.deleteById(note.id);
+    return this.noteDao.deleteById(note.id);
   }
 }

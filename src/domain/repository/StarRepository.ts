@@ -1,21 +1,17 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { singleton, inject } from 'tsyringe';
-import { isWithId, StarDataObject, Star } from 'domain/entity';
-import type { Dao } from './types';
+import { singleton, container } from 'tsyringe';
+import { isWithId, Star } from 'domain/entity';
 import { STAR_DAO_TOKEN } from './daoTokens';
 import { map, pick } from 'lodash';
 
 @singleton()
 export class StarRepository {
-  constructor(
-    @inject(STAR_DAO_TOKEN) protected starDao?: Dao<StarDataObject>,
-  ) {}
+  private readonly starDao = container.resolve(STAR_DAO_TOKEN);
   createStar(star: Star) {
-    this.starDao!.create(star.toDataObject());
+    this.starDao.create(star.toDataObject());
   }
 
   fetchAll() {
-    return this.starDao!.all().then((result) => result.map(Star.from));
+    return this.starDao.all().then((result) => result.map(Star.from));
   }
 
   updateStar(star: Star) {
@@ -25,10 +21,10 @@ export class StarRepository {
       throw new Error('no starId when update');
     }
 
-    return this.starDao!.update(payload);
+    return this.starDao.update(payload);
   }
 
   deleteStars(...stars: Star[]) {
-    return this.starDao!.hardDeleteByIds(map(stars, 'id'));
+    return this.starDao.hardDeleteByIds(map(stars, 'id'));
   }
 }
