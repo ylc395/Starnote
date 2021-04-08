@@ -1,3 +1,5 @@
+import { isUndefined } from 'lodash';
+
 export function selfish<T>(target: T) {
   const cache = new WeakMap();
   return new Proxy(target as never, {
@@ -12,4 +14,16 @@ export function selfish<T>(target: T) {
       return cache.get(value);
     },
   }) as T;
+}
+
+export class SafeMap<K, V> extends Map<K, V> {
+  get(key: K) {
+    const item = super.get(key);
+
+    if (isUndefined(item)) {
+      throw new Error('wrong key when get item from map');
+    }
+
+    return item;
+  }
 }

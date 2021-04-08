@@ -23,14 +23,14 @@ export default defineComponent({
     const {
       sortedStars: stars,
       setSortOrders,
-      removeStar,
+      removeStars,
     } = inject<StarService>(starToken)!;
 
     const {
       editorManager: { isActive, openInEditor },
     } = inject<EditorService>(editorToken)!;
 
-    return { stars, isActive, openInEditor, setSortOrders, removeStar };
+    return { stars, isActive, openInEditor, setSortOrders, removeStars };
   },
 });
 </script>
@@ -57,11 +57,11 @@ export default defineComponent({
           @click="openInEditor(element.entity.value)"
         >
           <FileOutlined class="mr-1" />
-          {{ element.entity.value.title.value }}
+          {{ element.entityName.value }}
           <button
             class="group-hover:visible absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer invisible"
           >
-            <CloseOutlined @click.stop="removeStar(element)" />
+            <CloseOutlined @click.stop="removeStars(element)" />
           </button>
         </li>
       </template>

@@ -3,7 +3,7 @@ import { singleton, inject } from 'tsyringe';
 import { isWithId, StarDataObject, Star } from 'domain/entity';
 import type { Dao } from './types';
 import { STAR_DAO_TOKEN } from './daoTokens';
-import { pick } from 'lodash';
+import { map, pick } from 'lodash';
 
 @singleton()
 export class StarRepository {
@@ -28,7 +28,7 @@ export class StarRepository {
     return this.starDao!.update(payload);
   }
 
-  deleteStar(star: Star) {
-    return this.starDao!.hardDeleteById(star.id);
+  deleteStars(...stars: Star[]) {
+    return this.starDao!.hardDeleteByIds(map(stars, 'id'));
   }
 }

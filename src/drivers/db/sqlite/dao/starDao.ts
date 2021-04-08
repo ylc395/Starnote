@@ -6,9 +6,7 @@ export const starDao = new DataAccessObject<StarDataObject>(EntityTypes.Star, {
     entity: EntityTypes.Note,
     foreignKey: StarTable.COLUMNS.ENTITY_ID,
     reference: NoteTable.COLUMNS.ID,
-    as: 'entity',
     required: true,
-    excludes: ['content'],
     scope: { valid: 1 },
   },
 });

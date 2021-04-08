@@ -6,11 +6,13 @@ import EventEmitter from 'eventemitter3';
 import { Note } from './Note';
 import { Notebook, ROOT_NOTEBOOK_ID } from './Notebook';
 import { singleton } from 'tsyringe';
+import { SafeMap } from 'utils/index';
 
 export enum ItemTreeEvents {
   Selected = 'SELECTED',
   Deleted = 'DELETED',
   Updated = 'UPDATED',
+  Loaded = 'LOADED',
 }
 
 export enum ViewMode {
@@ -29,12 +31,23 @@ export class ItemTree extends EventEmitter<ItemTreeEvents> {
   readonly mode: Ref<ViewMode> = ref(ViewMode.TwoColumn);
   readonly selectedItem: Ref<Notebook | Note | null> = shallowRef(null);
   readonly expandedItems: Notebook[] = shallowReactive([]);
-  constructor() {
-    super();
-  }
+  readonly indexedNotes = new SafeMap<TreeItem['id'], Note>();
 
   loadTree(rootItems: TreeItem[]) {
-    this.root.children.value = rootItems;
+    rootItems.forEach((item) => item.setParent(this.root, true));
+    this.emit(ItemTreeEvents.Loaded);
+
+    const indexFunc = (item: TreeItem) => {
+      if (Note.isA(item)) {
+        this.indexedNotes.set(item.id, item);
+      }
+
+      if (Notebook.isA(item)) {
+        item.children.value?.forEach(indexFunc);
+      }
+    };
+
+    rootItems.forEach(indexFunc);
   }
 
   setSelectedItem(item: TreeItem) {

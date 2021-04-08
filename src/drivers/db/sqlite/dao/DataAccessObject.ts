@@ -19,7 +19,7 @@ interface Config {
     entity: EntityTypes;
     foreignKey: string; // 本表的外键
     reference: string; // 目标表的主键
-    as: string;
+    as?: string;
     excludes?: string[];
     required?: boolean;
     scope?: Record<string, any>;
@@ -44,7 +44,7 @@ export class DataAccessObject<T> implements Dao<T> {
     private readonly tableName: EntityTypes,
     private readonly config?: Config,
   ) {}
-  private getFullWhere(where: Query<T>) {
+  private getFullWhere(where: Query<T> = {}) {
     const scope = this.config?.scope || {};
 
     return mapKeys(
@@ -73,20 +73,21 @@ export class DataAccessObject<T> implements Dao<T> {
       ? attributes.map(mapTableFields)
       : Object.values(COLUMNS_MAP[this.tableName]).map(mapTableFields);
 
-    const keysInAssoc = difference(
-      Object.values(COLUMNS_MAP[entity]),
-      excludes,
-    ).map((key) => `${as}.${key} as ${as}.${key}`);
+    const keysInAssoc = as
+      ? difference(Object.values(COLUMNS_MAP[entity]), excludes).map(
+          (key) => `${as}.${key} as ${as}.${key}`,
+        )
+      : [];
 
     const joinQuery = query
       .clear('select')
       .select(...keysInTable, ...keysInAssoc);
 
     return joinQuery[required ? 'join' : 'leftJoin'](
-      { [as]: entity }, // set alias for joined table
+      as ? { [as]: entity } : entity, // set alias for joined table
       {
-        ...mapKeys(scope, (_, key) => `${as}.${key}`),
-        [`${this.tableName}.${foreignKey}`]: `${as}.${reference}`,
+        ...mapKeys(scope, (_, key) => `${as || entity}.${key}`),
+        [`${this.tableName}.${foreignKey}`]: `${as || entity}.${reference}`,
       },
     );
   }
@@ -103,7 +104,9 @@ export class DataAccessObject<T> implements Dao<T> {
       const main = omitBy(row, isAssociation);
       const association = pickBy(row, isAssociation);
 
-      main[as] = mapKeys(association, (_, key) => key.replace(`${as}.`, ''));
+      if (as) {
+        main[as] = mapKeys(association, (_, key) => key.replace(`${as}.`, ''));
+      }
 
       return main;
     };
@@ -129,10 +132,10 @@ export class DataAccessObject<T> implements Dao<T> {
     } else if (Array.isArray(where)) {
       query = query.select(...where);
     } else {
-      query = query
-        .select(...(attributes || ['*']))
-        .where(this.getFullWhere(where));
+      query = query.select(...(attributes || ['*']));
     }
+
+    query = query.where(this.getFullWhere(Array.isArray(where) ? {} : where));
 
     return this.getQueryWithAssociation(query, attributes).then(
       this.processAssociation.bind(this),
@@ -202,9 +205,9 @@ export class DataAccessObject<T> implements Dao<T> {
       .then(() => undefined);
   }
 
-  hardDeleteById(id: string) {
+  hardDeleteByIds(ids: string[]) {
     return db(this.tableName)
-      .where({ id })
+      .whereIn('id', ids)
       .del()
       .then(() => undefined);
   }

@@ -1,51 +1,58 @@
 import { StarRepository } from 'domain/repository/StarRepository';
 import { container } from 'tsyringe';
 
-import { Star, Note } from 'domain/entity';
-import { StarList } from 'domain/entity/StarList';
-import { intersectionBy, unionBy, without } from 'lodash';
+import {
+  Star,
+  Note,
+  StarList,
+  ItemTree,
+  ItemTreeEvents,
+  TreeItem,
+} from 'domain/entity';
 import { computed } from '@vue/reactivity';
-import { AppEventBus, AppEvents } from './AppEventBus';
 
 export const token = Symbol();
 export class StarService {
-  private readonly appEventBus = container.resolve(AppEventBus);
   private readonly starRepository = container.resolve(StarRepository);
   private readonly starList = container.resolve(StarList);
-
-  get stars() {
-    return computed(() => this.starList.stars.value);
-  }
+  readonly itemTree = container.resolve(ItemTree);
 
   get sortedStars() {
     return this.starList.sortedStars;
   }
 
   constructor() {
-    this.loadStars();
-    this.appEventBus.on(AppEvents.ITEM_DELETED, this.loadStars, this);
+    this.itemTree
+      .on(ItemTreeEvents.Loaded, this.initStars, this)
+      .on(ItemTreeEvents.Deleted, this.removeStarsByEntity, this);
   }
 
-  private async loadStars() {
+  private async initStars() {
     const allStars = await this.starRepository.fetchAll();
-    const existedStars = this.starList.stars.value;
 
-    this.starList.stars.value = unionBy(
-      intersectionBy(existedStars, allStars, 'entityId'),
-      allStars,
-      'entityId',
-    );
+    for (const star of allStars) {
+      star.entity.value = this.itemTree.indexedNotes.get(star.entityId);
+    }
+
+    this.starList.stars.push(...allStars);
   }
 
   addStar(note: Note) {
-    const newStar = new Star(note);
-    this.starList.stars.value = [...this.starList.stars.value, newStar];
+    const newStar = this.starList.addStar(note);
     return this.starRepository.createStar(newStar);
   }
 
-  removeStar(star: Star) {
-    this.starRepository.deleteStar(star);
-    this.starList.stars.value = without(this.starList.stars.value, star);
+  removeStars(...stars: Star[]) {
+    this.starList.removeStars(...stars);
+    this.starRepository.deleteStars(...stars);
+  }
+
+  removeStarsByEntity(item: TreeItem) {
+    const stars = this.starList.removeStarsByEntity(item);
+
+    if (stars) {
+      this.starRepository.deleteStars(...stars);
+    }
   }
 
   setSortOrders(items: Star[]) {

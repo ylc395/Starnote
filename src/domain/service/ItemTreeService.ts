@@ -12,13 +12,11 @@ import {
   ItemTreeEvents,
 } from 'domain/entity';
 import { selfish } from 'utils/index';
-import { AppEventBus, AppEvents } from './AppEventBus';
 
 export const token = Symbol();
 export class ItemTreeService {
   private readonly notebookRepository = container.resolve(NotebookRepository);
   private readonly noteRepository = container.resolve(NoteRepository);
-  private readonly appEventBus = container.resolve(AppEventBus);
   readonly itemTree = selfish(container.resolve(ItemTree));
   constructor() {
     this.initTree();
@@ -41,7 +39,7 @@ export class ItemTreeService {
     }
   }
 
-  async createNote(parent?: Notebook) {
+  createNote(parent?: Notebook) {
     const target = parent || this.itemTree.selectedItem.value;
 
     if (!Notebook.isA(target)) {
@@ -49,7 +47,8 @@ export class ItemTreeService {
     }
 
     const newNote = target.createNote();
-    await this.noteRepository.createNote(newNote);
+    this.itemTree.indexedNotes.set(newNote.id, newNote);
+    this.noteRepository.createNote(newNote);
     this.itemTree.setSelectedItem(newNote);
   }
 
@@ -91,7 +90,6 @@ export class ItemTreeService {
       default:
         break;
     }
-    this.appEventBus.emit(AppEvents.ITEM_DELETED);
   }
 
   async setSortBy(notebook: Notebook, value: SortByEnums) {

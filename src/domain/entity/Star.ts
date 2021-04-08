@@ -1,8 +1,8 @@
-import { ref, shallowReadonly, shallowRef } from '@vue/reactivity';
+import { computed, ref, shallowRef } from '@vue/reactivity';
 import type { Ref } from '@vue/reactivity';
 import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
-import { Expose, Transform, Type } from 'class-transformer';
+import { Expose, Transform } from 'class-transformer';
 import { Note } from './Note';
 import { Entity } from './abstract/Entity';
 import {
@@ -23,18 +23,13 @@ export class Star
   @RefTransform
   readonly sortOrder = ref(0);
 
-  @Type(() => Note)
   @Expose({ toClassOnly: true })
-  @Transform(
-    ({ value }) => shallowReadonly(shallowRef(value?.id ? value : null)),
-    { toClassOnly: true },
-  )
-  readonly entity: Ref<Note | null> = shallowReadonly(shallowRef(null));
+  @Transform(({ obj }) => shallowRef(obj.entity), { toClassOnly: true })
+  readonly entity: Ref<Note | null> = shallowRef(null);
+  readonly entityName = computed(() => this.entity.value?.title.value || '');
 
-  @Expose({ toPlainOnly: true })
-  get entityId() {
-    return this.entity.value?.id || null;
-  }
+  @Expose()
+  readonly entityId: string = '';
 
   @DayjsRefTransform
   readonly userCreatedAt: Ref<Dayjs> = shallowRef(dayjs());
@@ -43,13 +38,15 @@ export class Star
     return instanceToDataObject<this, StarDataObject>(this);
   }
 
-  constructor(entity: Note) {
-    super();
-    this.entity = shallowRef(entity);
-  }
-
   static from(dataObject: StarDataObject) {
-    return dataObjectToInstance(Star, dataObject);
+    if (!dataObject.entityId && !dataObject.entity) {
+      throw new Error('invalid star initialized!');
+    }
+
+    return dataObjectToInstance(Star, {
+      ...dataObject,
+      ...(dataObject.entity ? { entityId: dataObject.entity.id } : null),
+    });
   }
 }
 

@@ -1,6 +1,6 @@
 import { v4 as uuid } from 'uuid';
 import { Expose } from 'class-transformer';
-import { hasIn } from 'lodash';
+import { hasIn, uniqueId } from 'lodash';
 
 export interface ObjectWithId {
   id: string;
@@ -17,7 +17,8 @@ export enum EntityTypes {
 
 export abstract class Entity implements ObjectWithId {
   @Expose()
-  readonly id: string = uuid();
+  readonly id = uuid();
+  private readonly _id = uniqueId('entity-'); // for debugging
 
   isEqual(entity: unknown) {
     return this === entity;
