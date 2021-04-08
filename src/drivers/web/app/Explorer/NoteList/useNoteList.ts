@@ -38,7 +38,7 @@ export function useNoteList() {
   });
 
   const isInvalidNotebook = computed(() => {
-    return !Notebook.isA(selectedItem.value);
+    return !Notebook.isA(selectedItem.value) || !selectedItem.value.getParent();
   });
 
   const sortable = computed(() => {
