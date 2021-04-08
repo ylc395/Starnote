@@ -55,7 +55,9 @@ export class Editor extends EventEmitter implements ListItem {
       return;
     }
 
-    this._note.value.title.value = this.title.value;
+    if (!this._note.value.isIndexNote) {
+      this._note.value.title.value = this.title.value;
+    }
     this._note.value.content.value = this.content.value;
     this.emitSync();
   }
