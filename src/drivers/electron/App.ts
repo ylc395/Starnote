@@ -1,11 +1,7 @@
 import { app, protocol, BrowserWindow, ipcMain } from 'electron';
 import type { App as ElectronApp } from 'electron';
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
-import {
-  IS_DEVELOPMENT,
-  IS_TEST,
-  WEBPACK_DEV_SERVER_URL,
-} from 'drivers/constants';
+import { IS_DEVELOPMENT, IS_TEST, WEBPACK_DEV_SERVER_URL } from 'drivers/env';
 import { camelCase, isFunction } from 'lodash';
 
 export class App {

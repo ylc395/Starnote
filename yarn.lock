@@ -11794,10 +11794,10 @@ warning@^4.0.0:
   dependencies:
     loose-envify "^1.0.0"
 
-wasm-git@^0.0.4:
-  version "0.0.4"
-  resolved "https://registry.npmjs.org/wasm-git/-/wasm-git-0.0.4.tgz#cdcf94473478e1d9c982333d9259d8f664354ba3"
-  integrity sha512-99owwK4XcwZFTQsjW+4Zgkjan1o2VvbP7e///Zd23k/3aLx5iOEDo/eyuX7RifJJlvFCSBbIWdC0ocqYPCB1Zg==
+wasm-git@^0.0.6:
+  version "0.0.6"
+  resolved "https://registry.npmjs.org/wasm-git/-/wasm-git-0.0.6.tgz#85c09a3e37e76495545b925cbfd2aa0d40ae8d61"
+  integrity sha512-i0cItmT4GgpV+4Gsh6xb24EqR93i0KluIjycSk9mYeuKSzlwWnN2wTPn/ywvZ7pqz8u3GhTCEhjkQ+cgQg0Lgg==
 
 watchpack-chokidar2@^2.0.1:
   version "2.0.1"

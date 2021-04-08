@@ -1,4 +1,4 @@
-import { IS_IN_ELECTRON } from 'drivers/constants';
+import { IS_IN_ELECTRON } from 'drivers/env';
 
 export const dbReady = new Promise((resolve) => {
   if (IS_IN_ELECTRON) {
