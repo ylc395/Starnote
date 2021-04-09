@@ -3,19 +3,17 @@ import { defineComponent } from 'vue';
 import DragIcon from './DragIcon/index.vue';
 import { useDrag } from './useDrag';
 import TreeViewer from './TreeViewer/index.vue';
-import NoteList from './NoteList/index.vue';
 
 export default defineComponent({
-  components: { TreeViewer, NoteList, DragIcon },
+  components: { TreeViewer, DragIcon },
   setup() {
     useDrag();
   },
 });
 </script>
 <template>
-  <section class="flex h-screen">
+  <aside>
     <TreeViewer />
-    <NoteList />
     <DragIcon />
-  </section>
+  </aside>
 </template>

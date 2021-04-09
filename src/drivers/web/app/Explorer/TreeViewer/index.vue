@@ -2,14 +2,15 @@
 import { defineComponent } from 'vue';
 import ItemTree from './ItemTree/index.vue';
 import StarList from './StarList/index.vue';
+import NoteList from './NoteList/index.vue';
 import Resizable from 'vue-resizable';
 
 export default defineComponent({
-  components: { StarList, ItemTree, Resizable },
+  components: { StarList, ItemTree, NoteList, Resizable },
 });
 </script>
 <template>
-  <aside>
+  <div class="flex h-screen">
     <Resizable
       class="tree-viewer h-full pt-4"
       :active="['r']"
@@ -20,7 +21,8 @@ export default defineComponent({
       <StarList />
       <ItemTree />
     </Resizable>
-  </aside>
+    <NoteList />
+  </div>
 </template>
 <style scoped>
 .tree-viewer {
