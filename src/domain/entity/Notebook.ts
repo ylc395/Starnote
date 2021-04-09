@@ -11,16 +11,16 @@ import {
   DayjsRefTransform,
 } from './abstract/DataMapper';
 import { Hierarchic, WithChildren } from './abstract/Hierarchic';
-import { Note } from './Note';
+import { Note, INDEX_NOTE_TITLE } from './Note';
 import { ListItem } from './abstract/ListItem';
 import { Expose, Transform, Type } from 'class-transformer';
 import { without } from 'lodash';
 import { container } from 'tsyringe';
 import { Setting } from './Setting';
 import { staticImplements } from 'utils/types';
+import { EntityTypes } from './abstract/Entity';
 
 export const ROOT_NOTEBOOK_ID: Notebook['id'] = NIL;
-export const INDEX_NOTE_TITLE = 'INDEX_NOTE';
 export enum SortByEnums {
   CreatedAt = 'CREATED_AT',
   UpdatedAt = 'UPDATED_AT',
@@ -33,6 +33,13 @@ export enum SortDirectEnums {
   Default = 'DEFAULT',
   Asc = 'ASC',
   Desc = 'DESC',
+}
+
+export enum TitleStatus {
+  Valid,
+  EmptyError,
+  DuplicatedError,
+  PreservedError,
 }
 
 @staticImplements<DataMapperStatic<NotebookDataObject>>()
@@ -131,13 +138,60 @@ export class Notebook
     return instanceToDataObject<this, NotebookDataObject>(this);
   }
 
+  checkChildTitle(
+    title: string,
+    type: EntityTypes.Note | EntityTypes.Notebook | Notebook | Note,
+  ) {
+    if (!title) {
+      return TitleStatus.EmptyError;
+    }
+
+    const checker =
+      type === EntityTypes.Note || Note.isA(type) ? Note.isA : Notebook.isA;
+    const notePreservedTitle = [INDEX_NOTE_TITLE];
+
+    if (type === EntityTypes.Note && notePreservedTitle.includes(title)) {
+      return TitleStatus.PreservedError;
+    }
+
+    const duplicated = this.children.value?.find((child) => {
+      return (
+        !child.isEqual(type) && checker(child) && child.title.value === title
+      );
+    });
+
+    if (duplicated) {
+      return TitleStatus.DuplicatedError;
+    }
+
+    return TitleStatus.Valid;
+  }
+
   createSubNotebook(title: string) {
+    const titleStatus = this.checkChildTitle(title, EntityTypes.Notebook);
+
+    if (titleStatus !== TitleStatus.Valid) {
+      throw new Error('invalid title');
+    }
+
     const newNotebook = Notebook.from({ title }, this);
     return newNotebook;
   }
 
   createNote() {
-    const note = Note.createEmptyNote(this, true);
+    const baseTitle = 'untitled note';
+    let title = baseTitle;
+
+    for (
+      let i = 1;
+      this.checkChildTitle(title, EntityTypes.Note) ===
+      TitleStatus.DuplicatedError;
+      i++
+    ) {
+      title = `${baseTitle}-${i}`;
+    }
+
+    const note = Note.createNote(this, { title });
     this.noteJustCreated = note;
     this.userModifiedAt.value = dayjs();
 
@@ -145,9 +199,7 @@ export class Notebook
   }
 
   createIndexNote() {
-    const newNote = Note.createEmptyNote(this, false, {
-      title: INDEX_NOTE_TITLE,
-    });
+    const newNote = Note.createIndexNote(this);
     this.indexNote.value = newNote;
     this.userModifiedAt.value = dayjs();
 

@@ -4,14 +4,17 @@ import {
   ItemTreeService,
   token as itemTreeToken,
 } from 'domain/service/ItemTreeService';
-import { Notebook } from 'domain/entity/Notebook';
+import { EntityTypes, Notebook, TitleStatus } from 'domain/entity';
 
 export const token: InjectionKey<
   ReturnType<typeof useNotebookCreator>
 > = Symbol();
 
 export function useNotebookCreator() {
-  const { createSubNotebook } = inject<ItemTreeService>(itemTreeToken)!;
+  const {
+    createSubNotebook,
+    itemTree: { root },
+  } = inject<ItemTreeService>(itemTreeToken)!;
   const isCreating = ref(false);
   const title = ref('');
 
@@ -23,27 +26,40 @@ export function useNotebookCreator() {
 
     const ancestors = _target.value.ancestors;
     const [, ...path] = ancestors;
-    path.push(_target.value);
+
+    if (!_target.value.isRoot) {
+      path.push(_target.value);
+    }
 
     return path.map(({ title }) => title.value);
   });
 
-  const handleEnter = () => {
-    if (!title.value) {
-      return;
+  const error = computed(() => {
+    const status = _target.value?.checkChildTitle(
+      title.value,
+      EntityTypes.Notebook,
+    );
+    const msgs = {
+      [TitleStatus.DuplicatedError]: '重复的目录名',
+      [TitleStatus.EmptyError]: '目录名不得为空',
+      [TitleStatus.PreservedError]: `${title.value} 不能作为目录名`,
+    };
+
+    if (!status) {
+      return '';
     }
-    stopCreating(true);
-  };
 
-  function startCreating(target?: Notebook) {
-    _target.value = target || null;
+    return msgs[status];
+  });
 
+  function startCreating(target: Notebook = root) {
+    _target.value = target;
     isCreating.value = true;
   }
 
   function stopCreating(isConfirmed: boolean) {
-    if (isConfirmed) {
-      createSubNotebook(title.value, _target.value as Notebook | null);
+    if (isConfirmed && _target.value && !error.value) {
+      createSubNotebook(title.value, _target.value);
     }
 
     title.value = '';
@@ -56,7 +72,7 @@ export function useNotebookCreator() {
     isCreating,
     title,
     path,
-    handleEnter,
+    error,
   };
   provide(token, service);
 

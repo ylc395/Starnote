@@ -14,4 +14,5 @@ export const builder: TableBuilder = (table) => {
   table.uuid(COLUMNS.ENTITY_ID).notNullable();
   table.integer(COLUMNS.SORT_ORDER).notNullable();
   table.dateTime(COLUMNS.USER_CREATED_AT).notNullable();
+  table.unique([COLUMNS.ENTITY_ID]);
 };

@@ -52,62 +52,52 @@ export class ItemTreeService {
     this.itemTree.setSelectedItem(newNote);
   }
 
-  async createSubNotebook(title: string, parent: Notebook | null) {
-    const newNotebook = parent
-      ? parent.createSubNotebook(title)
-      : this.itemTree.root.createSubNotebook(title);
+  createSubNotebook(title: string, parent: Notebook) {
+    const newNotebook = parent.createSubNotebook(title);
 
     if (parent) {
       this.itemTree.expandNotebook(parent);
     }
 
-    await this.notebookRepository.createNotebook(newNotebook);
+    this.notebookRepository.createNotebook(newNotebook);
     this.itemTree.setSelectedItem(newNotebook);
-
-    return newNotebook;
   }
 
-  async createIndexNote(parent: Notebook) {
+  createIndexNote(parent: Notebook) {
     const newNote = parent.createIndexNote();
 
-    await this.notebookRepository.updateNotebook(parent, ['indexNoteId']);
-    await this.noteRepository.createNote(newNote);
+    this.notebookRepository.updateNotebook(parent, ['indexNoteId']);
+    this.noteRepository.createNote(newNote);
     this.itemTree.setSelectedItem(parent);
 
     return newNote;
   }
 
-  async deleteItem(item: TreeItem) {
+  deleteItem(item: TreeItem) {
     this.itemTree.deleteItem(item);
 
     switch (true) {
       case Note.isA(item):
-        await this.noteRepository.deleteNote(item as Note);
+        this.noteRepository.deleteNote(item as Note);
         break;
       case Notebook.isA(item):
-        await this.notebookRepository.deleteNotebook(item as Notebook);
+        this.notebookRepository.deleteNotebook(item as Notebook);
         break;
       default:
         break;
     }
   }
 
-  async setSortBy(notebook: Notebook, value: SortByEnums) {
-    let result;
-
+  setSortBy(notebook: Notebook, value: SortByEnums) {
     if (value === SortByEnums.Custom) {
-      result = Promise.all(
-        notebook.sortedChildren.value.map(async (item, index) => {
-          item.sortOrder.value = index + 1;
-          return this.syncItem(item, ['sortOrder']);
-        }),
-      );
+      notebook.sortedChildren.value.forEach((item, index) => {
+        item.sortOrder.value = index + 1;
+        this.syncItem(item, ['sortOrder']);
+      });
     }
 
     notebook.sortBy.value = value;
-    result = this.notebookRepository.updateNotebook(notebook, ['sortBy']);
-
-    return result;
+    this.notebookRepository.updateNotebook(notebook, ['sortBy']);
   }
 
   setSortDirect(notebook: Notebook, value: SortDirectEnums) {

@@ -4,9 +4,10 @@ import { pull } from 'lodash';
 import EventEmitter from 'eventemitter3';
 
 import { Note } from './Note';
-import { Notebook, ROOT_NOTEBOOK_ID } from './Notebook';
+import { Notebook, ROOT_NOTEBOOK_ID, TitleStatus } from './Notebook';
 import { singleton } from 'tsyringe';
 import { SafeMap } from 'utils/index';
+import { EntityTypes } from './abstract/Entity';
 
 export enum ItemTreeEvents {
   Selected = 'SELECTED',
@@ -105,6 +106,15 @@ export class ItemTree extends EventEmitter<ItemTreeEvents> {
   rename(item: TreeItem, title: string) {
     if (!title) {
       throw new Error('empty title!');
+    }
+
+    if (item.parent) {
+      const type = Notebook.isA(item) ? EntityTypes.Notebook : EntityTypes.Note;
+      const titleStatus = item.parent.checkChildTitle(title, type);
+
+      if (titleStatus !== TitleStatus.Valid) {
+        throw new Error('invalid name');
+      }
     }
 
     item.title.value = title;

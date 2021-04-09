@@ -11,11 +11,13 @@ import {
   DataMapperStatic,
 } from './abstract/DataMapper';
 import { Hierarchic } from './abstract/Hierarchic';
-import { Notebook } from './Notebook';
+import { Notebook, TitleStatus } from './Notebook';
 import { ListItem } from './abstract/ListItem';
 import { staticImplements } from 'utils/types';
+import { EntityTypes } from './abstract/Entity';
 
 export const EMPTY_TITLE = '(empty title)';
+export const INDEX_NOTE_TITLE = 'INDEX_NOTE';
 
 @staticImplements<DataMapperStatic<NoteDataObject>>()
 export class Note
@@ -83,18 +85,28 @@ export class Note
     return entity instanceof Note;
   }
 
-  static createEmptyNote(
-    parent: Notebook,
-    bidirectional: boolean,
-    note: NoteDataObject = {},
-  ) {
-    const newNote = Note.from(
-      { title: 'untitled note', content: '', ...note },
-      parent,
-      bidirectional,
-    );
+  static createNote(parent: Notebook, note: NoteDataObject) {
+    if (
+      !note.title ||
+      parent.checkChildTitle(note.title, EntityTypes.Note) !== TitleStatus.Valid
+    ) {
+      throw new Error(`invalid note title`);
+    }
+
+    const newNote = Note.from({ content: '', ...note }, parent, true);
 
     newNote.isJustCreated = true;
+    return newNote;
+  }
+
+  static createIndexNote(parent: Notebook) {
+    const newNote = Note.from(
+      { content: '', title: INDEX_NOTE_TITLE },
+      parent,
+      false,
+    );
+    newNote.isJustCreated = true;
+
     return newNote;
   }
 }

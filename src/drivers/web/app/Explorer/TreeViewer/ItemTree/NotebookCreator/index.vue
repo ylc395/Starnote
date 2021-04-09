@@ -15,9 +15,7 @@ export default defineComponent({
   },
   setup() {
     const inputRef: Ref<null | HTMLInputElement> = ref(null);
-    const { title, isCreating, stopCreating, path, handleEnter } = inject(
-      token,
-    )!;
+    const { title, isCreating, stopCreating, path, error } = inject(token)!;
 
     onMounted(() => {
       inputRef.value!.focus();
@@ -29,7 +27,7 @@ export default defineComponent({
       stopCreating,
       inputRef,
       path,
-      handleEnter,
+      error,
     };
   },
 });
@@ -37,18 +35,19 @@ export default defineComponent({
 <template>
   <div>
     <Breadcrumb class="mb-4">
-      <BreadcrumbItem><FolderOpenOutlined /> </BreadcrumbItem>
+      <BreadcrumbItem><FolderOpenOutlined class="mr-2" />根目录</BreadcrumbItem>
       <BreadcrumbItem v-for="p of path" :key="p">{{ p }}</BreadcrumbItem>
     </Breadcrumb>
     <Input
       v-model:value="title"
       placeholder="新笔记本标题"
       ref="inputRef"
-      @keyup.enter="handleEnter"
+      @keyup.enter="stopCreating"
     />
+    <p class="text-right my-2 text-red-400">{{ error }}</p>
     <div class="text-right mt-5">
       <Button class="mr-2" @click="stopCreating(false)">取消</Button>
-      <Button :disabled="!title" @click="stopCreating(true)" type="primary"
+      <Button :disabled="!!error" @click="stopCreating(true)" type="primary"
         >确定</Button
       >
     </div>
