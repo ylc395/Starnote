@@ -38,16 +38,14 @@ export class Note
 
   readonly withContextmenu = ref(false);
 
-  protected readonly parent: Ref<Notebook | null> = shallowRef(null);
-
   isJustCreated = false;
 
   get isIndexNote() {
-    return this.parent.value?.indexNote.value === this;
+    return this.parent.indexNote.value === this;
   }
 
-  getParent() {
-    const parent = super.getParent();
+  get parent() {
+    const parent = super.parent;
 
     if (!parent) {
       throw new Error('no parent');

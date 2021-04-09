@@ -53,7 +53,7 @@ export class ItemTree extends EventEmitter<ItemTreeEvents> {
   setSelectedItem(item: TreeItem) {
     const _item = (() => {
       if (!Notebook.isA(item) && this.mode.value === ViewMode.TwoColumn) {
-        return item.getParent();
+        return item.parent;
       }
 
       return item;
@@ -84,7 +84,7 @@ export class ItemTree extends EventEmitter<ItemTreeEvents> {
       throw new Error('no item to move');
     }
 
-    if (child.getParent()?.isEqual(parent)) {
+    if (child.parent?.isEqual(parent)) {
       return;
     }
 
@@ -112,7 +112,7 @@ export class ItemTree extends EventEmitter<ItemTreeEvents> {
   }
 
   deleteItem(item: TreeItem) {
-    const parent = item.getParent();
+    const parent = item.parent;
 
     if (!parent) {
       throw new Error('no parent when delete');

@@ -1,7 +1,7 @@
 import { Entity } from './Entity';
 import { without } from 'lodash';
 import { Expose } from 'class-transformer';
-import type { Ref } from '@vue/reactivity';
+import { Ref, shallowRef } from '@vue/reactivity';
 
 export interface WithChildren<T extends Entity> extends Entity {
   readonly children: Ref<T[] | null>;
@@ -10,19 +10,26 @@ export interface WithChildren<T extends Entity> extends Entity {
 export abstract class Hierarchic<
   P extends WithChildren<Entity>
 > extends Entity {
-  protected abstract readonly parent: Ref<P | null>;
+  protected readonly _parent: Ref<P | null> = shallowRef(null);
+  get parent() {
+    return this._parent.value;
+  }
 
   @Expose({ name: 'parentId', toClassOnly: true })
   private initialParentId: Entity['id'] | null = null;
 
   @Expose({ toPlainOnly: true })
   get parentId() {
-    return this.parent.value?.id || this.initialParentId;
+    try {
+      return this.parent?.id || this.initialParentId;
+    } catch {
+      return this.initialParentId;
+    }
   }
 
   // 一般 indexNote 会被置为单向
   setParent(newParent: P, bidirectional: boolean) {
-    const oldParent = this.parent.value;
+    const oldParent = this._parent.value;
 
     if (oldParent?.isEqual(newParent)) {
       return this;
@@ -32,7 +39,7 @@ export abstract class Hierarchic<
       oldParent.children.value = without(oldParent.children.value, this);
     }
 
-    this.parent.value = newParent;
+    this._parent.value = newParent;
 
     if (!bidirectional) {
       return this;
@@ -55,7 +62,7 @@ export abstract class Hierarchic<
   }
 
   isDescendenceOf<T extends Entity>(entity: WithChildren<T>) {
-    let node: P | null = this.getParent();
+    let node: P | null = this._parent.value;
 
     while (node) {
       if (entity.isEqual(node)) {
@@ -63,7 +70,7 @@ export abstract class Hierarchic<
       }
 
       if (node instanceof Hierarchic) {
-        node = node.getParent();
+        node = node.parent;
       } else {
         break;
       }
@@ -72,7 +79,7 @@ export abstract class Hierarchic<
     return false;
   }
 
-  getParent() {
-    return this.parent.value;
+  get siblings() {
+    return without(this._parent.value?.children.value ?? [], this);
   }
 }

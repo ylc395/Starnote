@@ -37,7 +37,7 @@ export default defineComponent({
 <template>
   <div>
     <Breadcrumb class="mb-4">
-      <BreadcrumbItem><FolderOpenOutlined /> 根目录</BreadcrumbItem>
+      <BreadcrumbItem><FolderOpenOutlined /> </BreadcrumbItem>
       <BreadcrumbItem v-for="p of path" :key="p">{{ p }}</BreadcrumbItem>
     </Breadcrumb>
     <Input

@@ -42,12 +42,15 @@ export class Editor extends EventEmitter implements ListItem {
   loadNote(note: Note) {
     this._note.value = note;
 
-    this.title.value = note.isIndexNote
-      ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        note.getParent()!.title.value
-      : note.title.value;
+    const content = note.content.value;
+    const title = note.isIndexNote ? note.parent.title.value : note.title.value;
 
-    this.content.value = note.content.value ?? '';
+    if (content === null) {
+      throw new Error('empty title/content');
+    }
+
+    this.title.value = title;
+    this.content.value = content;
   }
 
   saveNote() {

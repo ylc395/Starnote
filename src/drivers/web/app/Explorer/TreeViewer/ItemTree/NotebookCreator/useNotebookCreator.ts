@@ -21,9 +21,9 @@ export function useNotebookCreator() {
     let node = _target.value;
     const path = [];
 
-    while (Notebook.isA(node)) {
+    while (Notebook.isA(node) && !node.isRoot) {
       path.push(node.title.value);
-      node = node.getParent();
+      node = node.parent;
     }
 
     return path.reverse();

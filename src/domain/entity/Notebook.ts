@@ -47,10 +47,6 @@ export class Notebook
   @RefTransform
   readonly title: Ref<string> = ref('untitled notebook');
 
-  @Expose({ name: 'parentId', toPlainOnly: true })
-  @Transform(({ value }) => value.value?.id || null, { toPlainOnly: true })
-  protected readonly parent: Ref<Notebook | null> = shallowRef(null);
-
   readonly withContextmenu = ref(false);
 
   children: Ref<(Note | Notebook)[] | null> = shallowRef(null);
