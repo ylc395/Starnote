@@ -1,6 +1,5 @@
 import { inject, ref, shallowRef, provide, computed } from 'vue';
 import type { InjectionKey, Ref } from 'vue';
-import { TreeItem } from 'domain/entity';
 import {
   ItemTreeService,
   token as itemTreeToken,
@@ -16,17 +15,17 @@ export function useNotebookCreator() {
   const isCreating = ref(false);
   const title = ref('');
 
-  const _target: Ref<TreeItem | null> = shallowRef(null);
+  const _target: Ref<Notebook | null> = shallowRef(null);
   const path = computed(() => {
-    let node = _target.value;
-    const path = [];
-
-    while (Notebook.isA(node) && !node.isRoot) {
-      path.push(node.title.value);
-      node = node.parent;
+    if (!_target.value) {
+      return [];
     }
 
-    return path.reverse();
+    const ancestors = _target.value.ancestors;
+    const [, ...path] = ancestors;
+    path.push(_target.value);
+
+    return path.map(({ title }) => title.value);
   });
 
   const handleEnter = () => {

@@ -82,4 +82,20 @@ export abstract class Hierarchic<
   get siblings() {
     return without(this._parent.value?.children.value ?? [], this);
   }
+
+  get ancestors() {
+    let node: P | null = this._parent.value;
+    const ancestors = [];
+
+    while (node) {
+      if (node instanceof Hierarchic) {
+        ancestors.unshift(node);
+        node = node.parent;
+      } else {
+        break;
+      }
+    }
+
+    return ancestors;
+  }
 }
