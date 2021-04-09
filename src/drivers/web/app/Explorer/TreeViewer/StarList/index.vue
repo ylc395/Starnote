@@ -27,7 +27,8 @@ export default defineComponent({
     } = inject<StarService>(starToken)!;
 
     const {
-      editorManager: { isActive, openInEditor },
+      editorManager: { isActive },
+      openInEditor,
     } = inject<EditorService>(editorToken)!;
 
     return { stars, isActive, openInEditor, setSortOrders, removeStars };
