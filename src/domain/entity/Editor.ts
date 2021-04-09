@@ -21,15 +21,17 @@ export class Editor extends EventEmitter implements ListItem {
   private saveRunner?: ReturnType<typeof effect>;
   private saveCount = 0;
   private emitSync() {
+    if (!this._note.value) {
+      throw new Error('no note to sync');
+    }
+
     if (this.saveCount < 1) {
       this.saveCount++;
       return;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    this._note.value!.userModifiedAt.value = dayjs();
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    this._note.value!.isJustCreated = false;
+    this._note.value.userModifiedAt.value = dayjs();
+    this._note.value.isJustCreated = false;
     this.emit(EditorEvents.Sync, this._note.value);
   }
 
