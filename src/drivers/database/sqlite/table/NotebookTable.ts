@@ -5,7 +5,6 @@ import { COLUMNS as NOTE_COLUMNS } from './NoteTable';
 export const TABLE_NAME = EntityTypes.Notebook;
 export const COLUMNS = {
   ID: 'id',
-  VALID: 'valid',
   TITLE: 'title',
   SORT_BY: 'sortBy',
   PARENT_ID: 'parentId',
@@ -18,7 +17,6 @@ export const COLUMNS = {
 
 export const builder: TableBuilder = (table) => {
   table.uuid(COLUMNS.ID).primary();
-  table.enum(COLUMNS.VALID, [0, 1]).notNullable().defaultTo(1);
   table.text(COLUMNS.TITLE).notNullable();
   table
     .enum(COLUMNS.SORT_BY, [

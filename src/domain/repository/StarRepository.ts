@@ -25,6 +25,6 @@ export class StarRepository {
   }
 
   deleteStars(...stars: Star[]) {
-    return this.starDao.hardDeleteByIds(map(stars, 'id'));
+    return this.starDao.deleteByIds(map(stars, 'id'));
   }
 }

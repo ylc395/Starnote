@@ -5,7 +5,6 @@ import { EntityTypes } from 'domain/entity';
 export const TABLE_NAME = EntityTypes.Note;
 export const COLUMNS = {
   ID: 'id',
-  VALID: 'valid',
   TITLE: 'title',
   CONTENT: 'content',
   PARENT_ID: 'parentId',
@@ -16,7 +15,6 @@ export const COLUMNS = {
 
 export const builder: TableBuilder = (table) => {
   table.uuid(COLUMNS.ID).primary();
-  table.enum(COLUMNS.VALID, [0, 1]).notNullable().defaultTo(1);
   table.text(COLUMNS.TITLE).notNullable();
   table.text(COLUMNS.CONTENT).notNullable();
   table.uuid(COLUMNS.PARENT_ID).notNullable();

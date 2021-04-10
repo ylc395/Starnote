@@ -1,10 +1,11 @@
 import 'reflect-metadata';
-import { dbReady } from 'drivers/db';
+import { Database } from 'drivers/database';
 
 import { createApp } from 'vue';
 import App from './App.vue';
 import './main.css';
 
-dbReady.then(() => {
+const db = new Database();
+db.ready.then(() => {
   createApp(App).mount('#app');
 });

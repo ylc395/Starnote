@@ -11,7 +11,6 @@ export const notebookDao = new DataAccessObject<NotebookDataObject>(
       reference: NoteTable.COLUMNS.ID,
       as: 'indexNote',
       excludes: ['content'],
-      scope: { valid: 1 },
     },
     hasMany: [
       {
@@ -23,6 +22,5 @@ export const notebookDao = new DataAccessObject<NotebookDataObject>(
         foreignKey: 'parentId',
       },
     ],
-    scope: { valid: 1 },
   },
 );

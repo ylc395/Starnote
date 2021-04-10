@@ -18,5 +18,5 @@ export interface Dao<T> {
   create(entity: T): Promise<void>; // 期望实现 findCreate 的语义
   update(patchEntity: T & ObjectWithId): Promise<void>;
   deleteById(id: string): Promise<void>;
-  hardDeleteByIds(ids: string[]): Promise<void>;
+  deleteByIds(ids: string[]): Promise<void>;
 }

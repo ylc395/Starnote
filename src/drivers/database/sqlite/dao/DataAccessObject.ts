@@ -142,15 +142,11 @@ export class DataAccessObject<T> implements Dao<T> {
     );
   }
 
-  private async deleteByIds(
-    ids: string[],
-    lastStep = false,
-    tableName?: EntityTypes,
-  ) {
+  async deleteByIds(ids: string[], lastStep = false, tableName?: EntityTypes) {
     if (!this.config?.hasMany || lastStep) {
       return db(tableName || this.tableName)
         .whereIn('id', ids)
-        .update({ valid: 0 })
+        .del()
         .then(() => undefined);
     }
 
@@ -202,13 +198,6 @@ export class DataAccessObject<T> implements Dao<T> {
   create(dataObject: T & ObjectWithId) {
     return db(this.tableName)
       .insert(dataObject)
-      .then(() => undefined);
-  }
-
-  hardDeleteByIds(ids: string[]) {
-    return db(this.tableName)
-      .whereIn('id', ids)
-      .del()
       .then(() => undefined);
   }
 }
