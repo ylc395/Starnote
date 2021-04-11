@@ -100,8 +100,15 @@ export class ItemTree extends EventEmitter<ItemTreeEvents> {
       return;
     }
 
-    child.setParent(parent || this.root, true);
-    this.emit(ItemTreeEvents.Updated, child, ['parentId']);
+    const _parent = parent || this.root;
+    const newTitle = _parent.getUniqueTitle(child.title.value);
+
+    if (newTitle !== child.title.value) {
+      child.title.value = newTitle;
+    }
+
+    child.setParent(_parent, true);
+    this.emit(ItemTreeEvents.Updated, child, ['parentId', 'title']);
   }
 
   private isExpanded(notebook: Notebook) {

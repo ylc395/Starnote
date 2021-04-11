@@ -178,8 +178,7 @@ export class Notebook
     return newNotebook;
   }
 
-  createNote() {
-    const baseTitle = 'untitled note';
+  getUniqueTitle(baseTitle: string) {
     let title = baseTitle;
 
     for (
@@ -191,7 +190,13 @@ export class Notebook
       title = `${baseTitle}-${i}`;
     }
 
-    const note = Note.createNote(this, { title });
+    return title;
+  }
+
+  createNote() {
+    const note = Note.createNote(this, {
+      title: this.getUniqueTitle('untitled note'),
+    });
     this.noteJustCreated = note;
     this.userModifiedAt.value = dayjs();
 
