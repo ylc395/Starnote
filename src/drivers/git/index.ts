@@ -1,15 +1,5 @@
-import EventEmitter from 'eventemitter3';
+import { container } from 'tsyringe';
+import { GIT_TOKEN } from 'domain/service/RevisionService';
+import { FsGit } from './FsGit';
 
-export enum GitEvents {
-  Message = 'MESSAGE',
-}
-
-export class Git extends EventEmitter<GitEvents> {
-  private readonly worker = new Worker('./worker.ts', { type: 'module' });
-  constructor() {
-    super();
-    this.worker.addEventListener('message', ({ data }) => {
-      this.emit(GitEvents.Message, data);
-    });
-  }
-}
+container.registerSingleton(GIT_TOKEN, FsGit);

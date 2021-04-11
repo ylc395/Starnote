@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 import { Database } from 'drivers/database';
+import 'drivers/git';
 
 import { createApp } from 'vue';
 import App from './App.vue';

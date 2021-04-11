@@ -15,6 +15,7 @@ import {
   token as settingToken,
 } from 'domain/service/SettingService';
 import { StarService, token as starToken } from 'domain/service/StarService';
+import { RevisionService } from 'domain/service/RevisionService';
 import { selfish } from 'utils/index';
 
 export default defineComponent({
@@ -24,6 +25,7 @@ export default defineComponent({
     provide(editorToken, selfish(new EditorService()));
     provide(settingToken, selfish(new SettingService()));
     provide(starToken, selfish(new StarService()));
+    new RevisionService();
   },
 });
 </script>

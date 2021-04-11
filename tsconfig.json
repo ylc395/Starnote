@@ -19,13 +19,7 @@
       "domain/*": ["src/domain/*"],
       "drivers/*": ["src/drivers/*"]
     },
-    "lib": [
-      "esnext",
-      "dom",
-      "dom.iterable",
-      "scripthost",
-      "WebWorker.ImportScripts"
-    ]
+    "lib": ["dom"]
   },
   "include": [
     "src/**/*.ts",

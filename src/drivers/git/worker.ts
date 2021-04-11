@@ -1,6 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/// <reference lib="WebWorker" />
 const rootPath = '/wasm-git';
-
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 (self as any).Module = {
   locateFile(path: string) {
     return `${rootPath}/${path}`;
@@ -9,22 +9,32 @@ const rootPath = '/wasm-git';
     // eslint-disable-next-line no-console
     console.log(text); // text must be outputted somehow, or we will get a error
     const _text = text;
-    self.postMessage({ event: 'message', data: _text }, '*');
+    self.postMessage({ event: 'output', data: _text });
   },
 };
 
 importScripts(`${rootPath}/lg2.js`);
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare const Module: any;
 Module.onRuntimeInitialized = () => {
   const lg = Module;
+  self.addEventListener('message', ({ data: [action, ...args] }) => {
+    if (!action) {
+      return;
+    }
 
-  FS.mkdir('/working');
-  FS.mount(MEMFS, {}, '/working');
-  FS.chdir('/working');
+    if (action === 'init') {
+      FS.mkdir('/git_repository');
+      FS.mount(NODEFS, { root: args[0] }, '/git_repository');
+      FS.chdir('/git_repository');
+      lg.callMain(['init', '/git_repository/.git']);
+    } else {
+      lg.callMain([action, ...args]);
+    }
 
-  FS.writeFile(
-    '/home/web_user/.gitconfig',
-    '[user]\n' + 'name = Test User\n' + 'email = test@example.com',
-  );
+    self.postMessage({ event: 'done' });
+  });
+
+  self.postMessage({ event: 'ready' });
 };

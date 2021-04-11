@@ -3,9 +3,8 @@ module.exports = {
     worker: true,
   },
   globals: {
-    EmscriptenModule: 'readonly',
     FS: 'readonly',
-    MEMFS: 'readonly',
+    NODEFS: 'readonly',
     Module: 'readonly',
   },
 };
