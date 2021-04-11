@@ -13,6 +13,7 @@ import EventEmitter from 'eventemitter3';
 import { Notebook } from './Notebook';
 import { singleton } from 'tsyringe';
 import { EditorEvents } from './Editor';
+import { selfish } from 'utils/index';
 
 const MAX_EDITOR_COUNT = 3;
 
@@ -25,7 +26,7 @@ export class EditorManager extends EventEmitter<EditorManagerEvents> {
   private readonly maxEditorCount = ref(MAX_EDITOR_COUNT);
   private readonly _editors: Editor[] = shallowReactive([]);
   readonly editors = computed(() => {
-    return shallowReadonly(this._editors);
+    return shallowReadonly(this._editors.map(selfish));
   });
   private _activeEditor: Ref<Editor | null> = shallowRef(null);
   readonly activeEditor = computed(() => {

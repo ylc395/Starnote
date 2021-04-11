@@ -9,17 +9,18 @@ export default defineComponent({
   },
   setup({ editor }) {
     const { titleRef, editorRef } = useEditor(editor);
-    return { titleRef, editorRef };
+    const { stopAutoSave, autoSave, title, note } = editor;
+    return { titleRef, editorRef, stopAutoSave, autoSave, title, note };
   },
 });
 </script>
 <template>
-  <div>
+  <div @focusout="stopAutoSave" @focusin="autoSave">
     <div>
       <input
         ref="titleRef"
-        v-model="editor.title.value"
-        v-if="!editor.note.value.isIndexNote"
+        v-model="title"
+        v-if="!note.isIndexNote"
         class="w-full border-0 text-xl py-2 px-4 focus:outline-none"
         placeholder="笔记标题"
       />

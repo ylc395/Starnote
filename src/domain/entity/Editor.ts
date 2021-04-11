@@ -16,12 +16,29 @@ export class Editor extends EventEmitter<EditorEvents> implements ListItem {
   readonly content = ref('');
   private readonly _note: Ref<Note | null> = shallowRef(null);
   readonly note = computed(() => this._note.value);
-  private saveEffect: ReturnType<typeof effect>;
-
+  private saveEffect: ReturnType<typeof effect> | null = null;
   constructor(note: Note) {
     super();
     this.loadNote(note);
-    this.saveEffect = effect(this.saveNote.bind(this));
+    this.autoSave();
+  }
+
+  autoSave() {
+    if (!this._note.value) {
+      throw new Error('load note before enable auto save');
+    }
+
+    if (!this.saveEffect) {
+      this.loadNote(this._note.value);
+      this.saveEffect = effect(this.saveNote.bind(this));
+    }
+  }
+
+  stopAutoSave() {
+    if (this.saveEffect) {
+      stop(this.saveEffect);
+      this.saveEffect = null;
+    }
   }
 
   loadNote(note: Note) {
@@ -34,8 +51,13 @@ export class Editor extends EventEmitter<EditorEvents> implements ListItem {
       throw new Error('empty title/content');
     }
 
-    this.title.value = title;
-    this.content.value = content;
+    if (this.title.value !== title) {
+      this.title.value = title;
+    }
+
+    if (this.content.value !== content) {
+      this.content.value = content;
+    }
   }
 
   private saveNote() {
@@ -71,7 +93,7 @@ export class Editor extends EventEmitter<EditorEvents> implements ListItem {
     this._note.value.content.value = null;
     this._note.value = null;
     this.removeAllListeners();
-    stop(this.saveEffect);
+    this.stopAutoSave();
   }
 
   static isA(instance: unknown): instance is Editor {
