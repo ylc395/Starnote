@@ -67,7 +67,7 @@ export class Notebook
     copy.sort((child1, child2) => {
       const sortBy =
         this.sortBy.value === SortByEnums.Default
-          ? this.setting.defaultSortBy
+          ? this.setting.defaultSortBy.value
           : this.sortBy.value;
 
       const sortDirect =
