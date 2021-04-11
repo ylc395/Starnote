@@ -1,11 +1,17 @@
 import { shallowRef, shallowReactive, ref } from '@vue/reactivity';
 import type { Ref } from '@vue/reactivity';
+import { singleton } from 'tsyringe';
 import { pull } from 'lodash';
 import EventEmitter from 'eventemitter3';
 
 import { Note } from './Note';
-import { Notebook, ROOT_NOTEBOOK_ID, TitleStatus } from './Notebook';
-import { singleton } from 'tsyringe';
+import {
+  Notebook,
+  ROOT_NOTEBOOK_ID,
+  TitleStatus,
+  SortByEnums,
+  SortDirectEnums,
+} from './Notebook';
 import { SafeMap } from 'utils/index';
 import { EntityTypes } from './abstract/Entity';
 
@@ -14,6 +20,7 @@ export enum ItemTreeEvents {
   Deleted = 'DELETED',
   Updated = 'UPDATED',
   Loaded = 'LOADED',
+  Created = 'CREATED',
 }
 
 export enum ViewMode {
@@ -146,5 +153,65 @@ export class ItemTree extends EventEmitter<ItemTreeEvents> {
     }
 
     this.emit(ItemTreeEvents.Deleted, item);
+  }
+  createNote(parent?: Notebook) {
+    const target = parent || this.selectedItem.value;
+
+    if (!Notebook.isA(target)) {
+      throw new Error('no target notebook');
+    }
+
+    const newNote = target.createNote();
+    this.indexedNotes.set(newNote.id, newNote);
+    this.setSelectedItem(newNote);
+    this.emit(ItemTreeEvents.Created, newNote);
+
+    return newNote;
+  }
+
+  createSubNotebook(title: string, parent: Notebook) {
+    const newNotebook = parent.createSubNotebook(title);
+
+    if (parent) {
+      this.expandNotebook(parent);
+    }
+
+    this.setSelectedItem(newNotebook);
+    this.emit(ItemTreeEvents.Created, newNotebook);
+
+    return newNotebook;
+  }
+
+  createIndexNote(parent: Notebook) {
+    const newNote = parent.createIndexNote();
+    this.setSelectedItem(parent);
+    this.emit(ItemTreeEvents.Created, newNote);
+    this.emit(ItemTreeEvents.Updated, parent, ['indexNoteId']);
+
+    return newNote;
+  }
+
+  setSortBy(notebook: Notebook, value: SortByEnums) {
+    if (value === SortByEnums.Custom) {
+      notebook.sortedChildren.value.forEach((item, index) => {
+        item.sortOrder.value = index + 1;
+        this.emit(ItemTreeEvents.Updated, item, ['sortOrder']);
+      });
+    }
+
+    notebook.sortBy.value = value;
+    this.emit(ItemTreeEvents.Updated, notebook, ['sortBy']);
+  }
+
+  setSortDirect(notebook: Notebook, value: SortDirectEnums) {
+    notebook.sortDirect.value = value;
+    this.emit(ItemTreeEvents.Updated, notebook, ['sortDirect']);
+  }
+
+  setSortOrders(items: TreeItem[]) {
+    items.forEach((item, index) => {
+      item.sortOrder.value = index + 1;
+      this.emit(ItemTreeEvents.Updated, item, ['sortOrder']);
+    });
   }
 }

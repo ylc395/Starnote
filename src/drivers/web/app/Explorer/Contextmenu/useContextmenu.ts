@@ -19,10 +19,7 @@ export function useContextmenu<T extends TreeItem>(
 ) {
   const { open, context } = useCommonContextmenu<T>();
   const {
-    createNote,
-    createIndexNote,
-    deleteItem,
-    itemTree: { mode },
+    itemTree: { mode, createNote, createIndexNote, deleteItem },
   } = inject<ItemTreeService>(itemTreeToken)!;
   const { addStar, isStar, removeStarsByEntity } = inject<StarService>(
     starToken,

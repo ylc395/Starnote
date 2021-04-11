@@ -15,9 +15,7 @@ import { Note, Notebook, SortByEnums } from 'domain/entity';
 
 export function useNoteList() {
   const {
-    itemTree: { selectedItem },
-    createNote,
-    setSortOrders,
+    itemTree: { selectedItem, createNote, setSortOrders },
   } = inject<ItemTreeService>(ItemTreeToken)!;
   const {
     openInEditor,

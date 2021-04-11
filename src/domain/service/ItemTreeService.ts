@@ -4,9 +4,6 @@ import {
   Notebook,
   ItemTree,
   TreeItem,
-  Note,
-  SortByEnums,
-  SortDirectEnums,
   NotebookDataObject,
   NoteDataObject,
   ItemTreeEvents,
@@ -25,7 +22,11 @@ export class ItemTreeService {
   private async initTree() {
     const items = await this.notebookRepository.fetchTree();
     this.itemTree.loadTree(items);
-    this.itemTree.on(ItemTreeEvents.Updated, this.syncItem, this);
+
+    this.itemTree
+      .on(ItemTreeEvents.Updated, this.syncItem, this)
+      .on(ItemTreeEvents.Created, this.syncNewItem, this)
+      .on(ItemTreeEvents.Deleted, this.syncDeletedItem, this);
   }
 
   private syncItem<T extends keyof (NotebookDataObject | NoteDataObject)>(
@@ -39,76 +40,19 @@ export class ItemTreeService {
     }
   }
 
-  createNote(parent?: Notebook) {
-    const target = parent || this.itemTree.selectedItem.value;
-
-    if (!Notebook.isA(target)) {
-      throw new Error('no target notebook');
-    }
-
-    const newNote = target.createNote();
-    this.itemTree.indexedNotes.set(newNote.id, newNote);
-    this.noteRepository.createNote(newNote);
-    this.itemTree.setSelectedItem(newNote);
-  }
-
-  createSubNotebook(title: string, parent: Notebook) {
-    const newNotebook = parent.createSubNotebook(title);
-
-    if (parent) {
-      this.itemTree.expandNotebook(parent);
-    }
-
-    this.notebookRepository.createNotebook(newNotebook);
-    this.itemTree.setSelectedItem(newNotebook);
-  }
-
-  createIndexNote(parent: Notebook) {
-    const newNote = parent.createIndexNote();
-
-    this.notebookRepository.updateNotebook(parent, ['indexNoteId']);
-    this.noteRepository.createNote(newNote);
-    this.itemTree.setSelectedItem(parent);
-
-    return newNote;
-  }
-
-  deleteItem(item: TreeItem) {
-    this.itemTree.deleteItem(item);
-
-    switch (true) {
-      case Note.isA(item):
-        this.noteRepository.deleteNote(item as Note);
-        break;
-      case Notebook.isA(item):
-        this.notebookRepository.deleteNotebook(item as Notebook);
-        break;
-      default:
-        break;
+  private syncNewItem(item: TreeItem) {
+    if (Notebook.isA(item)) {
+      return this.notebookRepository.createNotebook(item);
+    } else {
+      return this.noteRepository.createNote(item);
     }
   }
 
-  setSortBy(notebook: Notebook, value: SortByEnums) {
-    if (value === SortByEnums.Custom) {
-      notebook.sortedChildren.value.forEach((item, index) => {
-        item.sortOrder.value = index + 1;
-        this.syncItem(item, ['sortOrder']);
-      });
+  private syncDeletedItem(item: TreeItem) {
+    if (Notebook.isA(item)) {
+      return this.notebookRepository.deleteNotebook(item);
+    } else {
+      return this.noteRepository.deleteNote(item);
     }
-
-    notebook.sortBy.value = value;
-    this.notebookRepository.updateNotebook(notebook, ['sortBy']);
-  }
-
-  setSortDirect(notebook: Notebook, value: SortDirectEnums) {
-    notebook.sortDirect.value = value;
-    this.notebookRepository.updateNotebook(notebook, ['sortDirect']);
-  }
-
-  setSortOrders(items: TreeItem[]) {
-    items.forEach((item, index) => {
-      item.sortOrder.value = index + 1;
-      this.syncItem(item, ['sortOrder']);
-    });
   }
 }

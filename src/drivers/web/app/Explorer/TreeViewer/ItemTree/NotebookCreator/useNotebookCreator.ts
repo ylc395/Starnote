@@ -12,8 +12,7 @@ export const token: InjectionKey<
 
 export function useNotebookCreator() {
   const {
-    createSubNotebook,
-    itemTree: { root },
+    itemTree: { root, createSubNotebook },
   } = inject<ItemTreeService>(itemTreeToken)!;
   const isCreating = ref(false);
   const title = ref('');

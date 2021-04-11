@@ -17,9 +17,7 @@ import {
 
 export function useSort() {
   const {
-    itemTree: { selectedItem },
-    setSortBy,
-    setSortDirect,
+    itemTree: { selectedItem, setSortBy, setSortDirect },
   } = inject<ItemTreeService>(itemTreeToken)!;
   const {
     setting: { get: getSetting },
