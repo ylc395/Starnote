@@ -2,39 +2,38 @@ import { container } from 'tsyringe';
 import { NoteRepository } from 'domain/repository';
 import {
   EditorManager,
-  Notebook,
   Note,
   TreeItem,
-  EditorEvents,
   ItemTreeEvents,
   ItemTree,
+  EditorManagerEvents,
 } from 'domain/entity';
-import { effect } from '@vue/reactivity';
 import { debounce, isNull } from 'lodash';
 import { selfish } from 'utils/index';
 
 export const token = Symbol();
 export class EditorService {
-  readonly editorManager = selfish(new EditorManager());
+  readonly editorManager = selfish(container.resolve(EditorManager));
   private readonly noteRepository = container.resolve(NoteRepository);
   private readonly itemTree = selfish(container.resolve(ItemTree));
   constructor() {
-    effect(this.keepSync.bind(this));
+    this.keepSync();
     this.monitorItemTree(this.itemTree);
   }
 
   private monitorItemTree(itemTree: ItemTree) {
-    itemTree.on(ItemTreeEvents.Selected, this.openInEditor, this);
-    itemTree.on(
-      ItemTreeEvents.Deleted,
-      this.editorManager.closeEditorOf,
-      this.editorManager,
-    );
+    itemTree
+      .on(ItemTreeEvents.Selected, this.openInEditor, this)
+      .on(
+        ItemTreeEvents.Deleted,
+        this.editorManager.closeEditorOf,
+        this.editorManager,
+      );
   }
 
   private keepSync() {
-    this.editorManager.activeEditor.value?.on(
-      EditorEvents.Sync,
+    this.editorManager.on(
+      EditorManagerEvents.Sync,
       debounce(
         (note: Note) =>
           this.noteRepository.updateNote(note, [
@@ -63,7 +62,7 @@ export class EditorService {
 
   async openInEditor(item: TreeItem) {
     const note = (() => {
-      if (!Notebook.isA(item)) {
+      if (Note.isA(item)) {
         return item;
       }
 

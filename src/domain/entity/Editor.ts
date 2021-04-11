@@ -6,39 +6,22 @@ import { uniqueId } from 'lodash';
 import { ListItem } from './abstract/ListItem';
 
 export enum EditorEvents {
-  Sync = 'SYNC',
+  Saved = 'SAVED',
 }
 
-export class Editor extends EventEmitter implements ListItem {
+export class Editor extends EventEmitter<EditorEvents> implements ListItem {
   readonly withContextmenu = ref(false);
   readonly id = uniqueId('editor-');
   readonly title = ref('');
   readonly content = ref('');
-  private readonly _isActive = ref(false);
-  readonly isActive = computed(() => this._isActive.value);
   private readonly _note: Ref<Note | null> = shallowRef(null);
   readonly note = computed(() => this._note.value);
-  private saveRunner?: ReturnType<typeof effect>;
-  private saveCount = 0;
-  private emitSync() {
-    if (!this._note.value) {
-      throw new Error('no note to sync');
-    }
-
-    if (this.saveCount < 1) {
-      this.saveCount++;
-      return;
-    }
-
-    this._note.value.userModifiedAt.value = dayjs();
-    this._note.value.isJustCreated = false;
-    this.emit(EditorEvents.Sync, this._note.value);
-  }
+  private saveEffect: ReturnType<typeof effect>;
 
   constructor(note: Note) {
     super();
-
     this.loadNote(note);
+    this.saveEffect = effect(this.saveNote.bind(this));
   }
 
   loadNote(note: Note) {
@@ -55,51 +38,40 @@ export class Editor extends EventEmitter implements ListItem {
     this.content.value = content;
   }
 
-  saveNote() {
+  private saveNote() {
     if (!this._note.value) {
-      return;
+      throw new Error('no note to save');
     }
 
-    if (!this._note.value.isIndexNote) {
-      this._note.value.title.value = this.title.value;
-    }
-    this._note.value.content.value = this.content.value;
-    this.emitSync();
-  }
+    const { title: noteTitle, content: noteContent } = this._note.value;
+    let updated = false;
 
-  activate() {
-    if (!this._note.value) {
-      throw new Error('load a note before editor activated!');
+    if (!this._note.value.isIndexNote && noteTitle.value !== this.title.value) {
+      noteTitle.value = this.title.value;
+      updated = true;
     }
 
-    if (this._isActive.value) {
-      return;
+    if (noteContent.value !== this.content.value) {
+      noteContent.value = this.content.value;
+      updated = true;
     }
 
-    this.saveCount = 0;
-    this._isActive.value = true;
-    this.saveRunner = effect(this.saveNote.bind(this));
-  }
-
-  inactivate() {
-    this.removeListener('sync');
-    this._isActive.value = false;
-
-    if (this.saveRunner) {
-      stop(this.saveRunner);
+    if (updated) {
+      this._note.value.userModifiedAt.value = dayjs();
+      this._note.value.isJustCreated = false;
+      this.emit(EditorEvents.Saved);
     }
   }
 
   destroy() {
-    this.inactivate();
-    this.removeAllListeners();
-
     if (!this._note.value) {
-      return;
+      throw new Error('no note to destroy');
     }
 
     this._note.value.content.value = null;
     this._note.value = null;
+    this.removeAllListeners();
+    stop(this.saveEffect);
   }
 
   static isA(instance: unknown): instance is Editor {

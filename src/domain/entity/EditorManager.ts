@@ -5,15 +5,23 @@ import {
   Ref,
   computed,
   shallowReadonly,
+  effect,
 } from '@vue/reactivity';
-import { compact, isEmpty, isNull, remove, without } from 'lodash';
+import { isEmpty, remove } from 'lodash';
 import { Note, Editor } from 'domain/entity';
 import EventEmitter from 'eventemitter3';
 import { Notebook } from './Notebook';
+import { singleton } from 'tsyringe';
+import { EditorEvents } from './Editor';
 
 const MAX_EDITOR_COUNT = 3;
-export const token = Symbol();
-export class EditorManager extends EventEmitter {
+
+export enum EditorManagerEvents {
+  Sync = 'SYNC',
+}
+
+@singleton()
+export class EditorManager extends EventEmitter<EditorManagerEvents> {
   private readonly maxEditorCount = ref(MAX_EDITOR_COUNT);
   private readonly _editors: Editor[] = shallowReactive([]);
   readonly editors = computed(() => {
@@ -23,6 +31,18 @@ export class EditorManager extends EventEmitter {
   readonly activeEditor = computed(() => {
     return this._activeEditor.value;
   });
+  constructor() {
+    super();
+    effect(() => {
+      this._activeEditor.value?.on(EditorEvents.Saved, () =>
+        this.emit(
+          EditorManagerEvents.Sync,
+          this._activeEditor.value?.note.value,
+        ),
+      );
+    });
+  }
+
   private getEditorById(id: Editor['id']) {
     const result = this._editors.find((editor) => editor.id === id);
 
@@ -33,28 +53,16 @@ export class EditorManager extends EventEmitter {
     return result;
   }
 
-  setActiveEditor(editor: Editor | Editor['id'] | null, noteToLoad?: Note) {
-    if (isNull(editor)) {
-      this._activeEditor.value = editor;
-      this._editors.forEach((editor) => editor.inactivate());
-      return;
-    }
-
+  setActiveEditor(editor: Editor | Editor['id'], noteToLoad?: Note) {
     const editorInstance = Editor.isA(editor)
       ? editor
       : this.getEditorById(editor);
-
-    this._activeEditor.value = editorInstance;
 
     if (noteToLoad) {
       editorInstance.loadNote(noteToLoad);
     }
 
-    without(this._editors, editorInstance).forEach((editor) =>
-      editor.inactivate(),
-    );
-
-    editorInstance.activate();
+    this._activeEditor.value = editorInstance;
   }
 
   closeEditorById(id: Editor['id']) {
@@ -72,23 +80,25 @@ export class EditorManager extends EventEmitter {
     if (!isEmpty(this._editors)) {
       this.setActiveEditor(this._editors[index] || this._editors[index - 1]);
     } else {
-      this.setActiveEditor(null);
+      this._activeEditor.value = null;
     }
   }
 
   closeEditorOf(item: Note | Notebook) {
-    const editors = Note.isA(item)
-      ? [this._editors.find((editor) => editor.note.value?.isEqual(item))]
-      : this._editors.filter((editor) =>
-          editor.note.value?.isDescendenceOf(item),
-        );
-    const compactEditors = compact(editors);
+    if (Note.isA(item)) {
+      const editorToClose = this._editors.find((editor) =>
+        editor.note.value?.isEqual(item),
+      );
 
-    if (isEmpty(compactEditors)) {
-      return;
+      if (editorToClose) {
+        this.closeEditorById(editorToClose.id);
+      }
+    } else {
+      const editors = this._editors.filter((editor) =>
+        editor.note.value?.isDescendenceOf(item),
+      );
+      editors.forEach(({ id }) => this.closeEditorById(id));
     }
-
-    compactEditors.forEach(({ id }) => this.closeEditorById(id));
   }
 
   isActive(note: Note) {
