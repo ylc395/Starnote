@@ -32,12 +32,26 @@ export class FsGit implements Git {
     });
   }
 
-  private call(args: string[]): Promise<void> {
-    return new Promise((resolve) => {
-      const callback = ({ data: { event } }: { data: { event: string } }) => {
-        this.worker.removeEventListener('message', callback);
+  private call(args: string[]): Promise<string> {
+    return new Promise((resolve, reject) => {
+      let output = '';
+
+      const callback = ({
+        data: { event, data },
+      }: {
+        data: { event: string; data: string };
+      }) => {
+        if (event === 'output') {
+          output += `\n${data}`;
+        }
+
+        if (event === 'error') {
+          reject(data);
+        }
+
         if (event === 'done') {
-          resolve();
+          resolve(output);
+          this.worker.removeEventListener('message', callback);
         }
       };
       this.worker.addEventListener('message', callback);
@@ -98,12 +112,11 @@ export class FsGit implements Git {
     if (!(await pathExists(pathJoin(GIT_DIR, '.git')))) {
       await this.treeToFiles(tree);
     }
-
-    this.call(['init', GIT_DIR]);
+    await this.call(['init', GIT_DIR]);
   }
 
-  clone(url: string) {
-    return this.call(['clone', url]);
+  async clone(url: string) {
+    await this.call(['clone', url]);
   }
 
   deleteFileByItem(item: TreeItem) {

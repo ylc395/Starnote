@@ -1,19 +1,18 @@
 /// <reference lib="WebWorker" />
-const rootPath = '/wasm-git';
+const SCRIPTS_ROOT_PATH = '/wasm-git';
+const GIT_REPO_DIR = '/git_repository';
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (self as any).Module = {
   locateFile(path: string) {
-    return `${rootPath}/${path}`;
+    return `${SCRIPTS_ROOT_PATH}/${path}`;
   },
   print(text: string) {
-    // eslint-disable-next-line no-console
-    console.log(text); // text must be outputted somehow, or we will get a error
-    const _text = text;
-    self.postMessage({ event: 'output', data: _text });
+    self.postMessage({ event: 'output', data: text });
   },
 };
 
-importScripts(`${rootPath}/lg2.js`);
+importScripts(`${SCRIPTS_ROOT_PATH}/lg2.js`);
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare const Module: any;
@@ -25,10 +24,10 @@ Module.onRuntimeInitialized = () => {
     }
 
     if (action === 'init') {
-      FS.mkdir('/git_repository');
-      FS.mount(NODEFS, { root: args[0] }, '/git_repository');
-      FS.chdir('/git_repository');
-      lg.callMain(['init', '/git_repository/.git']);
+      FS.mkdir(GIT_REPO_DIR);
+      FS.mount(NODEFS, { root: args[0] }, GIT_REPO_DIR);
+      FS.chdir(GIT_REPO_DIR);
+      lg.callMain(['init', `${GIT_REPO_DIR}/.git`]);
     } else {
       lg.callMain([action, ...args]);
     }
