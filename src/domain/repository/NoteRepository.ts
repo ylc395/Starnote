@@ -22,7 +22,7 @@ export class NoteRepository {
   }
 
   createNote(note: Note) {
-    this.noteDao.create(note.toDataObject());
+    return this.noteDao.create(note.toDataObject());
   }
 
   updateNote<T extends keyof NoteDataObject>(note: Note, fields?: T[]) {

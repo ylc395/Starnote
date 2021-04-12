@@ -7,9 +7,13 @@ import {
   ItemTreeEvents,
   ItemTree,
   EditorManagerEvents,
+  NoteDataObject,
 } from 'domain/entity';
-import { debounce, isNull } from 'lodash';
+import { isNull } from 'lodash';
+import { fromEvent } from 'rxjs';
+import { debounceTime, concatMap } from 'rxjs/operators';
 import { selfish } from 'utils/index';
+import EventEmitter from 'eventemitter3';
 
 export const token = Symbol();
 export class EditorService {
@@ -32,18 +36,21 @@ export class EditorService {
   }
 
   private keepSync() {
-    this.editorManager.on(
+    fromEvent<[Note, NoteDataObject]>(
+      this.editorManager as EventEmitter,
       EditorManagerEvents.Sync,
-      debounce(
-        (note: Note) =>
-          this.noteRepository.updateNote(note, [
+    )
+      .pipe(
+        debounceTime(500),
+        concatMap(([note]) => {
+          return this.noteRepository.updateNote(note, [
             'title',
             'content',
             'userModifiedAt',
-          ]),
-        500,
-      ),
-    );
+          ]);
+        }),
+      )
+      .subscribe();
   }
   private async loadContentOf(note: Note, forced = false) {
     if (!forced && !isNull(note.content.value)) {
