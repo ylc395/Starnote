@@ -14,6 +14,7 @@ import { Notebook } from './Notebook';
 import { singleton } from 'tsyringe';
 import { EditorEvents } from './Editor';
 import { selfish } from 'utils/index';
+import { NoteDataObject } from './Note';
 
 const MAX_EDITOR_COUNT = 3;
 
@@ -35,11 +36,14 @@ export class EditorManager extends EventEmitter<EditorManagerEvents> {
   constructor() {
     super();
     effect(() => {
-      this._activeEditor.value?.on(EditorEvents.Saved, () =>
-        this.emit(
-          EditorManagerEvents.Sync,
-          this._activeEditor.value?.note.value,
-        ),
+      this._activeEditor.value?.on(
+        EditorEvents.Saved,
+        (snapshot: NoteDataObject) =>
+          this.emit(
+            EditorManagerEvents.Sync,
+            this._activeEditor.value?.note.value,
+            snapshot,
+          ),
       );
     });
   }

@@ -66,6 +66,9 @@ export class Editor extends EventEmitter<EditorEvents> implements ListItem {
     }
 
     const { title: noteTitle, content: noteContent } = this._note.value;
+
+    const snapshot = this._note.value.toDataObject();
+
     let updated = false;
 
     if (!this._note.value.isIndexNote && noteTitle.value !== this.title.value) {
@@ -81,7 +84,7 @@ export class Editor extends EventEmitter<EditorEvents> implements ListItem {
     if (updated) {
       this._note.value.userModifiedAt.value = dayjs();
       this._note.value.isJustCreated = false;
-      this.emit(EditorEvents.Saved);
+      this.emit(EditorEvents.Saved, snapshot);
     }
   }
 

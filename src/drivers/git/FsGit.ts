@@ -1,6 +1,6 @@
 import { container } from 'tsyringe';
 import { mapValues, groupBy } from 'lodash';
-import { outputFile, pathExists, ensureDir, remove } from 'fs-extra';
+import { outputFile, pathExists, ensureDir, remove, move } from 'fs-extra';
 import { join as pathJoin } from 'path';
 import { Note, Notebook } from 'domain/entity';
 import type { ItemTree, TreeItem } from 'domain/entity';
@@ -52,24 +52,14 @@ export class FsGit implements Git {
 
     type IndexedContents = Record<string, string>;
 
-    const travel = async (
-      item: TreeItem,
-      path: string,
-      indexedContents: IndexedContents,
-    ) => {
-      let _path = pathJoin(path, item.title.value);
-
+    const travel = async (item: TreeItem, indexedContents: IndexedContents) => {
       if (Note.isA(item)) {
         promises.push(
-          outputFile(`${_path}${NOTE_SUFFIX}`, indexedContents[item.id]),
+          outputFile(FsGit.getItemPath(item), indexedContents[item.id]),
         );
       }
 
       if (Notebook.isA(item)) {
-        if (item.isRoot) {
-          _path = TREE_ITEM_DIR;
-        }
-
         const contents = await this.noteDao.all({ parentId: item.id }, [
           'content',
           'id',
@@ -83,7 +73,7 @@ export class FsGit implements Git {
         if (item.indexNote.value) {
           promises.push(
             outputFile(
-              pathJoin(_path, item.indexNote.value.title.value),
+              FsGit.getItemPath(item.indexNote.value),
               indexedContents[item.indexNote.value.id],
             ),
           );
@@ -92,12 +82,12 @@ export class FsGit implements Git {
         const children = item.children.value;
 
         if (children) {
-          children.forEach((item) => travel(item, _path, indexedContents));
+          children.forEach((item) => travel(item, indexedContents));
         }
       }
     };
 
-    travel(root, GIT_DIR, {});
+    travel(root, {});
 
     return Promise.all(promises).then(() => undefined);
   }
@@ -121,7 +111,30 @@ export class FsGit implements Git {
   }
 
   noteToFile(note: Note) {
-    return outputFile(FsGit.getItemPath(note), note.content.value);
+    const path = FsGit.getItemPath(note);
+    return outputFile(path, note.content.value);
+  }
+
+  moveItem(
+    item: TreeItem,
+    {
+      parent: oldParent,
+      title: oldTitle,
+    }: { parent?: Notebook; title?: string },
+  ) {
+    const _oldParent = oldParent || item.parent;
+    const _oldTitle = oldTitle || item.title.value;
+
+    if (!_oldParent) {
+      throw new Error('no old parent');
+    }
+
+    const oldPath = pathJoin(
+      FsGit.getItemPath(_oldParent),
+      Note.isA(item) ? `${_oldTitle}${NOTE_SUFFIX}` : _oldTitle,
+    );
+
+    return move(oldPath, FsGit.getItemPath(item));
   }
 
   private static getItemPath(item: TreeItem) {

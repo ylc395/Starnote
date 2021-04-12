@@ -39,7 +39,8 @@ export class ItemTree extends EventEmitter<ItemTreeEvents> {
   readonly mode: Ref<ViewMode> = ref(ViewMode.TwoColumn);
   readonly selectedItem: Ref<Notebook | Note | null> = shallowRef(null);
   readonly expandedItems: Notebook[] = shallowReactive([]);
-  readonly indexedNotes = new SafeMap<TreeItem['id'], Note>();
+  readonly indexedNotes = new SafeMap<Note['id'], Note>();
+  readonly indexedNotebooks = new SafeMap<Notebook['id'], Notebook>();
 
   loadTree(rootItems: TreeItem[]) {
     rootItems.forEach((item) => item.setParent(this.root, true));
@@ -51,6 +52,7 @@ export class ItemTree extends EventEmitter<ItemTreeEvents> {
       }
 
       if (Notebook.isA(item)) {
+        this.indexedNotebooks.set(item.id, item);
         item.children.value?.forEach(indexFunc);
       }
     };
@@ -100,6 +102,7 @@ export class ItemTree extends EventEmitter<ItemTreeEvents> {
       return;
     }
 
+    const snapshot = child.toDataObject();
     const _parent = parent || this.root;
     const newTitle = _parent.getUniqueTitle(child.title.value);
 
@@ -108,7 +111,7 @@ export class ItemTree extends EventEmitter<ItemTreeEvents> {
     }
 
     child.setParent(_parent, true);
-    this.emit(ItemTreeEvents.Updated, child, ['parentId', 'title']);
+    this.emit(ItemTreeEvents.Updated, child, snapshot, ['title', 'parentId']);
   }
 
   private isExpanded(notebook: Notebook) {
@@ -122,6 +125,8 @@ export class ItemTree extends EventEmitter<ItemTreeEvents> {
       throw new Error('empty title!');
     }
 
+    const snapshot = item.toDataObject();
+
     if (item.parent) {
       const type = Notebook.isA(item) ? EntityTypes.Notebook : EntityTypes.Note;
       const titleStatus = item.parent.checkChildTitle(title, type);
@@ -132,7 +137,7 @@ export class ItemTree extends EventEmitter<ItemTreeEvents> {
     }
 
     item.title.value = title;
-    this.emit(ItemTreeEvents.Updated, item, ['title']);
+    this.emit(ItemTreeEvents.Updated, item, snapshot, ['title']);
   }
 
   deleteItem(item: TreeItem) {
@@ -160,6 +165,8 @@ export class ItemTree extends EventEmitter<ItemTreeEvents> {
     }
 
     this.emit(ItemTreeEvents.Deleted, item);
+    this.indexedNotebooks.delete(item.id);
+    this.indexedNotes.delete(item.id);
   }
   createNote(parent?: Notebook) {
     const target = parent || this.selectedItem.value;
@@ -185,40 +192,50 @@ export class ItemTree extends EventEmitter<ItemTreeEvents> {
 
     this.setSelectedItem(newNotebook);
     this.emit(ItemTreeEvents.Created, newNotebook);
+    this.indexedNotebooks.set(newNotebook.id, newNotebook);
 
     return newNotebook;
   }
 
   createIndexNote(parent: Notebook) {
     const newNote = parent.createIndexNote();
+    const snapshot = parent.toDataObject();
     this.setSelectedItem(parent);
-    this.emit(ItemTreeEvents.Created, newNote);
-    this.emit(ItemTreeEvents.Updated, parent, ['indexNoteId']);
 
+    this.emit(ItemTreeEvents.Created, newNote);
+    this.emit(ItemTreeEvents.Updated, parent, snapshot, ['indexNoteId']);
+    this.indexedNotes.set(newNote.id, newNote);
     return newNote;
   }
 
   setSortBy(notebook: Notebook, value: SortByEnums) {
+    const snapshot = notebook.toDataObject();
+
     if (value === SortByEnums.Custom) {
       notebook.sortedChildren.value.forEach((item, index) => {
+        const snapshot = notebook.toDataObject();
+
         item.sortOrder.value = index + 1;
-        this.emit(ItemTreeEvents.Updated, item, ['sortOrder']);
+        this.emit(ItemTreeEvents.Updated, item, snapshot, ['sortOrder']);
       });
     }
 
     notebook.sortBy.value = value;
-    this.emit(ItemTreeEvents.Updated, notebook, ['sortBy']);
+    this.emit(ItemTreeEvents.Updated, notebook, snapshot, ['sortBy']);
   }
 
   setSortDirect(notebook: Notebook, value: SortDirectEnums) {
+    const snapshot = notebook.toDataObject();
+
     notebook.sortDirect.value = value;
-    this.emit(ItemTreeEvents.Updated, notebook, ['sortDirect']);
+    this.emit(ItemTreeEvents.Updated, notebook, snapshot, ['sortDirect']);
   }
 
   setSortOrders(items: TreeItem[]) {
     items.forEach((item, index) => {
+      const snapshot = item.toDataObject();
       item.sortOrder.value = index + 1;
-      this.emit(ItemTreeEvents.Updated, item, ['sortOrder']);
+      this.emit(ItemTreeEvents.Updated, item, snapshot, ['sortOrder']);
     });
   }
 }

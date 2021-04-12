@@ -29,14 +29,21 @@ export class ItemTreeService {
       .on(ItemTreeEvents.Deleted, this.syncDeletedItem, this);
   }
 
-  private syncItem<T extends keyof (NotebookDataObject | NoteDataObject)>(
+  private syncItem<T extends NotebookDataObject | NoteDataObject>(
     item: TreeItem,
-    fields?: T[],
+    snapshot: T,
+    fieldsToUpdate: (keyof T)[],
   ) {
     if (Notebook.isA(item)) {
-      return this.notebookRepository.updateNotebook(item, fields);
+      return this.notebookRepository.updateNotebook(
+        item,
+        fieldsToUpdate as (keyof NotebookDataObject)[],
+      );
     } else {
-      return this.noteRepository.updateNote(item, fields);
+      return this.noteRepository.updateNote(
+        item,
+        fieldsToUpdate as (keyof NoteDataObject)[],
+      );
     }
   }
 
