@@ -1,6 +1,6 @@
 import { container, InjectionToken } from 'tsyringe';
-import { fromEvent } from 'rxjs';
-import { buffer, debounceTime } from 'rxjs/operators';
+import { fromEvent, merge } from 'rxjs';
+import { buffer, debounceTime, map, mergeAll } from 'rxjs/operators';
 import {
   ItemTree,
   ItemTreeEvents,
@@ -31,25 +31,38 @@ export class RevisionService {
   private readonly editorManager = container.resolve(EditorManager);
   private git = container.resolve(GIT_TOKEN);
   constructor() {
-    this.itemTree
-      .on(ItemTreeEvents.Deleted, this.git.deleteFileByItem, this.git)
-      .on(ItemTreeEvents.Updated, this.updateFileByItem, this);
+    this.git.init(this.itemTree);
+    this.keepWorkingTreeSynced();
+  }
+
+  private keepWorkingTreeSynced() {
+    const deleted$ = fromEvent<TreeItem>(
+      this.itemTree as EventEmitter,
+      ItemTreeEvents.Deleted,
+    ).pipe(map((item) => this.git.deleteFileByItem(item)));
+
+    const updated$ = fromEvent<[TreeItem, NoteDataObject | NotebookDataObject]>(
+      this.itemTree as EventEmitter,
+      ItemTreeEvents.Updated,
+    ).pipe(map(([item, snapshot]) => this.updateFileByItem(item, snapshot)));
 
     const noteSynced$ = fromEvent<[Note, NoteDataObject]>(
       this.editorManager as EventEmitter,
       EditorManagerEvents.Sync,
     );
 
-    noteSynced$
-      .pipe(buffer(noteSynced$.pipe(debounceTime(500))))
-      .subscribe((events) => {
-        this.updateFileByItem(events[0][0], events[0][1]);
-      });
+    const debouncedNoteSynced$ = noteSynced$.pipe(
+      // todo: 我们暂且假设一个 buffer 里都是同一个 item 的 synced 事件
+      buffer(noteSynced$.pipe(debounceTime(500))),
+      map(([[item, snapshot]]) => this.updateFileByItem(item, snapshot)),
+    );
 
-    this.git.init(this.itemTree);
+    merge(deleted$, updated$, debouncedNoteSynced$)
+      .pipe(mergeAll())
+      .subscribe();
   }
 
-  async updateFileByItem<T extends NotebookDataObject | NoteDataObject>(
+  private async updateFileByItem<T extends NotebookDataObject | NoteDataObject>(
     item: TreeItem,
     snapshot: T,
   ) {
