@@ -5,7 +5,6 @@ import {
   Ref,
   computed,
   shallowReadonly,
-  effect,
 } from '@vue/reactivity';
 import { isEmpty, remove } from 'lodash';
 import { Note, Editor } from 'domain/entity';
@@ -33,19 +32,13 @@ export class EditorManager extends EventEmitter<EditorManagerEvents> {
   readonly activeEditor = computed(() => {
     return this._activeEditor.value;
   });
-  constructor() {
-    super();
-    effect(() => {
-      this._activeEditor.value?.on(
-        EditorEvents.Saved,
-        (snapshot: NoteDataObject) =>
-          this.emit(
-            EditorManagerEvents.Sync,
-            this._activeEditor.value?.note.value,
-            snapshot,
-          ),
-      );
-    });
+
+  private emitSync(snapshot: NoteDataObject) {
+    this.emit(
+      EditorManagerEvents.Sync,
+      this._activeEditor.value?.note.value,
+      snapshot,
+    );
   }
 
   private getEditorById(id: Editor['id']) {
@@ -59,6 +52,10 @@ export class EditorManager extends EventEmitter<EditorManagerEvents> {
   }
 
   setActiveEditor(editor: Editor | Editor['id'], noteToLoad?: Note) {
+    if (this._activeEditor.value) {
+      this._activeEditor.value.off(EditorEvents.Saved, this.emitSync);
+    }
+
     const editorInstance = Editor.isA(editor)
       ? editor
       : this.getEditorById(editor);
@@ -67,6 +64,7 @@ export class EditorManager extends EventEmitter<EditorManagerEvents> {
       editorInstance.loadNote(noteToLoad);
     }
 
+    editorInstance.on(EditorEvents.Saved, this.emitSync, this);
     this._activeEditor.value = editorInstance;
   }
 
@@ -108,7 +106,7 @@ export class EditorManager extends EventEmitter<EditorManagerEvents> {
 
   isActive(note: Note) {
     return computed(() => {
-      return this.activeEditor.value?.note.value?.isEqual(note);
+      return this._activeEditor.value?.note.value?.isEqual(note);
     });
   }
 
