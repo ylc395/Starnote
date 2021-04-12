@@ -2,16 +2,14 @@ import { container } from 'tsyringe';
 import { NotebookRepository, NoteRepository } from 'domain/repository';
 import { fromEvent, merge } from 'rxjs';
 import { map, mergeAll } from 'rxjs/operators';
-import {
-  Notebook,
-  ItemTree,
+import type EventEmitter from 'eventemitter3';
+import { Notebook, ItemTree, ItemTreeEvents } from 'domain/entity';
+import type {
   TreeItem,
   NotebookDataObject,
   NoteDataObject,
-  ItemTreeEvents,
 } from 'domain/entity';
 import { selfish } from 'utils/index';
-import EventEmitter from 'eventemitter3';
 
 export const token = Symbol();
 export class ItemTreeService {

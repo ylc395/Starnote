@@ -1,18 +1,20 @@
 import { container, InjectionToken } from 'tsyringe';
 import { fromEvent, merge } from 'rxjs';
 import { buffer, debounceTime, map, mergeAll } from 'rxjs/operators';
+import type EventEmitter from 'eventemitter3';
 import {
   ItemTree,
   ItemTreeEvents,
-  TreeItem,
   Note,
   EditorManager,
   EditorManagerEvents,
-  NoteDataObject,
+} from 'domain/entity';
+import type {
+  TreeItem,
   NotebookDataObject,
+  NoteDataObject,
   Notebook,
 } from 'domain/entity';
-import EventEmitter from 'eventemitter3';
 export const GIT_TOKEN: InjectionToken<Git> = Symbol();
 
 export interface Git {
