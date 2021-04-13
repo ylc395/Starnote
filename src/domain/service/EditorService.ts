@@ -7,13 +7,10 @@ import {
   ItemTreeEvents,
   ItemTree,
   EditorManagerEvents,
-  NoteDataObject,
 } from 'domain/entity';
 import { isNull } from 'lodash';
-import { fromEvent } from 'rxjs';
-import { debounceTime, concatMap } from 'rxjs/operators';
+import { debounceTime, concatMap, filter } from 'rxjs/operators';
 import { selfish } from 'utils/index';
-import EventEmitter from 'eventemitter3';
 
 export const token = Symbol();
 export class EditorService {
@@ -26,24 +23,25 @@ export class EditorService {
   }
 
   private monitorItemTree(itemTree: ItemTree) {
-    itemTree
-      .on(ItemTreeEvents.Selected, this.openInEditor, this)
-      .on(
-        ItemTreeEvents.Deleted,
-        this.editorManager.closeEditorOf,
-        this.editorManager,
-      );
+    itemTree.event$.subscribe(({ event, item }) => {
+      if (event === ItemTreeEvents.Selected && item) {
+        this.openInEditor(item);
+      }
+
+      if (event === ItemTreeEvents.Deleted && item) {
+        this.editorManager.closeEditorOf(item);
+      }
+    });
   }
 
   private keepSync() {
-    fromEvent<[Note, NoteDataObject]>(
-      this.editorManager as EventEmitter,
-      EditorManagerEvents.Sync,
-    )
+    this.editorManager.event$
       .pipe(
+        filter(({ event }) => event === EditorManagerEvents.Sync),
         debounceTime(500),
-        concatMap(([note]) => {
-          return this.noteRepository.updateNote(note, [
+        concatMap(({ note }) => {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          return this.noteRepository.updateNote(note!, [
             'title',
             'content',
             'userModifiedAt',

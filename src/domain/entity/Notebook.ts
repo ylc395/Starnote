@@ -60,48 +60,52 @@ export class Notebook
 
   children: Ref<(Note | Notebook)[] | null> = shallowRef(null);
 
-  sortedChildren = computed(() => {
-    if (!this.children.value) {
-      return [];
-    }
-
-    const copy = this.children.value.slice();
-    copy.sort((child1, child2) => {
-      const sortBy =
-        this.sortBy.value === SortByEnums.Default
-          ? this.setting.defaultSortBy.value
-          : this.sortBy.value;
-
-      const sortDirect =
-        this.sortDirect.value === SortDirectEnums.Default
-          ? this.setting.defaultSortDirect
-          : this.sortDirect.value;
-
-      const TOP = sortDirect === SortDirectEnums.Asc ? 1 : -1;
-      const BOTTOM = sortDirect === SortDirectEnums.Asc ? -1 : 1;
-
-      switch (sortBy) {
-        case SortByEnums.Title:
-          return child1.title.value > child2.title.value ? TOP : BOTTOM;
-        case SortByEnums.CreatedAt:
-          return child1.userCreatedAt.value.isAfter(child2.userCreatedAt.value)
-            ? TOP
-            : BOTTOM;
-        case SortByEnums.UpdatedAt:
-          return child1.userModifiedAt.value.isAfter(
-            child2.userModifiedAt.value,
-          )
-            ? TOP
-            : BOTTOM;
-        case SortByEnums.Custom:
-          return child1.sortOrder.value > child2.sortOrder.value ? 1 : -1;
-        default:
-          return 1;
+  get sortedChildren() {
+    return computed(() => {
+      if (!this.children.value) {
+        return [];
       }
-    });
 
-    return copy;
-  });
+      const copy = this.children.value.slice();
+      copy.sort((child1, child2) => {
+        const sortBy =
+          this.sortBy.value === SortByEnums.Default
+            ? this.setting.defaultSortBy.value
+            : this.sortBy.value;
+
+        const sortDirect =
+          this.sortDirect.value === SortDirectEnums.Default
+            ? this.setting.defaultSortDirect
+            : this.sortDirect.value;
+
+        const TOP = sortDirect === SortDirectEnums.Asc ? 1 : -1;
+        const BOTTOM = sortDirect === SortDirectEnums.Asc ? -1 : 1;
+
+        switch (sortBy) {
+          case SortByEnums.Title:
+            return child1.title.value > child2.title.value ? TOP : BOTTOM;
+          case SortByEnums.CreatedAt:
+            return child1.userCreatedAt.value.isAfter(
+              child2.userCreatedAt.value,
+            )
+              ? TOP
+              : BOTTOM;
+          case SortByEnums.UpdatedAt:
+            return child1.userModifiedAt.value.isAfter(
+              child2.userModifiedAt.value,
+            )
+              ? TOP
+              : BOTTOM;
+          case SortByEnums.Custom:
+            return child1.sortOrder.value > child2.sortOrder.value ? 1 : -1;
+          default:
+            return 1;
+        }
+      });
+
+      return copy;
+    });
+  }
 
   @Type(() => Note)
   @Expose({ toClassOnly: true })

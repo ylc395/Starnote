@@ -8,20 +8,22 @@ import { Notebook } from './Notebook';
 @singleton()
 export class StarList {
   stars: Star[] = shallowReactive([]);
-  sortedStars = computed(() => {
-    const sorted = this.stars.slice();
-    sorted.sort((star1, star2) => {
-      if (star1.sortOrder.value === star2.sortOrder.value) {
-        return star1.userCreatedAt.value.isAfter(star2.userCreatedAt.value)
-          ? 1
-          : -1;
-      }
+  get sortedStars() {
+    return computed(() => {
+      const sorted = this.stars.slice();
+      sorted.sort((star1, star2) => {
+        if (star1.sortOrder.value === star2.sortOrder.value) {
+          return star1.userCreatedAt.value.isAfter(star2.userCreatedAt.value)
+            ? 1
+            : -1;
+        }
 
-      return star1.sortOrder.value > star2.sortOrder.value ? 1 : -1;
+        return star1.sortOrder.value > star2.sortOrder.value ? 1 : -1;
+      });
+
+      return sorted;
     });
-
-    return sorted;
-  });
+  }
 
   addStar(note: Note) {
     const newStar = Star.from({ entity: note });

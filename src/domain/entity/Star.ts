@@ -26,7 +26,9 @@ export class Star
   @Expose({ toClassOnly: true })
   @Transform(({ obj }) => shallowRef(obj.entity), { toClassOnly: true })
   readonly entity: Ref<Note | null> = shallowRef(null);
-  readonly entityName = computed(() => this.entity.value?.title.value || '');
+  get entityName() {
+    return computed(() => this.entity.value?.title.value || '');
+  }
 
   @Expose()
   readonly entityId: string = '';

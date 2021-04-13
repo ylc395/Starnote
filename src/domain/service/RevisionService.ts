@@ -1,7 +1,7 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { container, InjectionToken } from 'tsyringe';
-import { fromEvent, merge } from 'rxjs';
-import { buffer, debounceTime, map, mergeAll } from 'rxjs/operators';
-import type EventEmitter from 'eventemitter3';
+import { merge } from 'rxjs';
+import { buffer, debounceTime, map, mergeAll, filter } from 'rxjs/operators';
 import {
   ItemTree,
   ItemTreeEvents,
@@ -38,30 +38,29 @@ export class RevisionService {
   }
 
   private keepWorkingTreeSynced() {
-    const deleted$ = fromEvent<TreeItem>(
-      this.itemTree as EventEmitter,
-      ItemTreeEvents.Deleted,
-    ).pipe(map((item) => this.git.deleteFileByItem(item)));
+    const event$ = this.itemTree.event$;
+    const deleted$ = event$.pipe(
+      filter(({ event }) => event === ItemTreeEvents.Deleted),
+      map(({ item }) => this.git.deleteFileByItem(item!)),
+    );
+    const created$ = event$.pipe(
+      filter(({ event }) => event === ItemTreeEvents.Created),
+      map(({ item }) => this.createFileByItem(item!)),
+    );
 
-    const created$ = fromEvent<TreeItem>(
-      this.itemTree as EventEmitter,
-      ItemTreeEvents.Created,
-    ).pipe(map((item) => this.createFileByItem(item)));
+    const updated$ = event$.pipe(
+      filter(({ event }) => event === ItemTreeEvents.Updated),
+      map(({ item, snapshot }) => this.updateFileByItem(item!, snapshot!)),
+    );
 
-    const updated$ = fromEvent<[TreeItem, NoteDataObject | NotebookDataObject]>(
-      this.itemTree as EventEmitter,
-      ItemTreeEvents.Updated,
-    ).pipe(map(([item, snapshot]) => this.updateFileByItem(item, snapshot)));
-
-    const noteSynced$ = fromEvent<[Note, NoteDataObject]>(
-      this.editorManager as EventEmitter,
-      EditorManagerEvents.Sync,
+    const noteSynced$ = this.editorManager.event$.pipe(
+      filter(({ event }) => event === EditorManagerEvents.Sync),
     );
 
     const debouncedNoteSynced$ = noteSynced$.pipe(
       // todo: 我们暂且假设一个 buffer 里都是同一个 item 的 synced 事件
       buffer(noteSynced$.pipe(debounceTime(500))),
-      map(([[item, snapshot]]) => this.updateFileByItem(item, snapshot)),
+      map(([{ note, snapshot }]) => this.updateFileByItem(note!, snapshot!)),
     );
 
     merge(deleted$, updated$, created$, debouncedNoteSynced$)

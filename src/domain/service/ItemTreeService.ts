@@ -1,8 +1,8 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { container } from 'tsyringe';
 import { NotebookRepository, NoteRepository } from 'domain/repository';
-import { fromEvent, merge } from 'rxjs';
-import { map, mergeAll } from 'rxjs/operators';
-import type EventEmitter from 'eventemitter3';
+import { merge } from 'rxjs';
+import { map, mergeAll, filter } from 'rxjs/operators';
 import { Notebook, ItemTree, ItemTreeEvents } from 'domain/entity';
 import type {
   TreeItem,
@@ -23,27 +23,22 @@ export class ItemTreeService {
   private async initTree() {
     const items = await this.notebookRepository.fetchTree();
     this.itemTree.loadTree(items);
+    const event$ = this.itemTree.event$;
 
-    const updated$ = fromEvent<
-      [
-        TreeItem,
-        NoteDataObject | NotebookDataObject,
-        (keyof NoteDataObject)[] | (keyof NotebookDataObject)[],
-      ]
-    >(this.itemTree as EventEmitter, ItemTreeEvents.Updated).pipe(
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      map(([item, _, fields]) => this.syncItem(item, fields)),
+    const updated$ = event$.pipe(
+      filter(({ event }) => event === ItemTreeEvents.Updated),
+      map(({ fields, item }) => this.syncItem(item!, fields!)),
     );
 
-    const created$ = fromEvent<TreeItem>(
-      this.itemTree as EventEmitter,
-      ItemTreeEvents.Created,
-    ).pipe(map((item) => this.syncNewItem(item)));
+    const created$ = event$.pipe(
+      filter(({ event }) => event === ItemTreeEvents.Created),
+      map(({ item }) => this.syncNewItem(item!)),
+    );
 
-    const deleted$ = fromEvent<TreeItem>(
-      this.itemTree as EventEmitter,
-      ItemTreeEvents.Deleted,
-    ).pipe(map((item) => this.syncDeletedItem(item)));
+    const deleted$ = event$.pipe(
+      filter(({ event }) => event === ItemTreeEvents.Deleted),
+      map(({ item }) => this.syncDeletedItem(item!)),
+    );
 
     merge(deleted$, created$, updated$).pipe(mergeAll()).subscribe();
   }

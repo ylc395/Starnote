@@ -2,15 +2,15 @@ import { shallowRef, shallowReactive, ref } from '@vue/reactivity';
 import type { Ref } from '@vue/reactivity';
 import { singleton } from 'tsyringe';
 import { pull } from 'lodash';
-import EventEmitter from 'eventemitter3';
-
-import { Note } from './Note';
+import { Subject } from 'rxjs';
+import { Note, NoteDataObject } from './Note';
 import {
   Notebook,
   ROOT_NOTEBOOK_ID,
   TitleStatus,
   SortByEnums,
   SortDirectEnums,
+  NotebookDataObject,
 } from './Notebook';
 import { SafeMap } from 'utils/index';
 import { EntityTypes } from './abstract/Entity';
@@ -31,7 +31,7 @@ export enum ViewMode {
 export type TreeItem = Notebook | Note;
 
 @singleton()
-export class ItemTree extends EventEmitter<ItemTreeEvents> {
+export class ItemTree {
   readonly root: Notebook = Notebook.from({
     id: ROOT_NOTEBOOK_ID,
     title: 'ROOT',
@@ -41,11 +41,21 @@ export class ItemTree extends EventEmitter<ItemTreeEvents> {
   readonly expandedItems: Notebook[] = shallowReactive([]);
   readonly indexedNotes = new SafeMap<Note['id'], Note>();
   readonly indexedNotebooks = new SafeMap<Notebook['id'], Notebook>();
+  private readonly _event$ = new Subject<{
+    event: ItemTreeEvents;
+    item?: TreeItem;
+    snapshot?: NoteDataObject | NotebookDataObject;
+    fields?: (keyof NoteDataObject)[] | (keyof NotebookDataObject)[];
+  }>();
+
+  get event$() {
+    return this._event$.asObservable();
+  }
 
   loadTree(rootItems: TreeItem[]) {
     this.indexedNotebooks.set(this.root.id, this.root);
     rootItems.forEach((item) => item.setParent(this.root, true));
-    this.emit(ItemTreeEvents.Loaded);
+    this._event$.next({ event: ItemTreeEvents.Loaded });
 
     const indexFunc = (item: TreeItem) => {
       if (Note.isA(item)) {
@@ -75,7 +85,7 @@ export class ItemTree extends EventEmitter<ItemTreeEvents> {
     }
 
     this.selectedItem.value = _item;
-    this.emit(ItemTreeEvents.Selected, _item);
+    this._event$.next({ event: ItemTreeEvents.Selected, item: _item });
   }
 
   foldNotebook(notebook: Notebook) {
@@ -112,7 +122,12 @@ export class ItemTree extends EventEmitter<ItemTreeEvents> {
     }
 
     child.setParent(_parent, true);
-    this.emit(ItemTreeEvents.Updated, child, snapshot, ['title', 'parentId']);
+    this._event$.next({
+      event: ItemTreeEvents.Updated,
+      item: child,
+      snapshot,
+      fields: ['title', 'parentId'],
+    });
   }
 
   private isExpanded(notebook: Notebook) {
@@ -138,7 +153,12 @@ export class ItemTree extends EventEmitter<ItemTreeEvents> {
     }
 
     item.title.value = title;
-    this.emit(ItemTreeEvents.Updated, item, snapshot, ['title']);
+    this._event$.next({
+      event: ItemTreeEvents.Updated,
+      item,
+      snapshot,
+      fields: ['title'],
+    });
   }
 
   deleteItem(item: TreeItem) {
@@ -165,7 +185,7 @@ export class ItemTree extends EventEmitter<ItemTreeEvents> {
       }
     }
 
-    this.emit(ItemTreeEvents.Deleted, item);
+    this._event$.next({ event: ItemTreeEvents.Deleted, item });
     this.indexedNotebooks.delete(item.id);
     this.indexedNotes.delete(item.id);
   }
@@ -179,7 +199,7 @@ export class ItemTree extends EventEmitter<ItemTreeEvents> {
     const newNote = target.createNote();
     this.indexedNotes.set(newNote.id, newNote);
     this.setSelectedItem(newNote);
-    this.emit(ItemTreeEvents.Created, newNote);
+    this._event$.next({ event: ItemTreeEvents.Created, item: newNote });
 
     return newNote;
   }
@@ -192,7 +212,7 @@ export class ItemTree extends EventEmitter<ItemTreeEvents> {
     }
 
     this.setSelectedItem(newNotebook);
-    this.emit(ItemTreeEvents.Created, newNotebook);
+    this._event$.next({ event: ItemTreeEvents.Created, item: newNotebook });
     this.indexedNotebooks.set(newNotebook.id, newNotebook);
 
     return newNotebook;
@@ -203,8 +223,13 @@ export class ItemTree extends EventEmitter<ItemTreeEvents> {
     const snapshot = parent.toDataObject();
     this.setSelectedItem(parent);
 
-    this.emit(ItemTreeEvents.Created, newNote);
-    this.emit(ItemTreeEvents.Updated, parent, snapshot, ['indexNoteId']);
+    this._event$.next({ event: ItemTreeEvents.Created, item: newNote });
+    this._event$.next({
+      event: ItemTreeEvents.Updated,
+      item: parent,
+      snapshot,
+      fields: ['indexNoteId'],
+    });
     this.indexedNotes.set(newNote.id, newNote);
     return newNote;
   }
@@ -217,26 +242,46 @@ export class ItemTree extends EventEmitter<ItemTreeEvents> {
         const snapshot = notebook.toDataObject();
 
         item.sortOrder.value = index + 1;
-        this.emit(ItemTreeEvents.Updated, item, snapshot, ['sortOrder']);
+        this._event$.next({
+          event: ItemTreeEvents.Updated,
+          item,
+          snapshot,
+          fields: ['sortOrder'],
+        });
       });
     }
 
     notebook.sortBy.value = value;
-    this.emit(ItemTreeEvents.Updated, notebook, snapshot, ['sortBy']);
+    this._event$.next({
+      event: ItemTreeEvents.Updated,
+      item: notebook,
+      snapshot,
+      fields: ['sortBy'],
+    });
   }
 
   setSortDirect(notebook: Notebook, value: SortDirectEnums) {
     const snapshot = notebook.toDataObject();
 
     notebook.sortDirect.value = value;
-    this.emit(ItemTreeEvents.Updated, notebook, snapshot, ['sortDirect']);
+    this._event$.next({
+      event: ItemTreeEvents.Updated,
+      item: notebook,
+      snapshot,
+      fields: ['sortDirect'],
+    });
   }
 
   setSortOrders(items: TreeItem[]) {
     items.forEach((item, index) => {
       const snapshot = item.toDataObject();
       item.sortOrder.value = index + 1;
-      this.emit(ItemTreeEvents.Updated, item, snapshot, ['sortOrder']);
+      this._event$.next({
+        event: ItemTreeEvents.Updated,
+        item,
+        snapshot,
+        fields: ['sortDirect'],
+      });
     });
   }
 }

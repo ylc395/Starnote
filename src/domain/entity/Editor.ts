@@ -1,24 +1,29 @@
 import { Ref, ref, shallowRef, effect, stop, computed } from '@vue/reactivity';
-import { Note } from './Note';
+import { Subject } from 'rxjs';
+import { Note, NoteDataObject } from './Note';
 import dayjs from 'dayjs';
-import EventEmitter from 'eventemitter3';
 import { uniqueId } from 'lodash';
 import { ListItem } from './abstract/ListItem';
 
-export enum EditorEvents {
-  Saved = 'SAVED',
-}
-
-export class Editor extends EventEmitter<EditorEvents> implements ListItem {
+export class Editor implements ListItem {
   readonly withContextmenu = ref(false);
   readonly id = uniqueId('editor-');
   readonly title = ref('');
   readonly content = ref('');
   private readonly _note: Ref<Note | null> = shallowRef(null);
-  readonly note = computed(() => this._note.value);
+  get note() {
+    return computed(() => this._note.value);
+  }
   private saveEffect: ReturnType<typeof effect> | null = null;
+  private readonly _save$ = new Subject<{
+    snapshot: NoteDataObject;
+    note: Note;
+  }>();
+
+  get save$() {
+    return this._save$.asObservable();
+  }
   constructor(note: Note) {
-    super();
     this.loadNote(note);
     this.autoSave();
   }
@@ -84,7 +89,7 @@ export class Editor extends EventEmitter<EditorEvents> implements ListItem {
     if (updated) {
       this._note.value.userModifiedAt.value = dayjs();
       this._note.value.isJustCreated = false;
-      this.emit(EditorEvents.Saved, snapshot);
+      this._save$.next({ snapshot, note: this._note.value });
     }
   }
 
@@ -95,8 +100,8 @@ export class Editor extends EventEmitter<EditorEvents> implements ListItem {
 
     this._note.value.content.value = null;
     this._note.value = null;
-    this.removeAllListeners();
     this.stopAutoSave();
+    this._save$.complete();
   }
 
   static isA(instance: unknown): instance is Editor {

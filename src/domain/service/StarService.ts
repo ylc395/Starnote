@@ -22,9 +22,15 @@ export class StarService {
   }
 
   constructor() {
-    this.itemTree
-      .on(ItemTreeEvents.Loaded, this.initStars, this)
-      .on(ItemTreeEvents.Deleted, this.removeStarsByEntity, this);
+    this.itemTree.event$.subscribe(({ event, item }) => {
+      if (event === ItemTreeEvents.Loaded) {
+        this.initStars();
+      }
+
+      if (event === ItemTreeEvents.Deleted && item) {
+        this.removeStarsByEntity(item);
+      }
+    });
   }
 
   private async initStars() {

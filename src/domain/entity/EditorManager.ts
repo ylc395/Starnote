@@ -7,11 +7,10 @@ import {
   shallowReadonly,
 } from '@vue/reactivity';
 import { isEmpty, remove } from 'lodash';
+import { Subject } from 'rxjs';
 import { Note, Editor } from 'domain/entity';
-import EventEmitter from 'eventemitter3';
 import { Notebook } from './Notebook';
 import { singleton } from 'tsyringe';
-import { EditorEvents } from './Editor';
 import { selfish } from 'utils/index';
 import { NoteDataObject } from './Note';
 
@@ -19,26 +18,35 @@ const MAX_EDITOR_COUNT = 3;
 
 export enum EditorManagerEvents {
   Sync = 'SYNC',
+  Activated = 'ACTIVATED',
 }
 
 @singleton()
-export class EditorManager extends EventEmitter<EditorManagerEvents> {
+export class EditorManager {
   private readonly maxEditorCount = ref(MAX_EDITOR_COUNT);
   private readonly _editors: Editor[] = shallowReactive([]);
-  readonly editors = computed(() => {
-    return shallowReadonly(this._editors.map(selfish));
-  });
-  private _activeEditor: Ref<Editor | null> = shallowRef(null);
-  readonly activeEditor = computed(() => {
-    return this._activeEditor.value;
-  });
+  get editors() {
+    return computed(() => {
+      return shallowReadonly(this._editors.map(selfish));
+    });
+  }
 
-  private emitSync(snapshot: NoteDataObject) {
-    this.emit(
-      EditorManagerEvents.Sync,
-      this._activeEditor.value?.note.value,
-      snapshot,
-    );
+  private _activeEditor: Ref<Editor | null> = shallowRef(null);
+  get activeEditor() {
+    return computed(() => {
+      return this._activeEditor.value;
+    });
+  }
+
+  private readonly _event$ = new Subject<{
+    event: EditorManagerEvents;
+    snapshot?: NoteDataObject;
+    note?: Note;
+    editor?: Editor;
+  }>();
+
+  get event$() {
+    return this._event$.asObservable();
   }
 
   private getEditorById(id: Editor['id']) {
@@ -52,10 +60,6 @@ export class EditorManager extends EventEmitter<EditorManagerEvents> {
   }
 
   setActiveEditor(editor: Editor | Editor['id'], noteToLoad?: Note) {
-    if (this._activeEditor.value) {
-      this._activeEditor.value.off(EditorEvents.Saved, this.emitSync);
-    }
-
     const editorInstance = Editor.isA(editor)
       ? editor
       : this.getEditorById(editor);
@@ -64,8 +68,11 @@ export class EditorManager extends EventEmitter<EditorManagerEvents> {
       editorInstance.loadNote(noteToLoad);
     }
 
-    editorInstance.on(EditorEvents.Saved, this.emitSync, this);
     this._activeEditor.value = editorInstance;
+    this._event$.next({
+      event: EditorManagerEvents.Activated,
+      editor: editorInstance,
+    });
   }
 
   closeEditorById(id: Editor['id']) {
@@ -121,17 +128,16 @@ export class EditorManager extends EventEmitter<EditorManagerEvents> {
     }
 
     const newEditor = new Editor(note);
-
-    this.safeAddEditor(newEditor);
-    this.setActiveEditor(newEditor);
-  }
-
-  private safeAddEditor(editor: Editor) {
     if (this._editors.length >= this.maxEditorCount.value) {
       const lastEditor = this._editors.shift();
       lastEditor?.destroy();
     }
 
-    this._editors.push(editor);
+    this._editors.push(newEditor);
+    this.setActiveEditor(newEditor);
+
+    newEditor.save$.subscribe(({ note, snapshot }) => {
+      this._event$.next({ event: EditorManagerEvents.Sync, snapshot, note });
+    });
   }
 }
