@@ -43,6 +43,11 @@ export class RevisionService {
       ItemTreeEvents.Deleted,
     ).pipe(map((item) => this.git.deleteFileByItem(item)));
 
+    const created$ = fromEvent<TreeItem>(
+      this.itemTree as EventEmitter,
+      ItemTreeEvents.Created,
+    ).pipe(map((item) => this.createFileByItem(item)));
+
     const updated$ = fromEvent<[TreeItem, NoteDataObject | NotebookDataObject]>(
       this.itemTree as EventEmitter,
       ItemTreeEvents.Updated,
@@ -59,9 +64,17 @@ export class RevisionService {
       map(([[item, snapshot]]) => this.updateFileByItem(item, snapshot)),
     );
 
-    merge(deleted$, updated$, debouncedNoteSynced$)
+    merge(deleted$, updated$, created$, debouncedNoteSynced$)
       .pipe(mergeAll())
       .subscribe();
+  }
+
+  private async createFileByItem(item: TreeItem) {
+    if (!Note.isA(item)) {
+      return;
+    }
+
+    return this.git.noteToFile(item);
   }
 
   private async updateFileByItem<T extends NotebookDataObject | NoteDataObject>(
