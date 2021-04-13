@@ -44,6 +44,13 @@ export enum TitleStatus {
   InvalidFileNameError,
 }
 
+export const TITLE_STATUS_TEXT = {
+  [TitleStatus.DuplicatedError]: '重复的标题',
+  [TitleStatus.EmptyError]: '标题不得为空',
+  [TitleStatus.PreservedError]: '不能作为标题',
+  [TitleStatus.InvalidFileNameError]: '包含非法字符',
+  [TitleStatus.Valid]: '',
+} as const;
 @staticImplements<DataMapperStatic<NotebookDataObject>>()
 export class Notebook
   extends Hierarchic<Notebook>

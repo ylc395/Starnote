@@ -7,7 +7,7 @@ import {
   InjectionKey,
   computed,
 } from 'vue';
-import { TreeItem, TitleStatus } from 'domain/entity';
+import { TreeItem, TITLE_STATUS_TEXT } from 'domain/entity';
 import {
   ItemTreeService,
   token as itemTreeToken,
@@ -36,14 +36,7 @@ export function useRename() {
       return '';
     }
 
-    const msgs = {
-      [TitleStatus.DuplicatedError]: '重复的标题',
-      [TitleStatus.EmptyError]: '标题不得为空',
-      [TitleStatus.PreservedError]: `${title.value} 不能作为标题`,
-      [TitleStatus.InvalidFileNameError]: '包含非法字符',
-    };
-
-    return msgs[status];
+    return TITLE_STATUS_TEXT[status];
   });
 
   function startEditing(target: TreeItem) {

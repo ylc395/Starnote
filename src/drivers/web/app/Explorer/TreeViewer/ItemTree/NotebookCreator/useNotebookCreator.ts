@@ -4,7 +4,7 @@ import {
   ItemTreeService,
   token as itemTreeToken,
 } from 'domain/service/ItemTreeService';
-import { EntityTypes, Notebook, TitleStatus } from 'domain/entity';
+import { EntityTypes, Notebook, TITLE_STATUS_TEXT } from 'domain/entity';
 
 export const token: InjectionKey<
   ReturnType<typeof useNotebookCreator>
@@ -38,18 +38,12 @@ export function useNotebookCreator() {
       title.value,
       EntityTypes.Notebook,
     );
-    const msgs = {
-      [TitleStatus.DuplicatedError]: '重复的目录名',
-      [TitleStatus.EmptyError]: '目录名不得为空',
-      [TitleStatus.PreservedError]: `${title.value} 不能作为目录名`,
-      [TitleStatus.InvalidFileNameError]: '包含非法字符',
-    };
 
     if (!status) {
       return '';
     }
 
-    return msgs[status];
+    return TITLE_STATUS_TEXT[status];
   });
 
   function startCreating(target: Notebook = root) {

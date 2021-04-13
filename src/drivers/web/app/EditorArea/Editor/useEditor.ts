@@ -1,20 +1,13 @@
 import { onMounted, onUnmounted, Ref, ref } from 'vue';
 import type { EditorView } from '@codemirror/view';
-import { Editor, TitleStatus } from 'domain/entity';
+import { Editor, TITLE_STATUS_TEXT } from 'domain/entity';
 import { codemirrorEditor } from './codemirrorEditor';
 export function useEditor(editor: Editor) {
   const titleRef: Ref<HTMLInputElement | null> = ref(null);
   const editorRef: Ref<HTMLElement | null> = ref(null);
   const titleStatus = ref('');
   const checkTitle = (title: string) => {
-    const messages = {
-      [TitleStatus.DuplicatedError]: '重复的标题',
-      [TitleStatus.EmptyError]: '标题不得为空',
-      [TitleStatus.PreservedError]: `${title} 不能作为标题`,
-      [TitleStatus.InvalidFileNameError]: '包含非法字符',
-      [TitleStatus.Valid]: '',
-    };
-    titleStatus.value = messages[editor.checkTitle(title)];
+    titleStatus.value = TITLE_STATUS_TEXT[editor.checkTitle(title)];
   };
 
   const setTitle = (title: string) => {
