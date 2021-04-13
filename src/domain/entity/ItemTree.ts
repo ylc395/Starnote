@@ -43,6 +43,7 @@ export class ItemTree extends EventEmitter<ItemTreeEvents> {
   readonly indexedNotebooks = new SafeMap<Notebook['id'], Notebook>();
 
   loadTree(rootItems: TreeItem[]) {
+    this.indexedNotebooks.set(this.root.id, this.root);
     rootItems.forEach((item) => item.setParent(this.root, true));
     this.emit(ItemTreeEvents.Loaded);
 

@@ -37,7 +37,7 @@ export class ItemTreeService {
 
     const created$ = fromEvent<TreeItem>(
       this.itemTree as EventEmitter,
-      ItemTreeEvents.Updated,
+      ItemTreeEvents.Created,
     ).pipe(map((item) => this.syncNewItem(item)));
 
     const deleted$ = fromEvent<TreeItem>(

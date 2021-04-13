@@ -1,5 +1,5 @@
 import { container } from 'tsyringe';
-import { mapValues, groupBy } from 'lodash';
+import { mapValues, groupBy, isEmpty } from 'lodash';
 import { outputFile, pathExists, ensureDir, remove, move } from 'fs-extra';
 import { join as pathJoin } from 'path';
 import { Note, Notebook } from 'domain/entity';
@@ -69,7 +69,7 @@ export class FsGit implements Git {
     const travel = async (item: TreeItem, indexedContents: IndexedContents) => {
       if (Note.isA(item)) {
         promises.push(
-          outputFile(FsGit.getItemPath(item), indexedContents[item.id]),
+          outputFile(FsGit.getItemFsPath(item), indexedContents[item.id]),
         );
       }
 
@@ -87,7 +87,7 @@ export class FsGit implements Git {
         if (item.indexNote.value) {
           promises.push(
             outputFile(
-              FsGit.getItemPath(item.indexNote.value),
+              FsGit.getItemFsPath(item.indexNote.value),
               indexedContents[item.indexNote.value.id],
             ),
           );
@@ -120,11 +120,11 @@ export class FsGit implements Git {
   }
 
   deleteFileByItem(item: TreeItem) {
-    return remove(FsGit.getItemPath(item));
+    return remove(FsGit.getItemFsPath(item));
   }
 
   noteToFile(note: Note) {
-    const path = FsGit.getItemPath(note);
+    const path = FsGit.getItemFsPath(note);
     return outputFile(path, note.content.value);
   }
 
@@ -143,14 +143,18 @@ export class FsGit implements Git {
     }
 
     const oldPath = pathJoin(
-      FsGit.getItemPath(_oldParent),
+      FsGit.getItemFsPath(_oldParent),
       Note.isA(item) ? `${_oldTitle}${NOTE_SUFFIX}` : _oldTitle,
     );
 
-    return move(oldPath, FsGit.getItemPath(item));
+    return move(oldPath, FsGit.getItemFsPath(item));
   }
 
-  private static getItemPath(item: TreeItem) {
+  private static getItemFsPath(item: TreeItem) {
+    if (isEmpty(item.ancestors)) {
+      return TREE_ITEM_DIR;
+    }
+
     const [, ...ancestors] = item.ancestors;
     const path = pathJoin(
       TREE_ITEM_DIR,
