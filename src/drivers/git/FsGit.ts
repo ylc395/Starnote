@@ -9,7 +9,6 @@ import type { Git } from 'domain/service/RevisionService';
 import { APP_DIRECTORY } from 'drivers/env';
 
 const GIT_DIR = pathJoin(APP_DIRECTORY, 'git_repository');
-const TREE_ITEM_DIR = pathJoin(GIT_DIR, 'notes');
 const NOTE_SUFFIX = '.md';
 
 export class FsGit implements Git {
@@ -33,7 +32,7 @@ export class FsGit implements Git {
   }
 
   private call(args: string[]): Promise<string> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       let output = '';
 
       const callback = ({
@@ -43,10 +42,6 @@ export class FsGit implements Git {
       }) => {
         if (event === 'output') {
           output += `\n${data}`;
-        }
-
-        if (event === 'error') {
-          reject(data);
         }
 
         if (event === 'done') {
@@ -108,27 +103,35 @@ export class FsGit implements Git {
 
   async init(tree: ItemTree) {
     await ensureDir(GIT_DIR);
-
-    if (!(await pathExists(pathJoin(GIT_DIR, '.git')))) {
-      await this.treeToFiles(tree);
-    }
+    const firstInit = !(await pathExists(pathJoin(GIT_DIR, '.git')));
     await this.call(['init', GIT_DIR]);
+
+    if (!firstInit) {
+      return;
+    }
+
+    await this.treeToFiles(tree);
+    await this.call(['config', 'user.name', 'Starnote']);
+    await this.call(['config', 'user.email', 'i@starnote.com']);
+    await this.call(['add', '.']);
   }
 
   async clone(url: string) {
     await this.call(['clone', url]);
   }
 
-  deleteFileByItem(item: TreeItem) {
-    return remove(FsGit.getItemFsPath(item));
+  async deleteFileByItem(item: TreeItem) {
+    // "git rm" doesn't work, so we have to use "rm & git add"
+    await remove(FsGit.getItemFsPath(item));
+    await this.call(['add', FsGit.getItemFsPath(item, true)]);
   }
 
-  noteToFile(note: Note) {
-    const path = FsGit.getItemFsPath(note);
-    return outputFile(path, note.content.value);
+  async noteToFile(note: Note) {
+    await outputFile(FsGit.getItemFsPath(note), note.content.value);
+    await this.call(['add', FsGit.getItemFsPath(note, true)]);
   }
 
-  moveItem(
+  async moveItem(
     item: TreeItem,
     {
       parent: oldParent,
@@ -142,15 +145,23 @@ export class FsGit implements Git {
       throw new Error('no old parent');
     }
 
-    const oldPath = pathJoin(
-      FsGit.getItemFsPath(_oldParent),
-      Note.isA(item) ? `${_oldTitle}${NOTE_SUFFIX}` : _oldTitle,
+    const fileName = Note.isA(item) ? `${_oldTitle}${NOTE_SUFFIX}` : _oldTitle;
+
+    const oldPath = pathJoin(FsGit.getItemFsPath(_oldParent), fileName);
+    const oldVirtualPath = pathJoin(
+      FsGit.getItemFsPath(_oldParent, true),
+      fileName,
     );
 
-    return move(oldPath, FsGit.getItemFsPath(item));
+    // "git mv" doesn't work, so we have to use "mv & git add"
+    await move(oldPath, FsGit.getItemFsPath(item));
+    await this.call(['add', oldVirtualPath]);
+    await this.call(['add', FsGit.getItemFsPath(item, true)]);
   }
 
-  private static getItemFsPath(item: TreeItem) {
+  private static getItemFsPath(item: TreeItem, virtual = false) {
+    const TREE_ITEM_DIR = pathJoin(virtual ? '.' : GIT_DIR, 'notes');
+
     if (isEmpty(item.ancestors)) {
       return TREE_ITEM_DIR;
     }
