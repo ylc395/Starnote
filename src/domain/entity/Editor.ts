@@ -4,15 +4,22 @@ import { Note, NoteDataObject } from './Note';
 import dayjs from 'dayjs';
 import { uniqueId } from 'lodash';
 import { ListItem } from './abstract/ListItem';
+import { TitleStatus } from './Notebook';
 
 export class Editor implements ListItem {
   readonly withContextmenu = ref(false);
   readonly id = uniqueId('editor-');
-  readonly title = ref('');
+  private readonly _title = ref('');
+  get title() {
+    return computed(() => this._title.value);
+  }
   readonly content = ref('');
   private readonly _note: Ref<Note | null> = shallowRef(null);
   get note() {
     return computed(() => this._note.value);
+  }
+  get isJustCreated() {
+    return this._note.value?.isJustCreated || false;
   }
   private saveEffect: ReturnType<typeof effect> | null = null;
   private readonly _save$ = new Subject<{
@@ -26,6 +33,30 @@ export class Editor implements ListItem {
   constructor(note: Note) {
     this.loadNote(note);
     this.autoSave();
+  }
+
+  setTitle(title: string) {
+    if (!this._note.value) {
+      throw new Error('no note when set title');
+    }
+
+    const titleStatus = this.checkTitle(title);
+
+    if (titleStatus === TitleStatus.Valid) {
+      this._title.value = title;
+    } else {
+      throw new Error('invalid title in editor');
+    }
+  }
+
+  checkTitle(title: string) {
+    const note = this._note.value;
+
+    if (!note || !note.parent) {
+      throw new Error('no note or parent when check title');
+    }
+
+    return note.parent.checkChildTitle(title, note);
   }
 
   autoSave() {
@@ -56,8 +87,8 @@ export class Editor implements ListItem {
       throw new Error('empty title/content');
     }
 
-    if (this.title.value !== title) {
-      this.title.value = title;
+    if (this._title.value !== title) {
+      this._title.value = title;
     }
 
     if (this.content.value !== content) {
@@ -76,8 +107,11 @@ export class Editor implements ListItem {
 
     let updated = false;
 
-    if (!this._note.value.isIndexNote && noteTitle.value !== this.title.value) {
-      noteTitle.value = this.title.value;
+    if (
+      !this._note.value.isIndexNote &&
+      noteTitle.value !== this._title.value
+    ) {
+      noteTitle.value = this._title.value;
       updated = true;
     }
 

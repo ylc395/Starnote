@@ -191,14 +191,15 @@ export class Notebook
 
   getUniqueTitle(baseTitle: string) {
     let title = baseTitle;
+    let titleStatus = this.checkChildTitle(title, EntityTypes.Note);
 
-    for (
-      let i = 1;
-      this.checkChildTitle(title, EntityTypes.Note) ===
-      TitleStatus.DuplicatedError;
-      i++
-    ) {
+    for (let i = 1; titleStatus === TitleStatus.DuplicatedError; i++) {
       title = `${baseTitle}-${i}`;
+      titleStatus = this.checkChildTitle(title, EntityTypes.Note);
+    }
+
+    if (titleStatus !== TitleStatus.Valid) {
+      throw new Error('invalid title when generate unique title');
     }
 
     return title;
