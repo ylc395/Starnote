@@ -42,6 +42,7 @@ export function useNotebookCreator() {
       [TitleStatus.DuplicatedError]: '重复的目录名',
       [TitleStatus.EmptyError]: '目录名不得为空',
       [TitleStatus.PreservedError]: `${title.value} 不能作为目录名`,
+      [TitleStatus.InvalidFileNameError]: '包含非法字符',
     };
 
     if (!status) {

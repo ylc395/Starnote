@@ -2,6 +2,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import { NIL } from 'uuid';
 import { computed, ref, shallowRef } from '@vue/reactivity';
 import type { Ref } from '@vue/reactivity';
+import isValidFilename from 'valid-filename';
 import {
   dataObjectToInstance,
   instanceToDataObject,
@@ -40,6 +41,7 @@ export enum TitleStatus {
   EmptyError,
   DuplicatedError,
   PreservedError,
+  InvalidFileNameError,
 }
 
 @staticImplements<DataMapperStatic<NotebookDataObject>>()
@@ -146,8 +148,13 @@ export class Notebook
       return TitleStatus.EmptyError;
     }
 
-    const checker =
+    if (!isValidFilename(title)) {
+      return TitleStatus.InvalidFileNameError;
+    }
+
+    const typeCheck =
       type === EntityTypes.Note || Note.isA(type) ? Note.isA : Notebook.isA;
+
     const notePreservedTitle = [INDEX_NOTE_TITLE];
 
     if (type === EntityTypes.Note && notePreservedTitle.includes(title)) {
@@ -156,7 +163,7 @@ export class Notebook
 
     const duplicated = this.children.value?.find((child) => {
       return (
-        !child.isEqual(type) && checker(child) && child.title.value === title
+        !child.isEqual(type) && typeCheck(child) && child.title.value === title
       );
     });
 

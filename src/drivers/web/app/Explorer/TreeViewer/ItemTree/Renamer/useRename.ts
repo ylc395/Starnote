@@ -37,9 +37,10 @@ export function useRename() {
     }
 
     const msgs = {
-      [TitleStatus.DuplicatedError]: `重复的标题`,
+      [TitleStatus.DuplicatedError]: '重复的标题',
       [TitleStatus.EmptyError]: '标题不得为空',
       [TitleStatus.PreservedError]: `${title.value} 不能作为标题`,
+      [TitleStatus.InvalidFileNameError]: '包含非法字符',
     };
 
     return msgs[status];
