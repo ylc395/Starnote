@@ -33,12 +33,17 @@ export class RevisionService {
   private readonly editorManager = container.resolve(EditorManager);
   private git = container.resolve(GIT_TOKEN);
   constructor() {
-    this.git.init(this.itemTree);
     this.keepWorkingTreeSynced();
   }
 
   private keepWorkingTreeSynced() {
     const event$ = this.itemTree.event$;
+    event$.subscribe(({ event }) => {
+      if (event === ItemTreeEvents.Loaded) {
+        this.git.init(this.itemTree);
+      }
+    });
+
     const deleted$ = event$.pipe(
       filter(({ event }) => event === ItemTreeEvents.Deleted),
       map(({ item }) => this.git.deleteFileByItem(item!)),
