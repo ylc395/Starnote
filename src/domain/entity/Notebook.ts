@@ -3,6 +3,9 @@ import { NIL } from 'uuid';
 import { computed, ref, shallowRef } from '@vue/reactivity';
 import type { Ref } from '@vue/reactivity';
 import isValidFilename from 'valid-filename';
+import { Expose, Transform, Type } from 'class-transformer';
+import { without } from 'lodash';
+import { container } from 'tsyringe';
 import {
   dataObjectToInstance,
   instanceToDataObject,
@@ -12,14 +15,12 @@ import {
   DayjsRefTransform,
 } from './abstract/DataMapper';
 import { Hierarchic, WithChildren } from './abstract/Hierarchic';
+import { EntityTypes } from './abstract/Entity';
+import type { ListItem } from './abstract/ListItem';
+import type { GitItem } from './abstract/GitItem';
 import { Note, INDEX_NOTE_TITLE } from './Note';
-import { ListItem } from './abstract/ListItem';
-import { Expose, Transform, Type } from 'class-transformer';
-import { without } from 'lodash';
-import { container } from 'tsyringe';
 import { Setting } from './Setting';
 import { staticImplements } from 'utils/types';
-import { EntityTypes } from './abstract/Entity';
 
 export const ROOT_NOTEBOOK_ID: Notebook['id'] = NIL;
 export enum SortByEnums {
@@ -56,6 +57,7 @@ export class Notebook
   extends Hierarchic<Notebook>
   implements
     ListItem,
+    GitItem,
     WithChildren<Note | Notebook>,
     DataMapper<NotebookDataObject> {
   setting = container.resolve(Setting);
@@ -66,6 +68,7 @@ export class Notebook
   readonly withContextmenu = ref(false);
 
   children: Ref<(Note | Notebook)[] | null> = shallowRef(null);
+  readonly gitStatus: GitItem['gitStatus'] = ref('unknown');
 
   get sortedChildren() {
     return computed(() => {

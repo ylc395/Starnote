@@ -11,10 +11,11 @@ import {
   DataMapperStatic,
 } from './abstract/DataMapper';
 import { Hierarchic } from './abstract/Hierarchic';
-import { Notebook, TitleStatus } from './Notebook';
-import { ListItem } from './abstract/ListItem';
-import { staticImplements } from 'utils/types';
 import { EntityTypes } from './abstract/Entity';
+import type { ListItem } from './abstract/ListItem';
+import type { GitItem } from './abstract/GitItem';
+import { Notebook, TitleStatus } from './Notebook';
+import { staticImplements } from 'utils/types';
 
 export const EMPTY_TITLE = '(empty title)';
 export const INDEX_NOTE_TITLE = 'INDEX_NOTE';
@@ -22,7 +23,7 @@ export const INDEX_NOTE_TITLE = 'INDEX_NOTE';
 @staticImplements<DataMapperStatic<NoteDataObject>>()
 export class Note
   extends Hierarchic<Notebook>
-  implements ListItem, DataMapper<NoteDataObject> {
+  implements GitItem, ListItem, DataMapper<NoteDataObject> {
   @RefTransform
   title: Ref<string> = ref('untitled note');
 
@@ -39,6 +40,7 @@ export class Note
   readonly sortOrder: Ref<number> = ref(0);
 
   readonly withContextmenu = ref(false);
+  readonly gitStatus: GitItem['gitStatus'] = ref('unknown');
 
   isJustCreated = false;
 

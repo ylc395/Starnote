@@ -3,7 +3,7 @@ import type { Ref } from '@vue/reactivity';
 import { singleton } from 'tsyringe';
 import { pull } from 'lodash';
 import { Subject } from 'rxjs';
-import { Note, NoteDataObject } from './Note';
+import { Note, NoteDataObject, INDEX_NOTE_TITLE } from './Note';
 import {
   Notebook,
   ROOT_NOTEBOOK_ID,
@@ -15,6 +15,7 @@ import {
 import { SafeMap } from 'utils/index';
 import { EntityTypes } from './abstract/Entity';
 
+export const NOTE_PATH_SUFFIX = '.md';
 export enum ItemTreeEvents {
   Selected = 'SELECTED',
   Deleted = 'DELETED',
@@ -283,5 +284,43 @@ export class ItemTree {
         fields: ['sortDirect'],
       });
     });
+  }
+
+  getItemByPath(path: string) {
+    const titles = path.split('/');
+    let notebook = this.root;
+
+    for (let i = 0; i < titles.length; i++) {
+      const title = titles[i];
+      const name = title.replace(new RegExp(`\\${NOTE_PATH_SUFFIX}$`), '');
+      const isNote = title.endsWith(NOTE_PATH_SUFFIX);
+      const isLast = i === titles.length - 1;
+      const isIndexNote = isNote && name === INDEX_NOTE_TITLE;
+
+      if (isNote && !isLast) {
+        throw new Error(`invalid path ${path}`);
+      }
+
+      const child = isIndexNote
+        ? notebook.indexNote.value
+        : notebook.children.value?.find((item) => {
+            return (
+              item.title.value === name &&
+              (isLast ? Note.isA(item) : Notebook.isA(item))
+            );
+          });
+
+      if (Note.isA(child)) {
+        return child;
+      }
+
+      if (!child) {
+        throw new Error(`wrong path ${path}`);
+      }
+
+      notebook = child;
+    }
+
+    return notebook;
   }
 }

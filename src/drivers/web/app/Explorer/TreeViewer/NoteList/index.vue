@@ -20,7 +20,7 @@ import Contextmenu from '../../Contextmenu/index.vue';
 import { useContextmenu } from '../../Contextmenu/useContextmenu';
 import { token as dragToken } from '../../useDrag';
 import SortMenu from '../../SortMenu/index.vue';
-import ViewModeMenu from './ViewModeMenu/index.vue';
+import ViewModeMenu from './ViewModeMenu.vue';
 
 export default defineComponent({
   components: {
@@ -144,7 +144,15 @@ export default defineComponent({
             class="flex justify-between items-center"
           >
             <span>{{ element.title.value || EMPTY_TITLE }}</span>
-            <StarFilled v-if="isStar(element).value" class="text-yellow-300" />
+            <div>
+              <span v-show="element.gitStatus.value !== 'unknown'" class="mr-2">
+                {{ element.gitStatus.value }}
+              </span>
+              <StarFilled
+                :class="{ invisible: !isStar(element).value }"
+                class="text-yellow-300"
+              />
+            </div>
           </div>
           <time
             v-if="showingFields.includes('userCreatedAt')"

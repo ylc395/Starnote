@@ -14,8 +14,14 @@ import type {
   NotebookDataObject,
   NoteDataObject,
   Notebook,
+  GitStatusMark,
 } from 'domain/entity';
 export const GIT_TOKEN: InjectionToken<Git> = Symbol();
+
+interface FileGitStatus {
+  status: GitStatusMark;
+  file: string;
+}
 
 export interface Git {
   noteToFile(note: Note): Promise<void>;
@@ -26,6 +32,7 @@ export interface Git {
   ): Promise<void>;
   init(tree: ItemTree): Promise<void>;
   clone(url: string): Promise<void>;
+  getStatus(): Promise<FileGitStatus[]>;
 }
 
 export class RevisionService {
@@ -36,11 +43,23 @@ export class RevisionService {
     this.keepWorkingTreeSynced();
   }
 
+  private async init() {
+    await this.git.init(this.itemTree);
+    this.refreshGitStatus();
+  }
+
+  private async refreshGitStatus() {
+    const statuses = await this.git.getStatus();
+    statuses.forEach(({ file, status }) => {
+      this.itemTree.getItemByPath(file).gitStatus.value = status;
+    });
+  }
+
   private keepWorkingTreeSynced() {
     const event$ = this.itemTree.event$;
-    event$.subscribe(({ event }) => {
+    event$.subscribe(async ({ event }) => {
       if (event === ItemTreeEvents.Loaded) {
-        this.git.init(this.itemTree);
+        this.init();
       }
     });
 
@@ -69,8 +88,8 @@ export class RevisionService {
     );
 
     merge(deleted$, updated$, created$, debouncedNoteSynced$)
-      .pipe(mergeAll())
-      .subscribe();
+      .pipe(mergeAll(), debounceTime(1000))
+      .subscribe(this.refreshGitStatus.bind(this));
   }
 
   private async createFileByItem(item: TreeItem) {

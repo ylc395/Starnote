@@ -1,4 +1,5 @@
 export * from './abstract/Entity';
+export * from './abstract/GitItem';
 export * from './Note';
 export * from './Notebook';
 export * from './Editor';
