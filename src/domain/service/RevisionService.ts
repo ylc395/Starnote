@@ -22,7 +22,7 @@ export interface Git {
   deleteFileByItem(item: TreeItem): Promise<void>;
   moveItem(
     item: TreeItem,
-    snapshot: { parent?: Notebook; title?: string },
+    snapshot: { parent: Notebook; title: string },
   ): Promise<void>;
   init(tree: ItemTree): Promise<void>;
   clone(url: string): Promise<void>;
@@ -31,7 +31,7 @@ export interface Git {
 export class RevisionService {
   private readonly itemTree = container.resolve(ItemTree);
   private readonly editorManager = container.resolve(EditorManager);
-  private git = container.resolve(GIT_TOKEN);
+  private readonly git = container.resolve(GIT_TOKEN);
   constructor() {
     this.keepWorkingTreeSynced();
   }
@@ -101,14 +101,17 @@ export class RevisionService {
       return;
     }
 
-    const oldParentId = snapshot.parentId || item.parentId;
-    const oldParent = oldParentId
-      ? this.itemTree.indexedNotebooks.get(oldParentId)
-      : undefined;
+    const { parentId, title } = snapshot;
+
+    if (!parentId || !title) {
+      throw new Error('invalid snapshot when updateFie');
+    }
+
+    const oldParent = this.itemTree.indexedNotebooks.get(parentId);
 
     return this.git.moveItem(item, {
       parent: oldParent,
-      title: snapshot.title,
+      title,
     });
   }
 }

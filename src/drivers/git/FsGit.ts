@@ -133,23 +133,12 @@ export class FsGit implements Git {
 
   async moveItem(
     item: TreeItem,
-    {
-      parent: oldParent,
-      title: oldTitle,
-    }: { parent?: Notebook; title?: string },
+    { parent: oldParent, title: oldTitle }: { parent: Notebook; title: string },
   ) {
-    const _oldParent = oldParent || item.parent;
-    const _oldTitle = oldTitle || item.title.value;
-
-    if (!_oldParent) {
-      throw new Error('no old parent');
-    }
-
-    const fileName = Note.isA(item) ? `${_oldTitle}${NOTE_SUFFIX}` : _oldTitle;
-
-    const oldPath = pathJoin(FsGit.getItemFsPath(_oldParent), fileName);
+    const fileName = Note.isA(item) ? `${oldTitle}${NOTE_SUFFIX}` : oldTitle;
+    const oldPath = pathJoin(FsGit.getItemFsPath(oldParent), fileName);
     const oldVirtualPath = pathJoin(
-      FsGit.getItemFsPath(_oldParent, true),
+      FsGit.getItemFsPath(oldParent, true),
       fileName,
     );
 
