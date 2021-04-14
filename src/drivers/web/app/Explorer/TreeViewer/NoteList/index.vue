@@ -21,6 +21,7 @@ import { useContextmenu } from '../../Contextmenu/useContextmenu';
 import { token as dragToken } from '../../useDrag';
 import SortMenu from '../../SortMenu/index.vue';
 import ViewModeMenu from './ViewModeMenu.vue';
+import GitStatusMark from '../GitStatusMark.vue';
 
 export default defineComponent({
   components: {
@@ -38,6 +39,7 @@ export default defineComponent({
     StarFilled,
     Dropdown,
     ViewModeMenu,
+    GitStatusMark,
   },
   setup() {
     const {
@@ -145,9 +147,7 @@ export default defineComponent({
           >
             <span>{{ element.title.value || EMPTY_TITLE }}</span>
             <div>
-              <span v-show="element.gitStatus.value !== 'unknown'" class="mr-2">
-                {{ element.gitStatus.value }}
-              </span>
+              <GitStatusMark :mark="element.gitStatus.value" />
               <StarFilled
                 :class="{ invisible: !isStar(element).value }"
                 class="text-yellow-300"
