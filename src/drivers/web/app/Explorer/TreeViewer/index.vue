@@ -5,7 +5,7 @@ import { Collapse } from 'ant-design-vue';
 import ItemTree from './ItemTree/index.vue';
 import StarList from './StarList.vue';
 import NoteList from './NoteList/index.vue';
-import GitStatusView from './GitStatusView.vue';
+import GitStatusView from './GitStatusList.vue';
 
 export default defineComponent({
   components: {
@@ -19,7 +19,6 @@ export default defineComponent({
   setup() {
     return {
       activePanels: ref(['1', '2', '3']),
-      panelStyle: 'background-color: transparent;border-bottom: 0',
     };
   },
 });
@@ -38,9 +37,9 @@ export default defineComponent({
         class="bg-transparent"
         :bordered="false"
       >
-        <StarList key="1" :style="panelStyle" :showArrow="false" />
-        <ItemTree key="2" :style="panelStyle" :showArrow="false" />
-        <GitStatusView key="3" :style="panelStyle" :showArrow="false" />
+        <StarList key="1" />
+        <ItemTree key="2" />
+        <GitStatusView key="3" />
       </Collapse>
     </Resizable>
     <NoteList />
