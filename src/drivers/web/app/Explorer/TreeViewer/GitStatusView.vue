@@ -5,12 +5,12 @@ import {
   FolderOutlined,
   FileOutlined,
 } from '@ant-design/icons-vue';
-import { Collapse } from 'ant-design-vue';
 import {
   RevisionService,
   token as revisionToken,
 } from 'domain/service/RevisionService';
 import GitStatusMark from './GitStatusMark.vue';
+import CollapsePanel from './CollapsePanel.vue';
 
 export default defineComponent({
   components: {
@@ -18,7 +18,7 @@ export default defineComponent({
     GitStatusMark,
     FolderOutlined,
     FileOutlined,
-    CollapsePanel: Collapse.Panel,
+    CollapsePanel,
   },
   setup() {
     const { changedNotes } = inject<RevisionService>(revisionToken)!;
@@ -27,14 +27,9 @@ export default defineComponent({
 });
 </script>
 <template>
-  <CollapsePanel>
-    <template #header>
-      <div class="tree-viewer-header">
-        <h1 class="tree-viewer-title">
-          <BranchesOutlined class="tree-viewer-icon" />
-          Git
-        </h1>
-      </div>
+  <CollapsePanel title="Git">
+    <template #icon>
+      <BranchesOutlined />
     </template>
     <ul class="tree-viewer-list">
       <li

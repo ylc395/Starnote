@@ -1,17 +1,17 @@
 <script lang="ts">
 import { defineComponent, inject } from 'vue';
+import DraggableList from 'vuedraggable';
 import {
   StarOutlined,
   FileOutlined,
   CloseOutlined,
 } from '@ant-design/icons-vue';
-import { Collapse } from 'ant-design-vue';
 import { StarService, token as starToken } from 'domain/service/StarService';
 import {
   EditorService,
   token as editorToken,
 } from 'domain/service/EditorService';
-import DraggableList from 'vuedraggable';
+import CollapsePanel from './CollapsePanel.vue';
 
 export default defineComponent({
   components: {
@@ -19,7 +19,7 @@ export default defineComponent({
     CloseOutlined,
     FileOutlined,
     DraggableList,
-    CollapsePanel: Collapse.Panel,
+    CollapsePanel,
   },
   setup() {
     const {
@@ -38,14 +38,9 @@ export default defineComponent({
 });
 </script>
 <template>
-  <CollapsePanel>
-    <template #header>
-      <div class="tree-viewer-header">
-        <h1 class="tree-viewer-title">
-          <StarOutlined class="tree-viewer-icon" />
-          Stars
-        </h1>
-      </div>
+  <CollapsePanel title="Stars">
+    <template #icon>
+      <StarOutlined />
     </template>
     <DraggableList
       tag="ol"

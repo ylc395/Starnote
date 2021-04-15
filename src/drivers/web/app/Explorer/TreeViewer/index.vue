@@ -51,27 +51,7 @@ export default defineComponent({
   background-color: rgba(55, 65, 81);
 }
 
-:deep(.ant-collapse-header) {
-  padding: 0 !important;
-}
-
-:deep(.ant-collapse-content-box) {
-  padding: 0 !important;
-}
-
 @layer components {
-  :deep(.tree-viewer-header) {
-    @apply text-white p-2 flex justify-between items-center;
-  }
-
-  :deep(.tree-viewer-title) {
-    @apply text-inherit text-sm uppercase my-0;
-  }
-
-  :deep(.tree-viewer-icon) {
-    @apply mr-1;
-  }
-
   :deep(.tree-viewer-list) {
     @apply pl-0 text-gray-200 my-0;
   }
