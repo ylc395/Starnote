@@ -42,12 +42,12 @@ export function useTreeData() {
           slots: { title: 'title' },
           isLeaf: !Notebook.isA(item),
           children: Notebook.isA(item)
-            ? item.sortedChildren.value?.filter(notebookFilter).map(mapper)
+            ? item.sortedChildren.value.filter(notebookFilter).map(mapper)
             : undefined,
         };
       };
 
-      return root.children.value?.filter(notebookFilter).map(mapper) || [];
+      return root.children.value.filter(notebookFilter).map(mapper) || [];
     }),
 
     selectedKeys: computed(() => [selectedItem.value?.id]),

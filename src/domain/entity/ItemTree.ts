@@ -64,7 +64,7 @@ export class ItemTree {
 
       if (Notebook.isA(item)) {
         this.indexedNotebooks.set(item.id, item);
-        item.children.value?.forEach(indexFunc);
+        item.children.value.forEach(indexFunc);
       }
     };
 
@@ -303,7 +303,7 @@ export class ItemTree {
 
       const child = isIndexNote
         ? notebook.indexNote.value
-        : notebook.children.value?.find((item) => {
+        : notebook.children.value.find((item) => {
             return (
               item.title.value === name &&
               (isLast ? Note.isA(item) : Notebook.isA(item))

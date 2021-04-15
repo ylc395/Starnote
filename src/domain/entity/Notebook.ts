@@ -65,7 +65,15 @@ export class Notebook
 
   readonly withContextmenu = ref(false);
 
-  children: Ref<(Note | Notebook)[] | null> = shallowRef(null);
+  children: Ref<(Note | Notebook)[]> = shallowRef([]);
+
+  isEmpty(ignoreEmptyChild = false): boolean {
+    return ignoreEmptyChild
+      ? this.children.value.length > 0
+      : this.children.value.every((child) => {
+          return Notebook.isA(child) && child.isEmpty(true);
+        });
+  }
 
   get sortedChildren() {
     return computed(() => {
@@ -172,7 +180,7 @@ export class Notebook
       return TitleStatus.PreservedError;
     }
 
-    const duplicated = this.children.value?.find((child) => {
+    const duplicated = this.children.value.find((child) => {
       return (
         !child.isEqual(type) && typeCheck(child) && child.title.value === title
       );

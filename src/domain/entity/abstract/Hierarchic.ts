@@ -35,7 +35,7 @@ export abstract class Hierarchic<
       return this;
     }
 
-    if (oldParent?.children?.value) {
+    if (oldParent?.children.value) {
       oldParent.children.value = without(oldParent.children.value, this);
     }
 
