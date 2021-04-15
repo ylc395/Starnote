@@ -1,13 +1,15 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
+import { GIT_STATUS_MARKS } from 'domain/entity';
 
 export default defineComponent({
   props: {
     mark: {
       type: String,
       required: true,
-      validator: (val: string) => {
-        return ['M', 'R', 'A', 'D', 'unknown'].includes(val);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      validator: (val: any) => {
+        return GIT_STATUS_MARKS.includes(val);
       },
     },
   },

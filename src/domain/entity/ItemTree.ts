@@ -56,7 +56,6 @@ export class ItemTree {
   loadTree(rootItems: TreeItem[]) {
     this.indexedNotebooks.set(this.root.id, this.root);
     rootItems.forEach((item) => item.setParent(this.root, true));
-    this._event$.next({ event: ItemTreeEvents.Loaded });
 
     const indexFunc = (item: TreeItem) => {
       if (Note.isA(item)) {
@@ -70,6 +69,7 @@ export class ItemTree {
     };
 
     rootItems.forEach(indexFunc);
+    this._event$.next({ event: ItemTreeEvents.Loaded });
   }
 
   setSelectedItem(item: TreeItem) {

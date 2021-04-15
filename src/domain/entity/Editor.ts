@@ -81,7 +81,7 @@ export class Editor implements ListItem {
     this._note.value = note;
 
     const content = note.content.value;
-    const title = note.isIndexNote ? note.parent.title.value : note.title.value;
+    const title = note.actualTitle.value;
 
     if (content === null) {
       throw new Error('empty title/content');

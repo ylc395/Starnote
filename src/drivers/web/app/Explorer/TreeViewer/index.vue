@@ -1,12 +1,27 @@
 <script lang="ts">
-import { defineComponent } from 'vue';
-import ItemTree from './ItemTree/index.vue';
-import StarList from './StarList/index.vue';
-import NoteList from './NoteList/index.vue';
+import { defineComponent, ref } from 'vue';
 import Resizable from 'vue-resizable';
+import { Collapse } from 'ant-design-vue';
+import ItemTree from './ItemTree/index.vue';
+import StarList from './StarList.vue';
+import NoteList from './NoteList/index.vue';
+import GitStatusView from './GitStatusView.vue';
 
 export default defineComponent({
-  components: { StarList, ItemTree, NoteList, Resizable },
+  components: {
+    Collapse,
+    StarList,
+    ItemTree,
+    NoteList,
+    Resizable,
+    GitStatusView,
+  },
+  setup() {
+    return {
+      activePanels: ref(['1', '2', '3']),
+      panelStyle: 'background-color: transparent;border-bottom: 0',
+    };
+  },
 });
 </script>
 <template>
@@ -18,8 +33,15 @@ export default defineComponent({
       :minWidth="180"
       width="15rem"
     >
-      <StarList />
-      <ItemTree />
+      <Collapse
+        v-model:activeKey="activePanels"
+        class="bg-transparent"
+        :bordered="false"
+      >
+        <StarList key="1" :style="panelStyle" :showArrow="false" />
+        <ItemTree key="2" :style="panelStyle" :showArrow="false" />
+        <GitStatusView key="3" :style="panelStyle" :showArrow="false" />
+      </Collapse>
     </Resizable>
     <NoteList />
   </div>
@@ -27,6 +49,14 @@ export default defineComponent({
 <style scoped>
 .tree-viewer {
   background-color: rgba(55, 65, 81);
+}
+
+:deep(.ant-collapse-header) {
+  padding: 0 !important;
+}
+
+:deep(.ant-collapse-content-box) {
+  padding: 0 !important;
 }
 
 @layer components {
@@ -40,6 +70,14 @@ export default defineComponent({
 
   :deep(.tree-viewer-icon) {
     @apply mr-1;
+  }
+
+  :deep(.tree-viewer-list) {
+    @apply pl-0 text-gray-200 my-0;
+  }
+
+  :deep(.tree-viewer-list-item) {
+    @apply pl-5 p-2;
   }
 }
 </style>

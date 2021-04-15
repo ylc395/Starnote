@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
-import { ref, shallowRef } from '@vue/reactivity';
+import { computed, ref, shallowRef } from '@vue/reactivity';
 import type { Ref } from '@vue/reactivity';
 import {
   dataObjectToInstance,
@@ -56,6 +56,12 @@ export class Note
     }
 
     return parent;
+  }
+
+  get actualTitle() {
+    return computed(() =>
+      this.isIndexNote ? this.parent.title.value : this.title.value,
+    );
   }
 
   toDataObject() {

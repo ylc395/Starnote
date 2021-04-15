@@ -17,7 +17,6 @@ import {
 import { Hierarchic, WithChildren } from './abstract/Hierarchic';
 import { EntityTypes } from './abstract/Entity';
 import type { ListItem } from './abstract/ListItem';
-import type { GitItem } from './abstract/GitItem';
 import { Note, INDEX_NOTE_TITLE } from './Note';
 import { Setting } from './Setting';
 import { staticImplements } from 'utils/types';
@@ -57,7 +56,6 @@ export class Notebook
   extends Hierarchic<Notebook>
   implements
     ListItem,
-    GitItem,
     WithChildren<Note | Notebook>,
     DataMapper<NotebookDataObject> {
   setting = container.resolve(Setting);
@@ -68,7 +66,6 @@ export class Notebook
   readonly withContextmenu = ref(false);
 
   children: Ref<(Note | Notebook)[] | null> = shallowRef(null);
-  readonly gitStatus: GitItem['gitStatus'] = ref('unknown');
 
   get sortedChildren() {
     return computed(() => {

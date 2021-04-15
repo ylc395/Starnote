@@ -8,6 +8,7 @@ import {
   Note,
   EditorManager,
   EditorManagerEvents,
+  NOTE_PATH_SUFFIX,
 } from 'domain/entity';
 import type {
   TreeItem,
@@ -16,6 +17,7 @@ import type {
   Notebook,
   GitStatusMark,
 } from 'domain/entity';
+import { Ref, shallowRef } from '@vue/reactivity';
 export const GIT_TOKEN: InjectionToken<Git> = Symbol();
 
 interface FileGitStatus {
@@ -35,10 +37,12 @@ export interface Git {
   getStatus(): Promise<FileGitStatus[]>;
 }
 
+export const token = Symbol();
 export class RevisionService {
   private readonly itemTree = container.resolve(ItemTree);
   private readonly editorManager = container.resolve(EditorManager);
   private readonly git = container.resolve(GIT_TOKEN);
+  readonly changedNotes: Ref<Note[]> = shallowRef([]);
   constructor() {
     this.keepWorkingTreeSynced();
   }
@@ -50,9 +54,19 @@ export class RevisionService {
 
   private async refreshGitStatus() {
     const statuses = await this.git.getStatus();
-    statuses.forEach(({ file, status }) => {
-      this.itemTree.getItemByPath(file).gitStatus.value = status;
-    });
+    const changedItems = [];
+
+    for (const { status, file } of statuses) {
+      if (!file.endsWith(NOTE_PATH_SUFFIX)) {
+        continue;
+      }
+
+      const item = this.itemTree.getItemByPath(file) as Note;
+      item.gitStatus.value = status;
+      changedItems.push(item);
+    }
+
+    this.changedNotes.value = changedItems;
   }
 
   private keepWorkingTreeSynced() {

@@ -5,6 +5,7 @@ import {
   FileOutlined,
   CloseOutlined,
 } from '@ant-design/icons-vue';
+import { Collapse } from 'ant-design-vue';
 import { StarService, token as starToken } from 'domain/service/StarService';
 import {
   EditorService,
@@ -18,6 +19,7 @@ export default defineComponent({
     CloseOutlined,
     FileOutlined,
     DraggableList,
+    CollapsePanel: Collapse.Panel,
   },
   setup() {
     const {
@@ -36,24 +38,26 @@ export default defineComponent({
 });
 </script>
 <template>
-  <div>
-    <div class="tree-viewer-header">
-      <h1 class="tree-viewer-title">
-        <StarOutlined class="tree-viewer-icon" />
-        Stars
-      </h1>
-    </div>
+  <CollapsePanel>
+    <template #header>
+      <div class="tree-viewer-header">
+        <h1 class="tree-viewer-title">
+          <StarOutlined class="tree-viewer-icon" />
+          Stars
+        </h1>
+      </div>
+    </template>
     <DraggableList
       tag="ol"
       :modelValue="stars"
       ghostClass="sorting"
       @update:modelValue="setSortOrders"
       itemKey="id"
-      class="pl-0 text-gray-200 mt-2"
+      class="tree-viewer-list"
     >
       <template #item="{ element }">
         <li
-          class="group pl-5 py-2 relative"
+          class="group relative tree-viewer-list-item"
           :class="{ 'bg-gray-900': isActive(element.entity.value).value }"
           @click="openInEditor(element.entity.value)"
         >
@@ -67,7 +71,7 @@ export default defineComponent({
         </li>
       </template>
     </DraggableList>
-  </div>
+  </CollapsePanel>
 </template>
 <style scoped>
 :deep(.sorting) {

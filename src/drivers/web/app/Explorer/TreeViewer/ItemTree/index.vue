@@ -1,6 +1,6 @@
 <script lang="ts">
 import { defineComponent, inject } from 'vue';
-import { Tree, Modal } from 'ant-design-vue';
+import { Tree, Modal, Collapse } from 'ant-design-vue';
 import {
   FolderOutlined,
   PlusOutlined,
@@ -25,6 +25,7 @@ export default defineComponent({
     NotebookCreator,
     Renamer,
     Contextmenu,
+    CollapsePanel: Collapse.Panel,
   },
   setup() {
     const creator = useNotebookCreator();
@@ -69,16 +70,18 @@ export default defineComponent({
 });
 </script>
 <template>
-  <div class="flex flex-col">
-    <div class="tree-viewer-header">
-      <h1 class="tree-viewer-title" @dragover.prevent @drop="handleRootDrop">
-        <FolderOutlined class="tree-viewer-icon" ref="notebookIconRef" />
-        Notebooks
-      </h1>
-      <button @click="startCreating()">
-        <PlusOutlined />
-      </button>
-    </div>
+  <CollapsePanel>
+    <template #header>
+      <div class="tree-viewer-header">
+        <h1 class="tree-viewer-title" @dragover.prevent @drop="handleRootDrop">
+          <FolderOutlined class="tree-viewer-icon" ref="notebookIconRef" />
+          Notebooks
+        </h1>
+        <button @click="startCreating()">
+          <PlusOutlined />
+        </button>
+      </div>
+    </template>
     <Tree
       draggable
       class="overflow-y-auto pl-3"
@@ -119,7 +122,7 @@ export default defineComponent({
       <NotebookCreator />
     </Modal>
     <Contextmenu />
-  </div>
+  </CollapsePanel>
 </template>
 <style scoped>
 /* eslint-disable-next-line vue-scoped-css/no-unused-selector */
