@@ -68,7 +68,7 @@ export class Notebook
   children: Ref<(Note | Notebook)[]> = shallowRef([]);
 
   isEmpty(ignoreEmptyChild = false): boolean {
-    return ignoreEmptyChild
+    return !ignoreEmptyChild
       ? this.children.value.length > 0
       : this.children.value.every((child) => {
           return Notebook.isA(child) && child.isEmpty(true);

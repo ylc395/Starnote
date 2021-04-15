@@ -6,6 +6,7 @@ import {
   ItemTree,
   ItemTreeEvents,
   Note,
+  Notebook,
   EditorManager,
   EditorManagerEvents,
   NOTE_PATH_SUFFIX,
@@ -14,7 +15,6 @@ import type {
   TreeItem,
   NotebookDataObject,
   NoteDataObject,
-  Notebook,
   GitStatusMark,
 } from 'domain/entity';
 import { Ref, shallowRef } from '@vue/reactivity';
@@ -118,6 +118,10 @@ export class RevisionService {
     item: TreeItem,
     snapshot: T,
   ) {
+    if (Notebook.isA(item) && item.isEmpty(true)) {
+      return;
+    }
+
     const hasContentUpdated =
       Note.isA(item) &&
       item.content.value !== (snapshot as NoteDataObject).content;
