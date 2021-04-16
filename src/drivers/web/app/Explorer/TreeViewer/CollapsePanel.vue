@@ -1,9 +1,10 @@
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, ref } from 'vue';
 import { Collapse } from 'ant-design-vue';
+import { RightOutlined } from '@ant-design/icons-vue';
 
 export default defineComponent({
-  components: { CollapsePanel: Collapse.Panel },
+  components: { CollapsePanel: Collapse.Panel, RightOutlined },
   props: {
     title: {
       type: String,
@@ -13,12 +14,13 @@ export default defineComponent({
   setup() {
     return {
       panelStyle: 'background-color: transparent;border-bottom: 0',
+      panelRef: ref(null),
     };
   },
 });
 </script>
 <template>
-  <CollapsePanel :style="panelStyle" :showArrow="false">
+  <CollapsePanel :style="panelStyle" :showArrow="false" ref="panelRef">
     <template #header>
       <div class="text-white flex items-center">
         <h1
@@ -27,6 +29,10 @@ export default defineComponent({
           @drop="$emit('headerDrop')"
         >
           <slot name="icon"></slot><span class="ml-1">{{ title }}</span>
+          <RightOutlined
+            class="ml-1 transform scale-75"
+            :rotate="panelRef?.isActive ? 90 : 0"
+          />
         </h1>
         <div class="text-right" @click.stop>
           <slot name="extra"></slot>
