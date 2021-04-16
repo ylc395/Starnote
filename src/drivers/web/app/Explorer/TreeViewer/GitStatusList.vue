@@ -57,7 +57,7 @@ export default defineComponent({
       class="w-5/6 mx-auto mt-2 block"
       @click="commit"
     >
-      提交
+      提交修订
     </Button>
   </CollapsePanel>
 </template>

@@ -147,11 +147,11 @@ export default defineComponent({
           >
             <span>{{ element.title.value || EMPTY_TITLE }}</span>
             <div>
-              <GitStatusMark :mark="element.gitStatus.value" />
               <StarFilled
                 :class="{ invisible: !isStar(element).value }"
-                class="text-yellow-300"
+                class="text-yellow-300 mr-2"
               />
+              <GitStatusMark :mark="element.gitStatus.value" />
             </div>
           </div>
           <time

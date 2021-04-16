@@ -23,7 +23,7 @@ export default defineComponent({
       'bg-green-500': mark === 'A',
       'bg-yellow-500': ['M', 'R'].includes(mark),
     }"
-    class="mr-2 px-1 py-0.5 text-white text-xs"
+    class="px-1 py-0.5 text-white text-xs"
     >{{ mark }}</span
   >
 </template>
