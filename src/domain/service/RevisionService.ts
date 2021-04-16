@@ -59,6 +59,10 @@ export class RevisionService {
   }
 
   private async refreshGitStatus() {
+    this.changedNotes.value.forEach(
+      (note) => (note.gitStatus.value = 'unknown'),
+    );
+
     const statuses = await this.git.getStatus();
     const changedItems = [];
 
