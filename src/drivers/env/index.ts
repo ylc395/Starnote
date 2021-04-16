@@ -2,7 +2,7 @@ import { isRenderer } from './utils';
 import path from 'path';
 import { app, ipcRenderer } from 'electron';
 
-export const APP_NAME = 'starNote';
+export const APP_NAME = 'Starnote';
 export const IS_TEST = process.env.NODE_ENV === 'test';
 export const IS_DEVELOPMENT = process.env.NODE_ENV !== 'production';
 export const WEBPACK_DEV_SERVER_URL = process.env.WEBPACK_DEV_SERVER_URL;

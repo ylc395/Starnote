@@ -1,13 +1,19 @@
 import { app, protocol, BrowserWindow, ipcMain } from 'electron';
 import type { App as ElectronApp } from 'electron';
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
-import { IS_DEVELOPMENT, IS_TEST, WEBPACK_DEV_SERVER_URL } from 'drivers/env';
+import {
+  APP_DIRECTORY,
+  IS_DEVELOPMENT,
+  IS_TEST,
+  WEBPACK_DEV_SERVER_URL,
+} from 'drivers/env';
 import { camelCase, isFunction } from 'lodash';
+import { ensureDir } from 'fs-extra';
 
 export class App {
   private readonly electronApp = app;
   private readonly ipcMain = ipcMain;
-  start() {
+  async start() {
     // @see https://github.com/electron/electron/issues/22119
     // when this issue closed, remove this line
     this.electronApp.allowRendererProcessReuse = false;
@@ -59,6 +65,12 @@ export class App {
         ...args: unknown[]
       ) => unknown)(...args);
     });
+
+    await this.initAppDir();
+  }
+
+  private async initAppDir() {
+    await ensureDir(APP_DIRECTORY);
   }
 
   static async createWindow(devPath = '', prodPath = 'index.html') {

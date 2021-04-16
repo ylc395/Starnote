@@ -17,8 +17,7 @@ import type {
   NoteDataObject,
   GitStatusMark,
 } from 'domain/entity';
-import { computed, Ref, shallowReactive, shallowRef } from '@vue/reactivity';
-import { pull } from 'lodash';
+import { Ref, shallowRef } from '@vue/reactivity';
 export const GIT_TOKEN: InjectionToken<Git> = Symbol();
 
 interface FileGitStatus {
