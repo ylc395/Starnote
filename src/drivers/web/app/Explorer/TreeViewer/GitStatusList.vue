@@ -5,6 +5,7 @@ import {
   FolderOutlined,
   FileOutlined,
 } from '@ant-design/icons-vue';
+import { Button } from 'ant-design-vue';
 import {
   RevisionService,
   token as revisionToken,
@@ -14,6 +15,7 @@ import CollapsePanel from './CollapsePanel.vue';
 
 export default defineComponent({
   components: {
+    Button,
     BranchesOutlined,
     GitStatusMark,
     FolderOutlined,
@@ -21,8 +23,12 @@ export default defineComponent({
     CollapsePanel,
   },
   setup() {
-    const { changedNotes } = inject<RevisionService>(revisionToken)!;
-    return { changedNotes };
+    const { changedNotes, commit } = inject<RevisionService>(revisionToken)!;
+
+    return {
+      changedNotes,
+      commit,
+    };
   },
 });
 </script>
@@ -37,13 +43,21 @@ export default defineComponent({
         :key="note.id"
         class="flex justify-between tree-viewer-list-item"
       >
-        <div>
+        <span>
           <FolderOutlined v-if="note.isIndexNote" />
           <FileOutlined v-else />
           <span class="ml-2">{{ note.actualTitle.value }}</span>
-        </div>
+        </span>
         <GitStatusMark :mark="note.gitStatus.value" />
       </li>
     </ul>
+    <Button
+      type="primary"
+      v-if="changedNotes.length > 0"
+      class="w-5/6 mx-auto mt-2 block"
+      @click="commit"
+    >
+      提交
+    </Button>
   </CollapsePanel>
 </template>

@@ -40,7 +40,7 @@ export class FsGit implements Git {
       }: {
         data: { event: string; data: string };
       }) => {
-        if (event === 'output') {
+        if (event === 'stdout') {
           output += `\n${data}`;
         }
 
@@ -111,8 +111,6 @@ export class FsGit implements Git {
     }
 
     await this.treeToFiles(tree);
-    await this.call(['config', 'user.name', 'Starnote']);
-    await this.call(['config', 'user.email', 'i@starnote.com']);
     await this.call(['add', '.']);
   }
 
@@ -161,6 +159,10 @@ export class FsGit implements Git {
 
       return { file: src, status: marks[0] as GitStatusMark };
     });
+  }
+
+  async commit(msg: string) {
+    await this.call(['commit', '-m', msg]);
   }
 
   private static getItemFsPath(item: TreeItem, virtual = false) {

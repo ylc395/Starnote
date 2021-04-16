@@ -10,7 +10,7 @@
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
     "electron:build": "cross-env IS_ELECTRON=true vue-cli-service electron:build",
-    "electron:serve": "cross-env IS_ELECTRON=true vue-cli-service electron:serve",
+    "electron:serve": "cross-env IS_ELECTRON=true ELECTRON_ENABLE_LOGGING=true vue-cli-service electron:serve",
     "postinstall": "electron-builder install-app-deps",
     "postuninstall": "electron-builder install-app-deps"
   },

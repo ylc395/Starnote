@@ -17,7 +17,8 @@ import type {
   NoteDataObject,
   GitStatusMark,
 } from 'domain/entity';
-import { Ref, shallowRef } from '@vue/reactivity';
+import { computed, Ref, shallowReactive, shallowRef } from '@vue/reactivity';
+import { pull } from 'lodash';
 export const GIT_TOKEN: InjectionToken<Git> = Symbol();
 
 interface FileGitStatus {
@@ -34,6 +35,7 @@ export interface Git {
   ): Promise<void>;
   init(tree: ItemTree): Promise<void>;
   clone(url: string): Promise<void>;
+  commit(commitMessage: string): Promise<void>;
   getStatus(): Promise<FileGitStatus[]>;
 }
 
@@ -45,6 +47,11 @@ export class RevisionService {
   readonly changedNotes: Ref<Note[]> = shallowRef([]);
   constructor() {
     this.keepWorkingTreeSynced();
+  }
+
+  async commit() {
+    await this.git.commit('REVISION');
+    await this.refreshGitStatus();
   }
 
   private async init() {

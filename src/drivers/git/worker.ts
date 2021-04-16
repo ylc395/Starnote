@@ -8,7 +8,7 @@ const GIT_REPO_DIR = '/git_repository';
     return `${SCRIPTS_ROOT_PATH}/${path}`;
   },
   print(text: string) {
-    self.postMessage({ event: 'output', data: text });
+    self.postMessage({ event: 'stdout', data: text });
   },
 };
 
@@ -24,6 +24,10 @@ Module.onRuntimeInitialized = () => {
     }
 
     if (action === 'init') {
+      FS.writeFile(
+        '/home/web_user/.gitconfig',
+        '[user]\n' + 'name = Test User\n' + 'email = test@example.com',
+      );
       FS.mkdir(GIT_REPO_DIR);
       FS.mount(NODEFS, { root: args[0] }, GIT_REPO_DIR);
       FS.chdir(GIT_REPO_DIR);

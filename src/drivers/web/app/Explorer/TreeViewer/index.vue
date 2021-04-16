@@ -56,7 +56,7 @@ export default defineComponent({
   }
 
   :deep(.tree-viewer-list-item) {
-    @apply pl-5 p-2;
+    @apply text-inherit pl-5 p-2;
   }
 }
 </style>
