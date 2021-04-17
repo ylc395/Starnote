@@ -1,5 +1,5 @@
 import { Entity } from './Entity';
-import { without } from 'lodash';
+import { without, get } from 'lodash';
 import { Expose } from 'class-transformer';
 import { Ref, shallowRef } from '@vue/reactivity';
 
@@ -79,19 +79,23 @@ export abstract class Hierarchic<
     return false;
   }
 
-  get ancestors() {
+  getPath() {
+    let path = `/${get(this, 'title.value')}`;
     let node: P | null = this._parent.value;
-    const ancestors = [];
 
     while (node) {
       if (node instanceof Hierarchic) {
-        ancestors.unshift(node);
+        if (!node.parent) {
+          break;
+        }
+
+        path = `/${get(node, 'title.value')}${path}`;
         node = node.parent;
       } else {
         break;
       }
     }
 
-    return ancestors;
+    return path;
   }
 }

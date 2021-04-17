@@ -239,9 +239,6 @@ export class Notebook
   }
 
   removeChild(child: Note | Notebook) {
-    if (!this.children.value) {
-      throw new Error('no children to remove');
-    }
     const newChildren = without(this.children.value, child);
 
     if (newChildren.length === this.children.value.length) {

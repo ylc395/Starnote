@@ -1,8 +1,8 @@
 import { container } from 'tsyringe';
-import { mapValues, groupBy, isEmpty, compact } from 'lodash';
+import { mapValues, groupBy, compact } from 'lodash';
 import { outputFile, pathExists, ensureDir, remove, move } from 'fs-extra';
 import { join as pathJoin } from 'path';
-import { GitStatusMark, Note, Notebook, NOTE_PATH_SUFFIX } from 'domain/entity';
+import { GitStatusMark, Note, Notebook, NOTE_SUFFIX } from 'domain/entity';
 import type { ItemTree, TreeItem } from 'domain/entity';
 import { NOTE_DAO_TOKEN } from 'domain/repository';
 import type { Git } from 'domain/service/RevisionService';
@@ -133,9 +133,7 @@ export class FsGit implements Git {
     item: TreeItem,
     { parent: oldParent, title: oldTitle }: { parent: Notebook; title: string },
   ) {
-    const fileName = Note.isA(item)
-      ? `${oldTitle}${NOTE_PATH_SUFFIX}`
-      : oldTitle;
+    const fileName = Note.isA(item) ? `${oldTitle}${NOTE_SUFFIX}` : oldTitle;
     const oldPath = pathJoin(FsGit.getItemFsPath(oldParent), fileName);
     const oldVirtualPath = pathJoin(
       FsGit.getItemFsPath(oldParent, true),
@@ -168,18 +166,11 @@ export class FsGit implements Git {
   private static getItemFsPath(item: TreeItem, virtual = false) {
     const TREE_ITEM_DIR = pathJoin(virtual ? '.' : GIT_DIR, ITEM_DIR);
 
-    if (isEmpty(item.ancestors)) {
+    if (!item.parent) {
       return TREE_ITEM_DIR;
     }
 
-    const [, ...ancestors] = item.ancestors;
-    const path = pathJoin(
-      TREE_ITEM_DIR,
-      ...ancestors.map(({ title }) => title.value),
-      Note.isA(item)
-        ? `${item.title.value}${NOTE_PATH_SUFFIX}`
-        : item.title.value,
-    );
+    const path = pathJoin(TREE_ITEM_DIR, ...item.getPath().split('/').slice(1));
 
     return path;
   }

@@ -23,14 +23,7 @@ export function useNotebookCreator() {
       return [];
     }
 
-    const ancestors = _target.value.ancestors;
-    const [, ...path] = ancestors;
-
-    if (!_target.value.isRoot) {
-      path.push(_target.value);
-    }
-
-    return path.map(({ title }) => title.value);
+    return _target.value.getPath().split('/').slice(1);
   });
 
   const error = computed(() => {

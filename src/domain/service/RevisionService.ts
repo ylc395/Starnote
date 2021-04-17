@@ -9,7 +9,7 @@ import {
   Notebook,
   EditorManager,
   EditorManagerEvents,
-  NOTE_PATH_SUFFIX,
+  NOTE_SUFFIX,
 } from 'domain/entity';
 import type {
   TreeItem,
@@ -67,7 +67,7 @@ export class RevisionService {
     const changedItems = [];
 
     for (const { status, file } of statuses) {
-      if (!file.endsWith(NOTE_PATH_SUFFIX)) {
+      if (!file.endsWith(NOTE_SUFFIX)) {
         continue;
       }
 

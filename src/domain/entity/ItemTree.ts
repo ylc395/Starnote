@@ -3,7 +3,7 @@ import type { Ref } from '@vue/reactivity';
 import { singleton } from 'tsyringe';
 import { pull } from 'lodash';
 import { Subject } from 'rxjs';
-import { Note, NoteDataObject, INDEX_NOTE_TITLE } from './Note';
+import { Note, NoteDataObject, INDEX_NOTE_TITLE, NOTE_SUFFIX } from './Note';
 import {
   Notebook,
   ROOT_NOTEBOOK_ID,
@@ -15,7 +15,6 @@ import {
 import { SafeMap } from 'utils/index';
 import { EntityTypes } from './abstract/Entity';
 
-export const NOTE_PATH_SUFFIX = '.md';
 export enum ItemTreeEvents {
   Selected = 'SELECTED',
   Deleted = 'DELETED',
@@ -292,8 +291,8 @@ export class ItemTree {
 
     for (let i = 0; i < titles.length; i++) {
       const title = titles[i];
-      const name = title.replace(new RegExp(`\\${NOTE_PATH_SUFFIX}$`), '');
-      const isNote = title.endsWith(NOTE_PATH_SUFFIX);
+      const name = title.replace(new RegExp(`\\${NOTE_SUFFIX}$`), '');
+      const isNote = title.endsWith(NOTE_SUFFIX);
       const isLast = i === titles.length - 1;
       const isIndexNote = isNote && name === INDEX_NOTE_TITLE;
 

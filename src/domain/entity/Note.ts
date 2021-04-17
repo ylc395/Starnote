@@ -19,6 +19,7 @@ import { staticImplements } from 'utils/types';
 
 export const EMPTY_TITLE = '(empty title)';
 export const INDEX_NOTE_TITLE = 'INDEX_NOTE';
+export const NOTE_SUFFIX = '.md';
 
 @staticImplements<DataMapperStatic<NoteDataObject>>()
 export class Note
@@ -62,6 +63,10 @@ export class Note
     return computed(() =>
       this.isIndexNote ? this.parent.title.value : this.title.value,
     );
+  }
+
+  getPath(suffix = true) {
+    return `${super.getPath()}${suffix ? NOTE_SUFFIX : ''}`;
   }
 
   toDataObject() {
