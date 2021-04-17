@@ -52,7 +52,7 @@ export default defineComponent({
     >
       <template #item="{ element }">
         <li
-          class="group relative tree-viewer-list-item"
+          class="group relative tree-viewer-list-item cursor-pointer"
           :class="{ 'bg-gray-900': isActive(element.entity.value).value }"
           @click="openInEditor(element.entity.value)"
         >
