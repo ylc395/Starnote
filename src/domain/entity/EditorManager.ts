@@ -59,14 +59,10 @@ export class EditorManager {
     return result;
   }
 
-  setActiveEditor(editor: Editor | Editor['id'], noteToLoad?: Note) {
+  setActiveEditor(editor: Editor | Editor['id']) {
     const editorInstance = Editor.isA(editor)
       ? editor
       : this.getEditorById(editor);
-
-    if (noteToLoad) {
-      editorInstance.loadNote(noteToLoad);
-    }
 
     this._activeEditor.value = editorInstance;
     this._event$.next({
@@ -97,33 +93,29 @@ export class EditorManager {
   closeEditorOf(item: Note | Notebook) {
     if (Note.isA(item)) {
       const editorToClose = this._editors.find((editor) =>
-        editor.note.value?.isEqual(item),
+        editor.contains(item),
       );
 
       if (editorToClose) {
         this.closeEditorById(editorToClose.id);
       }
     } else {
-      const editors = this._editors.filter((editor) =>
-        editor.note.value?.isDescendenceOf(item),
-      );
+      const editors = this._editors.filter((editor) => editor.contains(item));
       editors.forEach(({ id }) => this.closeEditorById(id));
     }
   }
 
   isActive(note: Note) {
     return computed(() => {
-      return this._activeEditor.value?.note.value?.isEqual(note);
+      return this._activeEditor.value?.contains(note);
     });
   }
 
   openInEditor(note: Note) {
-    const openedEditor = this._editors.find((editor) =>
-      note.isEqual(editor.note.value),
-    );
+    const openedEditor = this._editors.find((editor) => editor.contains(note));
 
     if (openedEditor) {
-      this.setActiveEditor(openedEditor, note);
+      this.setActiveEditor(openedEditor);
       return;
     }
 

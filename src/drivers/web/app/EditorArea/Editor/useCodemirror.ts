@@ -1,26 +1,33 @@
-import { Editor } from 'domain/entity';
-
-import { EditorView, ViewUpdate, keymap } from '@codemirror/view';
+import { onUnmounted } from 'vue';
+import { EditorView, keymap, ViewUpdate } from '@codemirror/view';
 import { EditorState } from '@codemirror/state';
-import { defaultKeymap } from '@codemirror/commands';
 import { markdown } from '@codemirror/lang-markdown';
 import { defaultHighlightStyle } from '@codemirror/highlight';
+import { defaultKeymap } from '@codemirror/commands';
 
-export function codemirrorEditor(editor: Editor, el: HTMLElement) {
-  return new EditorView({
+import { Editor } from 'domain/entity';
+
+export function useCodemirror(editor: Editor, el: HTMLElement) {
+  const editorView = new EditorView({
     parent: el,
     state: EditorState.create({
-      doc: editor.content.value,
       extensions: [
         markdown(),
         defaultHighlightStyle,
         keymap.of(defaultKeymap),
+
         EditorView.updateListener.of((v: ViewUpdate) => {
           if (v.docChanged) {
-            editor.content.value = v.state.doc.toJSON().join('\n');
+            editor.setContent(v.state.doc.toJSON().join('\n'));
           }
         }),
       ],
     }),
   });
+
+  onUnmounted(() => {
+    editorView.destroy();
+  });
+
+  return editorView;
 }

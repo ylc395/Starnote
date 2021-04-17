@@ -37,7 +37,7 @@ export default defineComponent({
   >
     <TabPane v-for="editor of editors" :key="editor.id" :closable="true">
       <template #tab>
-        <FolderOutlined v-if="editor.note.value.isIndexNote" />
+        <FolderOutlined v-if="editor.isIndexNote" />
         <FileOutlined v-else />
         <span>
           {{ editor.title.value || EMPTY_TITLE }}

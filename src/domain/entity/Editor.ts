@@ -1,56 +1,63 @@
-import { Ref, ref, shallowRef, effect, stop, computed } from '@vue/reactivity';
+import { ref, effect, stop } from '@vue/reactivity';
 import { Subject } from 'rxjs';
-import { Note, NoteDataObject } from './Note';
 import dayjs from 'dayjs';
 import { uniqueId } from 'lodash';
-import { ListItem } from './abstract/ListItem';
-import { TitleStatus } from './Notebook';
 
-export class Editor implements ListItem {
-  readonly withContextmenu = ref(false);
+import { Note, NoteDataObject } from './Note';
+import { Notebook, TitleStatus } from './Notebook';
+
+export class Editor {
   readonly id = uniqueId('editor-');
-  private readonly _title = ref('');
-  get title() {
-    return computed(() => this._title.value);
-  }
-  readonly content = ref('');
-  private readonly _note: Ref<Note | null> = shallowRef(null);
-  get note() {
-    return computed(() => this._note.value);
-  }
+  private note: Note | null = null;
   get isJustCreated() {
-    return this._note.value?.isJustCreated || false;
+    return this.note?.isJustCreated || false;
   }
-  private saveEffect: ReturnType<typeof effect> | null = null;
+  get isIndexNote() {
+    return this.note?.isIndexNote || false;
+  }
+  private content = ref('');
+  setContent(content: string) {
+    this.content.value = content;
+  }
+  private readonly loadRunner: ReturnType<typeof effect>;
+  private readonly saveRunner: ReturnType<typeof effect>;
   private readonly _save$ = new Subject<{
     snapshot: NoteDataObject;
     note: Note;
   }>();
-
   get save$() {
     return this._save$.asObservable();
   }
   constructor(note: Note) {
-    this.loadNote(note);
-    this.autoSave();
+    this.loadRunner = this.loadNote(note);
+    this.saveRunner = this.saveNote();
+  }
+  private readonly title = ref('');
+  readonly titleStatus = ref(TitleStatus.Valid);
+  get noteTitle() {
+    if (!this.note) {
+      throw new Error('no note to read title');
+    }
+
+    return this.note.title.value;
   }
 
   setTitle(title: string) {
-    if (!this._note.value) {
-      throw new Error('no note when set title');
-    }
-
     const titleStatus = this.checkTitle(title);
+    this.titleStatus.value = titleStatus;
 
     if (titleStatus === TitleStatus.Valid) {
-      this._title.value = title;
-    } else {
-      throw new Error('invalid title in editor');
+      this.title.value = title;
+      this.saveNote();
     }
   }
 
-  checkTitle(title: string) {
-    const note = this._note.value;
+  resetTitleStatus() {
+    this.titleStatus.value = TitleStatus.Valid;
+  }
+
+  private checkTitle(title: string) {
+    const note = this.note;
 
     if (!note || !note.parent) {
       throw new Error('no note or parent when check title');
@@ -59,82 +66,82 @@ export class Editor implements ListItem {
     return note.parent.checkChildTitle(title, note);
   }
 
-  autoSave() {
-    if (!this._note.value) {
-      throw new Error('load note before enable auto save');
-    }
+  private loadNote(note: Note) {
+    this.note = note;
 
-    if (!this.saveEffect) {
-      this.loadNote(this._note.value);
-      this.saveEffect = effect(this.saveNote.bind(this));
-    }
-  }
+    return effect(() => {
+      if (!this.note) {
+        return;
+      }
 
-  stopAutoSave() {
-    if (this.saveEffect) {
-      stop(this.saveEffect);
-      this.saveEffect = null;
-    }
-  }
+      const note = this.note;
+      this.note = null;
 
-  loadNote(note: Note) {
-    this._note.value = note;
+      const noteContent = note.content.value;
+      const noteTitle = note.actualTitle.value;
 
-    const content = note.content.value;
-    const title = note.actualTitle.value;
+      if (noteContent === null) {
+        throw new Error('empty content');
+      }
 
-    if (content === null) {
-      throw new Error('empty title/content');
-    }
-
-    if (this._title.value !== title) {
-      this._title.value = title;
-    }
-
-    if (this.content.value !== content) {
-      this.content.value = content;
-    }
+      this.title.value = noteTitle;
+      this.content.value = noteContent;
+      this.note = note;
+    });
   }
 
   private saveNote() {
-    if (!this._note.value) {
-      throw new Error('no note to save');
-    }
+    return effect(() => {
+      if (!this.note) {
+        return;
+      }
 
-    const { title: noteTitle, content: noteContent } = this._note.value;
+      const note = this.note;
+      this.note = null;
 
-    const snapshot = this._note.value.toDataObject();
+      const snapshot = note.toDataObject();
+      const editorContent = this.content.value;
+      const editorTitle = this.title.value;
+      let updated = false;
 
-    let updated = false;
+      if (!note.isIndexNote && note.title.value !== editorTitle) {
+        note.title.value = this.title.value;
+        updated = true;
+      }
 
-    if (
-      !this._note.value.isIndexNote &&
-      noteTitle.value !== this._title.value
-    ) {
-      noteTitle.value = this._title.value;
-      updated = true;
-    }
+      if (note.content.value !== editorContent) {
+        note.content.value = editorContent;
+        updated = true;
+      }
 
-    if (noteContent.value !== this.content.value) {
-      noteContent.value = this.content.value;
-      updated = true;
-    }
+      if (updated) {
+        note.userModifiedAt.value = dayjs();
+        note.isJustCreated = false;
+        this._save$.next({ snapshot, note });
+      }
 
-    if (updated) {
-      this._note.value.userModifiedAt.value = dayjs();
-      this._note.value.isJustCreated = false;
-      this._save$.next({ snapshot, note: this._note.value });
-    }
+      this.note = note;
+    });
   }
 
+  contains(item: Note | Notebook) {
+    if (!this.note) {
+      throw new Error('no note');
+    }
+
+    return Note.isA(item)
+      ? item.isEqual(this.note)
+      : this.note.isDescendenceOf(item);
+  }
   destroy() {
-    if (!this._note.value) {
+    if (!this.note) {
       throw new Error('no note to destroy');
     }
 
-    this._note.value.content.value = null;
-    this._note.value = null;
-    this.stopAutoSave();
+    stop(this.loadRunner);
+    stop(this.saveRunner);
+    this.note.content.value = null;
+    this.note = null;
     this._save$.complete();
   }
 

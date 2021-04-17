@@ -11,33 +11,29 @@ export default defineComponent({
     const {
       titleRef,
       editorRef,
-      checkTitle,
       titleStatus,
       setTitle,
+      resetTitle,
     } = useEditor(editor);
-    const { stopAutoSave, autoSave, title, note } = editor;
+
     return {
       titleRef,
       editorRef,
-      stopAutoSave,
-      autoSave,
-      title,
-      note,
       setTitle,
-      checkTitle,
       titleStatus,
+      resetTitle,
     };
   },
 });
 </script>
 <template>
-  <div @focusout="stopAutoSave" @focusin="autoSave">
+  <div>
     <div>
       <input
         ref="titleRef"
-        @change="setTitle($event.target.value)"
-        @input="checkTitle($event.target.value)"
-        v-if="!note.isIndexNote"
+        @input="setTitle($event.target.value)"
+        @blur="resetTitle"
+        v-if="!editor.isIndexNote"
         class="w-full border-0 text-xl py-2 px-4 focus:outline-none"
         placeholder="笔记标题"
       />
