@@ -158,7 +158,7 @@ export default defineComponent({
             v-if="showingFields.includes('userCreatedAt')"
             class="note-list-time"
           >
-            创建于 {{ element.userCreatedAt.value.format('YYYY-MM-DD HH:m') }}
+            创建于 {{ element.userCreatedAt.value.format('YYYY-MM-DD HH:mm') }}
           </time>
           <time
             v-if="showingFields.includes('userModifiedAt')"

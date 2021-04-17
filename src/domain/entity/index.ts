@@ -1,5 +1,6 @@
 export * from './abstract/Entity';
 export * from './abstract/GitItem';
+export { TIME_DATA_FORMAT } from './abstract/DataMapper';
 export * from './Note';
 export * from './Notebook';
 export * from './Editor';

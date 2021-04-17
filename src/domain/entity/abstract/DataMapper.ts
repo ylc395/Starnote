@@ -11,6 +11,8 @@ import customParseFormat from 'dayjs/plugin/customParseFormat';
 
 dayjs.extend(customParseFormat);
 
+export const TIME_DATA_FORMAT = 'YYYY-MM-DD HH:mm:ss.SSS Z';
+
 export interface DataMapper<T> {
   toDataObject(): T;
 }
@@ -47,7 +49,6 @@ export const DayjsRefTransform = (
   target: DataMapper<unknown>,
   propertyName: string,
 ) => {
-  const TIME_DATA_FORMAT = 'YYYY-MM-DD HH:mm:ss.SSS Z';
   const toClass = Transform(
     ({ value }) => shallowRef(dayjs(value, TIME_DATA_FORMAT)),
     { toClassOnly: true },
