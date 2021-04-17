@@ -15,7 +15,6 @@ import {
   token as editorToken,
 } from 'domain/service/EditorService';
 import { INDEX_NOTE_TITLE, Note, NOTE_SUFFIX } from 'domain/entity';
-import type { GitStatusMark } from 'domain/entity';
 import Mark from './GitStatusMark.vue';
 import CollapsePanel from './CollapsePanel.vue';
 import { last } from 'lodash';
