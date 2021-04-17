@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent, inject } from 'vue';
+import { defineComponent, inject, computed } from 'vue';
 import {
   BranchesOutlined,
   FolderOutlined,
@@ -10,24 +10,58 @@ import {
   RevisionService,
   token as revisionToken,
 } from 'domain/service/RevisionService';
-import GitStatusMark from './GitStatusMark.vue';
+import {
+  EditorService,
+  token as editorToken,
+} from 'domain/service/EditorService';
+import { INDEX_NOTE_TITLE, Note, NOTE_SUFFIX } from 'domain/entity';
+import type { GitStatusMark } from 'domain/entity';
+import Mark from './GitStatusMark.vue';
 import CollapsePanel from './CollapsePanel.vue';
+import { last } from 'lodash';
 
 export default defineComponent({
   components: {
     Button,
     BranchesOutlined,
-    GitStatusMark,
+    Mark,
     FolderOutlined,
     FileOutlined,
     CollapsePanel,
   },
   setup() {
     const { changedNotes, commit } = inject<RevisionService>(revisionToken)!;
+    const {
+      editorManager: { isActive },
+      openInEditor,
+    } = inject<EditorService>(editorToken)!;
+    const getTitle = (title: string) => {
+      return last(title.split('/'))!.replace(
+        new RegExp(`\\${NOTE_SUFFIX}$`),
+        '',
+      );
+    };
 
     return {
-      changedNotes,
+      changedNotes: computed(() =>
+        changedNotes.value.map((item) => ({
+          isNote: Note.isA(item),
+          item,
+          id: Note.isA(item) ? item.id : item.file,
+          title: Note.isA(item) ? item.actualTitle.value : getTitle(item.file),
+          status: Note.isA(item) ? item.gitStatus.value : item.status,
+          isIndexNote: Note.isA(item)
+            ? item.isIndexNote
+            : item.file.endsWith(`${INDEX_NOTE_TITLE}${NOTE_SUFFIX}`),
+        })),
+      ),
+      openInEditor(item: unknown) {
+        if (Note.isA(item)) {
+          openInEditor(item);
+        }
+      },
       commit,
+      isActive,
     };
   },
 });
@@ -42,13 +76,18 @@ export default defineComponent({
         v-for="note of changedNotes"
         :key="note.id"
         class="flex justify-between tree-viewer-list-item"
+        :class="{
+          'cursor-pointer': note.isNote,
+          'bg-gray-900': isActive(note.item).value,
+        }"
+        @click="openInEditor(note.item)"
       >
         <span>
           <FolderOutlined v-if="note.isIndexNote" />
           <FileOutlined v-else />
-          <span class="ml-2">{{ note.actualTitle.value }}</span>
+          <span class="ml-2">{{ note.title }}</span>
         </span>
-        <GitStatusMark :mark="note.gitStatus.value" />
+        <Mark :mark="note.status" />
       </li>
     </ul>
     <Button

@@ -43,7 +43,7 @@ export class RevisionService {
   private readonly itemTree = container.resolve(ItemTree);
   private readonly editorManager = container.resolve(EditorManager);
   private readonly git = container.resolve(GIT_TOKEN);
-  readonly changedNotes: Ref<Note[]> = shallowRef([]);
+  readonly changedNotes: Ref<(Note | FileGitStatus)[]> = shallowRef([]);
   constructor() {
     this.keepWorkingTreeSynced();
   }
@@ -59,9 +59,9 @@ export class RevisionService {
   }
 
   private async refreshGitStatus() {
-    this.changedNotes.value.forEach(
-      (note) => (note.gitStatus.value = 'unknown'),
-    );
+    this.changedNotes.value
+      .filter(Note.isA)
+      .forEach((note) => (note.gitStatus.value = 'unknown'));
 
     const statuses = await this.git.getStatus();
     const changedItems = [];
@@ -71,9 +71,13 @@ export class RevisionService {
         continue;
       }
 
-      const item = this.itemTree.getItemByPath(file) as Note;
-      item.gitStatus.value = status;
-      changedItems.push(item);
+      if (['D', 'R'].includes(status)) {
+        changedItems.push({ status, file });
+      } else {
+        const item = this.itemTree.getItemByPath(file) as Note;
+        item.gitStatus.value = status;
+        changedItems.push(item);
+      }
     }
 
     this.changedNotes.value = changedItems;

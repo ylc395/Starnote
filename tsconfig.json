@@ -19,7 +19,7 @@
       "domain/*": ["src/domain/*"],
       "drivers/*": ["src/drivers/*"]
     },
-    "lib": ["dom"]
+    "lib": ["dom", "esnext"]
   },
   "include": [
     "src/**/*.ts",
