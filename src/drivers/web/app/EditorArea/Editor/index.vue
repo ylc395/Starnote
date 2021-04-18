@@ -8,18 +8,11 @@ export default defineComponent({
     editor: { type: Editor, required: true },
   },
   setup({ editor }) {
-    const {
-      titleRef,
-      editorRef,
-      titleStatus,
-      setTitle,
-      resetTitle,
-    } = useEditor(editor);
+    const { titleRef, editorRef, titleStatus, resetTitle } = useEditor(editor);
 
     return {
       titleRef,
       editorRef,
-      setTitle,
       titleStatus,
       resetTitle,
     };
@@ -31,7 +24,7 @@ export default defineComponent({
     <div>
       <input
         ref="titleRef"
-        @input="setTitle($event.target.value)"
+        @input="editor.setTitle($event.target.value)"
         @blur="resetTitle"
         v-if="!editor.isIndexNote"
         class="w-full border-0 text-xl py-2 px-4 focus:outline-none"

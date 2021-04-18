@@ -1,5 +1,4 @@
-import { computed, onMounted, Ref, ref } from 'vue';
-import type { EditorView } from '@codemirror/view';
+import { computed, onMounted, Ref, ref, watch } from 'vue';
 import { Editor, TITLE_STATUS_TEXT } from 'domain/entity';
 import { useCodemirror } from './useCodemirror';
 export function useEditor(editor: Editor) {
@@ -9,15 +8,19 @@ export function useEditor(editor: Editor) {
     () => TITLE_STATUS_TEXT[editor.titleStatus.value],
   );
 
-  let codeMirrorEditor: EditorView | null = null;
-
   onMounted(() => {
-    codeMirrorEditor = useCodemirror(editor, editorRef.value!);
+    const codeMirrorEditor = useCodemirror(editor, editorRef.value!);
     const isNewNote = editor.isJustCreated;
 
-    if (titleRef.value) {
-      titleRef.value.value = editor.noteTitle;
-    }
+    watch(
+      () => editor.noteTitle.value,
+      (newTitle) => {
+        if (titleRef.value && newTitle !== titleRef.value.value) {
+          titleRef.value.value = newTitle;
+        }
+      },
+      { immediate: true },
+    );
 
     if (isNewNote && titleRef.value) {
       titleRef.value.select();
@@ -30,11 +33,10 @@ export function useEditor(editor: Editor) {
     titleRef,
     editorRef,
     titleStatus,
-    setTitle: editor.setTitle,
     resetTitle() {
       if (titleStatus.value) {
-        titleRef.value!.value = editor.noteTitle;
-        editor.resetTitleStatus();
+        titleRef.value!.value = editor.noteTitle.value;
+        editor.resetTitle();
       }
     },
   };
