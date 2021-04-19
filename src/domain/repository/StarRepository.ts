@@ -1,7 +1,7 @@
 import { singleton, container } from 'tsyringe';
 import { isWithId, Star } from 'domain/entity';
 import { STAR_DAO_TOKEN } from './daoTokens';
-import { map, pick } from 'lodash';
+import { isEmpty, map, pick } from 'lodash';
 
 @singleton()
 export class StarRepository {
@@ -25,6 +25,8 @@ export class StarRepository {
   }
 
   deleteStars(...stars: Star[]) {
-    return this.starDao.deleteByIds(map(stars, 'id'));
+    if (!isEmpty(stars)) {
+      return this.starDao.deleteByIds(map(stars, 'id'));
+    }
   }
 }
