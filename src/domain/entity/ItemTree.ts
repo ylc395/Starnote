@@ -1,7 +1,7 @@
 import { shallowRef, shallowReactive, ref } from '@vue/reactivity';
 import type { Ref } from '@vue/reactivity';
 import { singleton } from 'tsyringe';
-import { pull } from 'lodash';
+import { compact, pull, last } from 'lodash';
 import { Subject } from 'rxjs';
 import { Note, NoteDataObject, INDEX_NOTE_TITLE, NOTE_SUFFIX } from './Note';
 import {
@@ -285,13 +285,13 @@ export class ItemTree {
     });
   }
 
-  getItemByPath(path: string) {
-    const titles = path.split('/');
+  getItemByPath(path: string, ensure = false) {
+    const titles = compact(path.split('/'));
     let notebook = this.root;
 
     for (let i = 0; i < titles.length; i++) {
       const title = titles[i];
-      const name = title.replace(new RegExp(`\\${NOTE_SUFFIX}$`), '');
+      const name = ItemTree.removeSuffix(title);
       const isNote = title.endsWith(NOTE_SUFFIX);
       const isLast = i === titles.length - 1;
       const isIndexNote = isNote && name === INDEX_NOTE_TITLE;
@@ -300,12 +300,12 @@ export class ItemTree {
         throw new Error(`invalid path ${path}`);
       }
 
-      const child = isIndexNote
+      let child = isIndexNote
         ? notebook.indexNote.value
         : notebook.children.value.find((item) => {
             return (
               item.title.value === name &&
-              (isLast ? Note.isA(item) : Notebook.isA(item))
+              (isNote ? Note.isA(item) : Notebook.isA(item))
             );
           });
 
@@ -314,12 +314,34 @@ export class ItemTree {
       }
 
       if (!child) {
-        return null;
+        if (!ensure) {
+          return null;
+        }
+
+        if (isNote) {
+          return this.createNote(notebook);
+        }
+
+        child = this.createSubNotebook(name, notebook);
       }
 
       notebook = child;
     }
 
     return notebook;
+  }
+
+  static removeSuffix(title: string) {
+    return title.replace(new RegExp(`\\${NOTE_SUFFIX}$`), '');
+  }
+
+  static getTitleWithoutSuffix(path: string) {
+    const fileName = last(path.split('/'));
+
+    if (!fileName) {
+      throw new Error(`no file name in ${path}`);
+    }
+
+    return ItemTree.removeSuffix(fileName);
   }
 }

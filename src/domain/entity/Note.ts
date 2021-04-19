@@ -46,22 +46,12 @@ export class Note
   isJustCreated = false;
 
   get isIndexNote() {
-    return this.parent.indexNote.value === this;
-  }
-
-  get parent() {
-    const parent = super.parent;
-
-    if (!parent) {
-      throw new Error('no parent');
-    }
-
-    return parent;
+    return this.parent?.indexNote.value === this;
   }
 
   get actualTitle() {
     return computed(() =>
-      this.isIndexNote ? this.parent.title.value : this.title.value,
+      this.isIndexNote ? this.parent?.title.value : this.title.value,
     );
   }
 
