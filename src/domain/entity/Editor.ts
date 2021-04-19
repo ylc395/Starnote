@@ -1,5 +1,6 @@
 import { ref, effect, stop, computed } from '@vue/reactivity';
 import { Subject } from 'rxjs';
+import { buffer, debounceTime, map } from 'rxjs/operators';
 import dayjs from 'dayjs';
 import { uniqueId } from 'lodash';
 
@@ -20,23 +21,24 @@ export class Editor {
   get isIndexNote() {
     return this.note?.isIndexNote || false;
   }
-  private _content = ref('');
-  content = computed(() => this._content.value);
+  private readonly _content = ref('');
+  readonly content = computed(() => this._content.value);
   private readonly loadRunner: ReturnType<typeof effect>;
   private readonly saveRunner: ReturnType<typeof effect>;
-  private readonly _save$ = new Subject<{
-    snapshot: NoteDataObject;
-    note: Note;
-  }>();
-  save$ = this._save$.asObservable();
+  private readonly _save$ = new Subject<NoteDataObject>();
+  save$ = this._save$.pipe(
+    buffer(this._save$.pipe(debounceTime(500))),
+    map((snapshots) => snapshots[0]),
+  );
   private readonly title = ref('');
-  noteTitle = computed(() => {
+  readonly noteTitle = computed(() => {
     if (!this.note) {
       throw new Error('no note when read title');
     }
     return this.note.title.value;
   });
-  readonly titleStatus = ref(TitleStatus.Valid);
+  private readonly _titleStatus = ref(TitleStatus.Valid);
+  titleStatus = computed(() => this._titleStatus.value);
 
   private checkTitle(title: string) {
     const note = this.note;
@@ -50,7 +52,7 @@ export class Editor {
 
   setTitle(title: string) {
     const titleStatus = this.checkTitle(title);
-    this.titleStatus.value = titleStatus;
+    this._titleStatus.value = titleStatus;
 
     if (titleStatus === TitleStatus.Valid) {
       this.title.value = title;
@@ -58,7 +60,11 @@ export class Editor {
   }
 
   resetTitle() {
-    this.titleStatus.value = TitleStatus.Valid;
+    if (!this._titleStatus.value) {
+      return;
+    }
+
+    this._titleStatus.value = TitleStatus.Valid;
     this.title.value = this.noteTitle.value;
   }
 
@@ -101,8 +107,7 @@ export class Editor {
     note.content.value = this._content.value;
     note.userModifiedAt.value = dayjs();
     note.isJustCreated = false;
-    this._save$.next({ snapshot, note });
-    this.isSaving = false;
+    this._save$.next(snapshot);
   }
 
   private startAutoSave() {

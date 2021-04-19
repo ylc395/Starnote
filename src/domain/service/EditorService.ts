@@ -9,7 +9,7 @@ import {
   EditorManagerEvents,
 } from 'domain/entity';
 import { isNull } from 'lodash';
-import { debounceTime, concatMap, filter } from 'rxjs/operators';
+import { concatMap, filter } from 'rxjs/operators';
 import { selfish } from 'utils/index';
 
 export const token = Symbol();
@@ -38,7 +38,6 @@ export class EditorService {
     this.editorManager.event$
       .pipe(
         filter(({ event }) => event === EditorManagerEvents.Sync),
-        debounceTime(500),
         concatMap(({ note }) => {
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           return this.noteRepository.updateNote(note!, [

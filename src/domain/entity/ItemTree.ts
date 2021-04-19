@@ -314,7 +314,7 @@ export class ItemTree {
       }
 
       if (!child) {
-        throw new Error(`wrong path ${path}`);
+        return null;
       }
 
       notebook = child;

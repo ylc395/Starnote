@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { container, InjectionToken } from 'tsyringe';
 import { merge } from 'rxjs';
-import { buffer, debounceTime, map, mergeAll, filter } from 'rxjs/operators';
+import { debounceTime, filter, concatMap } from 'rxjs/operators';
 import {
   ItemTree,
   ItemTreeEvents,
@@ -18,6 +18,7 @@ import type {
   GitStatusMark,
 } from 'domain/entity';
 import { Ref, shallowRef } from '@vue/reactivity';
+import { difference } from 'lodash';
 export const GIT_TOKEN: InjectionToken<Git> = Symbol();
 
 interface FileGitStatus {
@@ -53,16 +54,7 @@ export class RevisionService {
     await this.refreshGitStatus();
   }
 
-  private async init() {
-    await this.git.init(this.itemTree);
-    this.refreshGitStatus();
-  }
-
   private async refreshGitStatus() {
-    this.changedNotes.value
-      .filter(Note.isA)
-      .forEach((note) => (note.gitStatus.value = 'unknown'));
-
     const statuses = await this.git.getStatus();
     const changedItems = [];
 
@@ -73,51 +65,66 @@ export class RevisionService {
 
       if (['D', 'R'].includes(status)) {
         changedItems.push({ status, file });
-      } else {
-        const item = this.itemTree.getItemByPath(file) as Note;
+        continue;
+      }
+
+      const item = this.itemTree.getItemByPath(file);
+
+      if (Note.isA(item)) {
         item.gitStatus.value = status;
         changedItems.push(item);
+      } else {
+        return;
       }
     }
+
+    difference(this.changedNotes.value, changedItems)
+      .filter(Note.isA)
+      .forEach((note) => (note.gitStatus.value = 'unknown'));
 
     this.changedNotes.value = changedItems;
   }
 
   private keepWorkingTreeSynced() {
-    const event$ = this.itemTree.event$;
-    event$.subscribe(async ({ event }) => {
-      if (event === ItemTreeEvents.Loaded) {
-        this.init();
-      }
-    });
-
-    const deleted$ = event$.pipe(
-      filter(({ event }) => event === ItemTreeEvents.Deleted),
-      map(({ item }) => this.git.deleteFileByItem(item!)),
-    );
-    const created$ = event$.pipe(
-      filter(({ event }) => event === ItemTreeEvents.Created),
-      map(({ item }) => this.createFileByItem(item!)),
-    );
-
-    const updated$ = event$.pipe(
-      filter(({ event }) => event === ItemTreeEvents.Updated),
-      map(({ item, snapshot }) => this.updateFileByItem(item!, snapshot!)),
+    const itemEvent$ = this.itemTree.event$.pipe(
+      filter(({ event }) =>
+        [
+          ItemTreeEvents.Created,
+          ItemTreeEvents.Deleted,
+          ItemTreeEvents.Updated,
+          ItemTreeEvents.Loaded,
+        ].includes(event),
+      ),
     );
 
     const noteSynced$ = this.editorManager.event$.pipe(
       filter(({ event }) => event === EditorManagerEvents.Sync),
     );
 
-    const debouncedNoteSynced$ = noteSynced$.pipe(
-      // todo: 我们暂且假设一个 buffer 里都是同一个 item 的 synced 事件
-      buffer(noteSynced$.pipe(debounceTime(500))),
-      map(([{ note, snapshot }]) => this.updateFileByItem(note!, snapshot!)),
-    );
+    merge(itemEvent$, noteSynced$)
+      .pipe(
+        concatMap((e) => {
+          const { event, snapshot } = e;
+          const item = 'item' in e ? e.item : 'note' in e ? e.note : null;
 
-    merge(deleted$, updated$, created$, debouncedNoteSynced$)
-      .pipe(mergeAll(), debounceTime(1000))
-      .subscribe(this.refreshGitStatus.bind(this));
+          if (!item && event !== ItemTreeEvents.Loaded) {
+            throw new Error('no item to update');
+          }
+
+          switch (event) {
+            case ItemTreeEvents.Loaded:
+              return this.git.init(this.itemTree);
+            case ItemTreeEvents.Created:
+              return this.createFileByItem(item!);
+            case ItemTreeEvents.Deleted:
+              return this.git.deleteFileByItem(item!);
+            default:
+              return this.updateFileByItem(item!, snapshot!);
+          }
+        }),
+        debounceTime(1000),
+      )
+      .subscribe(() => this.refreshGitStatus());
   }
 
   private async createFileByItem(item: TreeItem) {

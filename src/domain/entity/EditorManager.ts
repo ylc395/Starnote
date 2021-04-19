@@ -25,18 +25,13 @@ export enum EditorManagerEvents {
 export class EditorManager {
   private readonly maxEditorCount = ref(MAX_EDITOR_COUNT);
   private readonly _editors: Editor[] = shallowReactive([]);
-  get editors() {
-    return computed(() => {
-      return shallowReadonly(this._editors.map(selfish));
-    });
-  }
-
-  private _activeEditor: Ref<Editor | null> = shallowRef(null);
-  get activeEditor() {
-    return computed(() => {
-      return this._activeEditor.value;
-    });
-  }
+  readonly editors = computed(() => {
+    return shallowReadonly(this._editors);
+  });
+  private readonly _activeEditor: Ref<Editor | null> = shallowRef(null);
+  readonly activeEditor = computed(() => {
+    return this._activeEditor.value;
+  });
 
   private readonly _event$ = new Subject<{
     event: EditorManagerEvents;
@@ -44,10 +39,7 @@ export class EditorManager {
     note?: Note;
     editor?: Editor;
   }>();
-
-  get event$() {
-    return this._event$.asObservable();
-  }
+  readonly event$ = this._event$.asObservable();
 
   private getEditorById(id: Editor['id']) {
     const result = this._editors.find((editor) => editor.id === id);
@@ -119,7 +111,7 @@ export class EditorManager {
       return;
     }
 
-    const newEditor = new Editor(note);
+    const newEditor = selfish(new Editor(note));
     if (this._editors.length >= this.maxEditorCount.value) {
       const lastEditor = this._editors.shift();
       lastEditor?.destroy();
@@ -128,7 +120,7 @@ export class EditorManager {
     this._editors.push(newEditor);
     this.setActiveEditor(newEditor);
 
-    newEditor.save$.subscribe(({ note, snapshot }) => {
+    newEditor.save$.subscribe((snapshot) => {
       this._event$.next({ event: EditorManagerEvents.Sync, snapshot, note });
     });
   }

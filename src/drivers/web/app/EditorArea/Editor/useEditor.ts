@@ -33,11 +33,6 @@ export function useEditor(editor: Editor) {
     titleRef,
     editorRef,
     titleStatus,
-    resetTitle() {
-      if (titleStatus.value) {
-        titleRef.value!.value = editor.noteTitle.value;
-        editor.resetTitle();
-      }
-    },
+    resetTitle: editor.resetTitle,
   };
 }
