@@ -1,6 +1,6 @@
 import { container } from 'tsyringe';
 import { mapValues, groupBy, compact } from 'lodash';
-import { outputFile, pathExists, ensureDir, remove, move } from 'fs-extra';
+import { outputFile, ensureDir, remove, move } from 'fs-extra';
 import { join as pathJoin } from 'path';
 import { GitStatusMark, Note, Notebook, NOTE_SUFFIX } from 'domain/entity';
 import type { ItemTree, TreeItem } from 'domain/entity';
@@ -55,61 +55,50 @@ export class FsGit implements Git {
       });
     });
   }
-  private treeToFiles(tree: ItemTree) {
+
+  private async treeToFiles(tree: ItemTree) {
+    await remove(pathJoin(GIT_DIR, ITEM_DIR));
+
     const { root } = tree;
     const promises: Promise<void>[] = [];
+    const contents = await this.noteDao.all(['content', 'id']);
+    const indexedContents = mapValues(
+      groupBy(contents, 'id'),
+      (val) => val[0].content,
+    );
 
-    type IndexedContents = Record<string, string>;
-
-    const travel = async (item: TreeItem, indexedContents: IndexedContents) => {
+    const travel = (item: TreeItem) => {
       if (Note.isA(item)) {
         promises.push(
           outputFile(FsGit.getItemFsPath(item), indexedContents[item.id]),
         );
+        return;
       }
 
-      if (Notebook.isA(item)) {
-        const contents = await this.noteDao.all({ parentId: item.id }, [
-          'content',
-          'id',
-        ]);
+      if (item.indexNote.value) {
+        promises.push(
+          outputFile(
+            FsGit.getItemFsPath(item.indexNote.value),
+            indexedContents[item.indexNote.value.id],
+          ),
+        );
+      }
 
-        const indexedContents = mapValues(
-          groupBy(contents, 'id'),
-          (val) => val[0].content,
-        ) as IndexedContents;
+      const children = item.children.value;
 
-        if (item.indexNote.value) {
-          promises.push(
-            outputFile(
-              FsGit.getItemFsPath(item.indexNote.value),
-              indexedContents[item.indexNote.value.id],
-            ),
-          );
-        }
-
-        const children = item.children.value;
-
-        if (children) {
-          children.forEach((item) => travel(item, indexedContents));
-        }
+      if (children) {
+        children.forEach((item) => travel(item));
       }
     };
 
-    travel(root, {});
+    travel(root);
 
-    return Promise.all(promises).then(() => undefined);
+    await Promise.all(promises);
   }
 
   async init(tree: ItemTree) {
     await ensureDir(GIT_DIR);
-    const firstInit = !(await pathExists(pathJoin(GIT_DIR, '.git')));
     await this.call(['init', GIT_DIR]);
-
-    if (!firstInit) {
-      return;
-    }
-
     await this.treeToFiles(tree);
     await this.call(['add', '.']);
   }
