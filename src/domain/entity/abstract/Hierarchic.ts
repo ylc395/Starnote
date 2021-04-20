@@ -20,11 +20,7 @@ export abstract class Hierarchic<
 
   @Expose({ toPlainOnly: true })
   get parentId() {
-    try {
-      return this.parent?.id || this.initialParentId;
-    } catch {
-      return this.initialParentId;
-    }
+    return this.parent?.id || this.initialParentId;
   }
 
   // 一般 indexNote 会被置为单向

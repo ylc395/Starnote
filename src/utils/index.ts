@@ -17,10 +17,12 @@ export function selfish<T>(target: T) {
 }
 
 export class SafeMap<K, V> extends Map<K, V> {
-  get(key: K) {
+  get(key: K): V;
+  get(key: K, silent: true): V | undefined;
+  get(key: K, silent = false) {
     const item = super.get(key);
 
-    if (isUndefined(item)) {
+    if (isUndefined(item) && !silent) {
       throw new Error('wrong key when get item from map');
     }
 

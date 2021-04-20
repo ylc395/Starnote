@@ -51,7 +51,8 @@ export class Note
 
   get actualTitle() {
     return computed(() =>
-      this.isIndexNote ? this.parent?.title.value : this.title.value,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      this.isIndexNote ? this.parent!.title.value : this.title.value,
     );
   }
 

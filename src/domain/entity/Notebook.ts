@@ -220,9 +220,10 @@ export class Notebook
     return title;
   }
 
-  createNote() {
+  createNote(noteDO?: NotebookDataObject) {
     const note = Note.createNote(this, {
-      title: this.getUniqueTitle('untitled note'),
+      title: this.getUniqueTitle(noteDO?.title || 'untitled note'),
+      ...noteDO,
     });
     this.noteJustCreated = note;
     this.userModifiedAt.value = dayjs();

@@ -105,6 +105,10 @@ export class ItemTree {
       throw new Error('no item to move');
     }
 
+    if (!child.parent) {
+      throw new Error('no parent. Use `createNote` if this is a new note');
+    }
+
     if (child.parent?.isEqual(parent)) {
       return;
     }
@@ -189,14 +193,14 @@ export class ItemTree {
     this.indexedNotebooks.delete(item.id);
     this.indexedNotes.delete(item.id);
   }
-  createNote(parent?: Notebook) {
+  createNote(parent?: Notebook, noteDO?: NotebookDataObject) {
     const target = parent || this.selectedItem.value;
 
     if (!Notebook.isA(target)) {
       throw new Error('no target notebook');
     }
 
-    const newNote = target.createNote();
+    const newNote = target.createNote(noteDO);
     this.indexedNotes.set(newNote.id, newNote);
     this.setSelectedItem(newNote);
     this._event$.next({ event: ItemTreeEvents.Created, item: newNote });
@@ -319,7 +323,7 @@ export class ItemTree {
         }
 
         if (isNote) {
-          return this.createNote(notebook);
+          return this.createNote(notebook, { title: name });
         }
 
         child = this.createSubNotebook(name, notebook);
