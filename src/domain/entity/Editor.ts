@@ -10,7 +10,7 @@ import { Notebook, TitleStatus } from './Notebook';
 export class Editor {
   constructor(note: Note) {
     this.loadRunner = this.loadNote(note);
-    this.saveRunner = this.startAutoSave();
+    this.startAutoSave();
   }
   readonly id = uniqueId('editor-');
   private note: Note | null = null;
@@ -24,7 +24,7 @@ export class Editor {
   private readonly _content = ref('');
   readonly content = computed(() => this._content.value);
   private readonly loadRunner: ReturnType<typeof effect>;
-  private readonly saveRunner: ReturnType<typeof effect>;
+  private saveRunner: ReturnType<typeof effect> | null = null;
   private readonly _save$ = new Subject<NoteDataObject>();
   save$ = this._save$.pipe(
     buffer(this._save$.pipe(debounceTime(500))),
@@ -76,13 +76,12 @@ export class Editor {
     this.note = note;
 
     return effect(() => {
-      if (this.isSaving) {
-        this.isSaving = true;
-        return;
-      }
-
       const noteContent = note.content.value;
       const noteTitle = note.actualTitle.value;
+
+      if (this.isSaving) {
+        return;
+      }
 
       if (noteContent === null) {
         throw new Error('empty content');
@@ -108,10 +107,16 @@ export class Editor {
     note.userModifiedAt.value = dayjs();
     note.isJustCreated = false;
     this._save$.next(snapshot);
+
+    this.isSaving = false;
   }
 
-  private startAutoSave() {
-    return effect(() => {
+  startAutoSave() {
+    if (this.saveRunner) {
+      return;
+    }
+
+    this.saveRunner = effect(() => {
       const note = this.note;
       const editorContent = this._content.value;
       const editorTitle = this.title.value;
@@ -130,6 +135,13 @@ export class Editor {
     });
   }
 
+  stopAutoSave() {
+    if (this.saveRunner) {
+      stop(this.saveRunner);
+      this.saveRunner = null;
+    }
+  }
+
   contains(item: Note | Notebook) {
     if (!this.note) {
       throw new Error('no note');
@@ -146,7 +158,7 @@ export class Editor {
     }
 
     stop(this.loadRunner);
-    stop(this.saveRunner);
+    this.stopAutoSave();
     this.note.content.value = null;
     this.note = null;
     this._save$.complete();

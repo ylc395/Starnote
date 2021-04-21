@@ -8,19 +8,26 @@ export default defineComponent({
     editor: { type: Editor, required: true },
   },
   setup({ editor }) {
-    const { titleRef, editorRef, titleStatus, resetTitle } = useEditor(editor);
+    const {
+      titleRef,
+      editorRef,
+      titleStatus,
+      resetTitle,
+      toggleAutoSave,
+    } = useEditor(editor);
 
     return {
       titleRef,
       editorRef,
       titleStatus,
       resetTitle,
+      toggleAutoSave,
     };
   },
 });
 </script>
 <template>
-  <div>
+  <div @focusin="toggleAutoSave" @focusout="toggleAutoSave">
     <div>
       <input
         ref="titleRef"

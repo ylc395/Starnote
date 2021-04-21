@@ -31,7 +31,7 @@ Module.onRuntimeInitialized = () => {
       FS.mkdir(GIT_REPO_DIR);
       FS.mount(NODEFS, { root: args[0] }, GIT_REPO_DIR);
       FS.chdir(GIT_REPO_DIR);
-      lg.callMain(['init', `${GIT_REPO_DIR}/.git`]);
+      lg.callMain(['init', '.']);
     } else {
       lg.callMain([action, ...args]);
     }

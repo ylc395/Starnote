@@ -1,12 +1,21 @@
 import { container } from 'tsyringe';
-import { mapValues, groupBy, compact } from 'lodash';
-import { outputFile, ensureDir, remove, move } from 'fs-extra';
+import { mapValues, groupBy, compact, isUndefined } from 'lodash';
+import { outputFile, ensureDir, remove, move, readFile } from 'fs-extra';
 import { join as pathJoin } from 'path';
-import { GitStatusMark, Note, Notebook, NOTE_SUFFIX } from 'domain/entity';
-import type { ItemTree, TreeItem } from 'domain/entity';
+import fm from 'front-matter';
+import {
+  GitStatusMark,
+  Note,
+  Notebook,
+  NOTE_SUFFIX,
+  ItemTree,
+  TIME_DATA_FORMAT,
+} from 'domain/entity';
+import type { TreeItem } from 'domain/entity';
 import { NOTE_DAO_TOKEN } from 'domain/repository';
 import type { Git } from 'domain/service/RevisionService';
 import { APP_DIRECTORY } from 'drivers/env';
+import dayjs from 'dayjs';
 
 const GIT_DIR = pathJoin(APP_DIRECTORY, 'git_repository');
 const ITEM_DIR = 'notes';
@@ -69,22 +78,18 @@ export class FsGit implements Git {
 
     const travel = (item: TreeItem) => {
       if (Note.isA(item)) {
-        promises.push(
-          outputFile(FsGit.getItemFsPath(item), indexedContents[item.id]),
-        );
+        promises.push(this.noteToFile(item, indexedContents[item.id]));
         return;
       }
 
-      if (item.indexNote.value) {
+      const indexNote = item.indexNote.value;
+      const children = item.children.value;
+
+      if (indexNote) {
         promises.push(
-          outputFile(
-            FsGit.getItemFsPath(item.indexNote.value),
-            indexedContents[item.indexNote.value.id],
-          ),
+          this.noteToFile(indexNote, indexedContents[indexNote.id]),
         );
       }
-
-      const children = item.children.value;
 
       if (children) {
         children.forEach((item) => travel(item));
@@ -92,7 +97,6 @@ export class FsGit implements Git {
     };
 
     travel(root);
-
     await Promise.all(promises);
   }
 
@@ -110,12 +114,19 @@ export class FsGit implements Git {
   async deleteFileByItem(item: TreeItem) {
     // "git rm" doesn't work, so we have to use "rm & git add"
     await remove(FsGit.getItemFsPath(item));
-    await this.call(['add', FsGit.getItemFsPath(item, true)]);
+    await this.call(['add', '.']);
   }
 
-  async noteToFile(note: Note) {
-    await outputFile(FsGit.getItemFsPath(note), note.content.value);
-    await this.call(['add', FsGit.getItemFsPath(note, true)]);
+  async noteToFile(note: Note, content?: string) {
+    await outputFile(
+      FsGit.getItemFsPath(note),
+      FsGit.noteContentFoFileContent(note, content),
+    );
+
+    // if this function is not called during init
+    if (isUndefined(content)) {
+      await this.call(['add', '.']);
+    }
   }
 
   async moveItem(
@@ -124,15 +135,10 @@ export class FsGit implements Git {
   ) {
     const fileName = Note.isA(item) ? `${oldTitle}${NOTE_SUFFIX}` : oldTitle;
     const oldPath = pathJoin(FsGit.getItemFsPath(oldParent), fileName);
-    const oldVirtualPath = pathJoin(
-      FsGit.getItemFsPath(oldParent, true),
-      fileName,
-    );
 
     // "git mv" doesn't work, so we have to use "mv & git add"
     await move(oldPath, FsGit.getItemFsPath(item));
-    await this.call(['add', oldVirtualPath]);
-    await this.call(['add', FsGit.getItemFsPath(item, true)]);
+    await this.call(['add', '.']);
   }
 
   async getStatus() {
@@ -142,7 +148,7 @@ export class FsGit implements Git {
 
     return statuses.map((status) => {
       const marks = status.slice(0, 2);
-      const src = status.slice(3).replace(`${ITEM_DIR}/`, '');
+      const src = status.slice(3).replace(`${ITEM_DIR}/`, '/');
 
       return { file: src, status: marks[0] as GitStatusMark };
     });
@@ -152,15 +158,67 @@ export class FsGit implements Git {
     await this.call(['commit', '-m', msg]);
   }
 
+  async restore(path: string) {
+    const file = `${ITEM_DIR}${path}`;
+    await this.call(['checkout', '--', file]);
+    const note = await FsGit.fileToNote(
+      pathJoin(GIT_DIR, ITEM_DIR, ...path.split('/').slice(1)),
+    );
+
+    return note;
+  }
+
   private static getItemFsPath(item: TreeItem, virtual = false) {
-    const TREE_ITEM_DIR = pathJoin(virtual ? '.' : GIT_DIR, ITEM_DIR);
+    const TREE_ITEM_DIR = virtual ? ITEM_DIR : pathJoin(GIT_DIR, ITEM_DIR);
 
     if (!item.parent) {
       return TREE_ITEM_DIR;
     }
 
-    const path = pathJoin(TREE_ITEM_DIR, ...item.getPath().split('/').slice(1));
+    const path = virtual
+      ? `${TREE_ITEM_DIR}${item.getPath()}`
+      : pathJoin(TREE_ITEM_DIR, ...item.getPath().split('/').slice(1));
 
     return path;
+  }
+
+  private static noteContentFoFileContent(note: Note, content?: string) {
+    const _content = note.content.value ?? content;
+
+    if (isUndefined(_content)) {
+      throw new Error('no content when write file');
+    }
+
+    const { userCreatedAt, sortOrder, id } = note.toDataObject();
+
+    const frontmatter = [
+      '---',
+      [
+        `id: ${id}`,
+        `userCreatedAt: ${userCreatedAt}`,
+        `sortOrder: ${sortOrder}`,
+      ].join('\n'),
+      '---',
+    ].join('\n');
+
+    return frontmatter.concat('\n', _content);
+  }
+
+  private static async fileToNote(file: string) {
+    const fileContent = await readFile(file, 'utf-8');
+    interface NoteFrontMatter {
+      id: string;
+      userCreatedAt: Date;
+      sortOrder: number;
+    }
+
+    const { attributes, body: content } = fm<NoteFrontMatter>(fileContent);
+
+    return {
+      ...attributes,
+      userCreatedAt: dayjs(attributes.userCreatedAt).format(TIME_DATA_FORMAT),
+      title: ItemTree.getTitleWithoutSuffix(file),
+      content,
+    };
   }
 }

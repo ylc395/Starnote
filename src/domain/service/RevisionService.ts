@@ -17,8 +17,10 @@ import type {
   NoteDataObject,
   GitStatusMark,
 } from 'domain/entity';
+import { NoteRepository } from 'domain/repository';
 import { Ref, shallowRef } from '@vue/reactivity';
 import { difference } from 'lodash';
+
 export const GIT_TOKEN: InjectionToken<Git> = Symbol();
 
 interface FileGitStatus {
@@ -37,16 +39,55 @@ export interface Git {
   clone(url: string): Promise<void>;
   commit(commitMessage: string): Promise<void>;
   getStatus(): Promise<FileGitStatus[]>;
+  restore(path: string): Promise<NoteDataObject>;
 }
 
 export const token = Symbol();
 export class RevisionService {
+  private readonly noteRepository = container.resolve(NoteRepository);
   private readonly itemTree = container.resolve(ItemTree);
   private readonly editorManager = container.resolve(EditorManager);
   private readonly git = container.resolve(GIT_TOKEN);
   readonly changedNotes: Ref<(Note | FileGitStatus)[]> = shallowRef([]);
   constructor() {
-    this.keepWorkingTreeSynced();
+    this.keepGitIndexSynced();
+  }
+
+  async restore(path: string) {
+    const restoredNoteDO = await this.git.restore(path);
+    const note = this.itemTree.indexedNotes.get(restoredNoteDO.id!, true);
+
+    // rename / move / modify / create
+    if (note) {
+      // create
+      if (note.gitStatus.value === 'A') {
+        this.itemTree.deleteItem(note);
+        return;
+      }
+
+      note.content.value = restoredNoteDO.content!;
+      note.title.value = restoredNoteDO.title!;
+
+      // rename / modify
+      if (note.getPath() === path) {
+        await this.noteRepository.updateNote(note, ['content', 'title']);
+        await this.refreshGitStatus();
+        return;
+      }
+    }
+
+    // move / delete
+    const notebookPath = `/${path.split('/').slice(1, -1).join('/')}`;
+    const notebook = this.itemTree.getItemByPath(
+      notebookPath,
+      true,
+    ) as Notebook;
+
+    if (note) {
+      this.itemTree.moveTo(note, notebook);
+    } else {
+      this.itemTree.createNote(notebook, restoredNoteDO);
+    }
   }
 
   async commit() {
@@ -85,7 +126,7 @@ export class RevisionService {
     this.changedNotes.value = changedItems;
   }
 
-  private keepWorkingTreeSynced() {
+  private keepGitIndexSynced() {
     const itemEvent$ = this.itemTree.event$.pipe(
       filter(({ event }) =>
         [
@@ -162,7 +203,7 @@ export class RevisionService {
     const { parentId, title } = snapshot;
 
     if (!parentId || !title) {
-      throw new Error('invalid snapshot when updateFie');
+      throw new Error('invalid snapshot when updateFile');
     }
 
     const oldParent = this.itemTree.indexedNotebooks.get(parentId);
