@@ -30,9 +30,12 @@ export default defineComponent({
     RedoOutlined,
   },
   setup() {
-    const { changedNotes, commit, restore } = inject<RevisionService>(
-      revisionToken,
-    )!;
+    const {
+      changedNotes,
+      commit,
+      restore,
+      isRefreshing,
+    } = inject<RevisionService>(revisionToken)!;
     const {
       editorManager: { isActive },
       openInEditor,
@@ -61,6 +64,7 @@ export default defineComponent({
       commit,
       isActive,
       restore,
+      isRefreshing,
     };
   },
 });
@@ -87,7 +91,11 @@ export default defineComponent({
           <span class="ml-2">{{ note.title }}</span>
         </span>
         <span>
-          <RedoOutlined @click.stop="restore(note.path)" class="mr-2" />
+          <RedoOutlined
+            v-if="!isRefreshing"
+            @click.stop="restore(note.path)"
+            class="mr-2"
+          />
           <Mark :mark="note.status" />
         </span>
       </li>
@@ -96,6 +104,7 @@ export default defineComponent({
       type="primary"
       v-if="changedNotes.length > 0"
       class="w-5/6 mx-auto mt-2 block"
+      :disabled="isRefreshing"
       @click="commit"
     >
       提交修订

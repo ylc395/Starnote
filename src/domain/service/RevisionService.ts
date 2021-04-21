@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { container, InjectionToken } from 'tsyringe';
 import { merge } from 'rxjs';
-import { debounceTime, filter, concatMap } from 'rxjs/operators';
+import { debounceTime, filter, concatMap, tap } from 'rxjs/operators';
 import {
   ItemTree,
   ItemTreeEvents,
@@ -18,7 +18,7 @@ import type {
   GitStatusMark,
 } from 'domain/entity';
 import { NoteRepository } from 'domain/repository';
-import { Ref, shallowRef } from '@vue/reactivity';
+import { ref, Ref, shallowRef } from '@vue/reactivity';
 import { difference } from 'lodash';
 
 export const GIT_TOKEN: InjectionToken<Git> = Symbol();
@@ -49,6 +49,7 @@ export class RevisionService {
   private readonly editorManager = container.resolve(EditorManager);
   private readonly git = container.resolve(GIT_TOKEN);
   readonly changedNotes: Ref<(Note | FileGitStatus)[]> = shallowRef([]);
+  readonly isRefreshing = ref(false);
   constructor() {
     this.keepGitIndexSynced();
   }
@@ -124,6 +125,7 @@ export class RevisionService {
       .forEach((note) => (note.gitStatus.value = 'unknown'));
 
     this.changedNotes.value = changedItems;
+    this.isRefreshing.value = false;
   }
 
   private keepGitIndexSynced() {
@@ -144,6 +146,7 @@ export class RevisionService {
 
     merge(itemEvent$, noteSynced$)
       .pipe(
+        tap(() => (this.isRefreshing.value = true)),
         concatMap((e) => {
           const { event, snapshot } = e;
           const item = 'item' in e ? e.item : 'note' in e ? e.note : null;
