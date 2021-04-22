@@ -1,5 +1,6 @@
 import knex from 'knex';
-import { IS_DEVELOPMENT, APP_DIRECTORY } from 'drivers/env';
+import { IS_DEVELOPMENT } from 'utils/env';
+import { APP_DIRECTORY } from 'drivers/electron/constants';
 import path from 'path';
 import { EntityTypes } from 'domain/entity';
 

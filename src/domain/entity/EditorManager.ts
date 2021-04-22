@@ -11,7 +11,7 @@ import { Subject } from 'rxjs';
 import { Note, Editor } from 'domain/entity';
 import { Notebook } from './Notebook';
 import { singleton } from 'tsyringe';
-import { selfish } from 'utils/index';
+import { selfish } from 'utils/helper';
 import { NoteDataObject } from './Note';
 
 const MAX_EDITOR_COUNT = 3;

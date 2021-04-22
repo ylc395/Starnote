@@ -10,7 +10,7 @@ import {
 } from 'domain/entity';
 import { isNull } from 'lodash';
 import { concatMap, filter } from 'rxjs/operators';
-import { selfish } from 'utils/index';
+import { selfish } from 'utils/helper';
 
 export const token = Symbol();
 export class EditorService {

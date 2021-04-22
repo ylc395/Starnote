@@ -12,7 +12,7 @@ import {
   SortDirectEnums,
   NotebookDataObject,
 } from './Notebook';
-import { SafeMap } from 'utils/index';
+import { SafeMap } from 'utils/helper';
 import { EntityTypes } from './abstract/Entity';
 
 export enum ItemTreeEvents {

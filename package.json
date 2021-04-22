@@ -34,6 +34,7 @@
     "dayjs": "^1.10.4",
     "front-matter": "^4.0.2",
     "fs-extra": "^9.1.0",
+    "js-logger": "^1.6.1",
     "knex": "^0.95.4",
     "lodash": "^4.17.21",
     "postcss": "^7",

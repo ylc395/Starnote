@@ -19,7 +19,7 @@ import {
   RevisionService,
   token as revisionToken,
 } from 'domain/service/RevisionService';
-import { selfish } from 'utils/index';
+import { selfish } from 'utils/helper';
 
 export default defineComponent({
   components: { Explorer, EditorArea },

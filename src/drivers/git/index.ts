@@ -1,5 +1,14 @@
 import { container } from 'tsyringe';
 import { GIT_TOKEN } from 'domain/service/RevisionService';
-import { FsGit } from './FsGit';
+import { IS_IN_ELECTRON } from 'utils/env';
 
-container.registerSingleton(GIT_TOKEN, FsGit);
+export const ready: Promise<void> = new Promise((resolve) => {
+  if (IS_IN_ELECTRON) {
+    import(/* webpackChunkName: "electron-env" */ './FsGit').then(
+      ({ FsGit }) => {
+        container.registerSingleton(GIT_TOKEN, FsGit);
+        resolve();
+      },
+    );
+  }
+});

@@ -1,12 +1,8 @@
 import { app, protocol, BrowserWindow, ipcMain } from 'electron';
 import type { App as ElectronApp } from 'electron';
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
-import {
-  APP_DIRECTORY,
-  IS_DEVELOPMENT,
-  IS_TEST,
-  WEBPACK_DEV_SERVER_URL,
-} from 'drivers/env';
+import { IS_DEVELOPMENT, IS_TEST, WEBPACK_DEV_SERVER_URL } from 'utils/env';
+import { APP_DIRECTORY } from './constants';
 import { camelCase, isFunction } from 'lodash';
 import { ensureDir } from 'fs-extra';
 

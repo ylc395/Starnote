@@ -21,7 +21,7 @@ import {
 import type { TreeItem } from 'domain/entity';
 import { NOTE_DAO_TOKEN } from 'domain/repository';
 import type { Git } from 'domain/service/RevisionService';
-import { APP_DIRECTORY } from 'drivers/env';
+import { APP_DIRECTORY } from 'drivers/electron/constants';
 import dayjs from 'dayjs';
 
 const GIT_DIR = pathJoin(APP_DIRECTORY, 'git_repository');
