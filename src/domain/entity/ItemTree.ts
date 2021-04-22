@@ -335,7 +335,7 @@ export class ItemTree {
     return notebook;
   }
 
-  static removeSuffix(title: string) {
+  private static removeSuffix(title: string) {
     return title.replace(new RegExp(`\\${NOTE_SUFFIX}$`), '');
   }
 

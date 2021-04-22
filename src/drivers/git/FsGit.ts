@@ -1,6 +1,13 @@
 import { container } from 'tsyringe';
 import { mapValues, groupBy, compact, isUndefined } from 'lodash';
-import { outputFile, ensureDir, remove, move, readFile } from 'fs-extra';
+import {
+  outputFile,
+  ensureDir,
+  remove,
+  move,
+  readFile,
+  ensureFile,
+} from 'fs-extra';
 import { join as pathJoin } from 'path';
 import fm from 'front-matter';
 import {
@@ -160,10 +167,10 @@ export class FsGit implements Git {
 
   async restore(path: string) {
     const file = `${ITEM_DIR}${path}`;
+    const fsPath = pathJoin(GIT_DIR, ITEM_DIR, ...path.split('/').slice(1));
+    await ensureFile(fsPath); // a workaround for https://github.com/petersalomonsen/wasm-git/issues/29
     await this.call(['checkout', '--', file]);
-    const note = await FsGit.fileToNote(
-      pathJoin(GIT_DIR, ITEM_DIR, ...path.split('/').slice(1)),
-    );
+    const note = await FsGit.fileToNote(fsPath);
 
     return note;
   }
