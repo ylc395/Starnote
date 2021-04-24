@@ -20,7 +20,15 @@ import dayjs from 'dayjs';
 
 const GIT_DIR = pathJoin(APP_DIRECTORY, 'git_repository');
 const ITEM_DIR = 'notes';
-const { outputFile, ensureDir, remove, move, readFile, ensureFile } = fs;
+const {
+  outputFile,
+  ensureDir,
+  remove,
+  move,
+  readFile,
+  ensureFile,
+  pathExists,
+} = fs;
 
 export default class FsGit implements Git {
   private readonly noteDao = container.resolve(NOTE_DAO_TOKEN);
@@ -36,7 +44,7 @@ export default class FsGit implements Git {
         if (event === 'ready') {
           resolve();
           this.worker.removeEventListener('message', readyCallback);
-          logger.debug('fsGit', { event: 'ready' });
+          logger.debug('git', { event: 'ready' });
         }
       };
       this.worker.addEventListener('message', readyCallback);
@@ -106,10 +114,16 @@ export default class FsGit implements Git {
   }
 
   async init(tree: ItemTree) {
+    const isFirst = !(await pathExists(pathJoin(GIT_DIR, '.git')));
+
     await ensureDir(GIT_DIR);
     await this.call(['init', GIT_DIR]);
     await this.treeToFiles(tree);
     await this.call(['add', '.']);
+
+    if (isFirst) {
+      await this.commit('init commit');
+    }
   }
 
   async clone(url: string) {
