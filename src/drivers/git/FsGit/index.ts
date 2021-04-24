@@ -1,13 +1,6 @@
 import { container } from 'tsyringe';
 import { mapValues, groupBy, compact, isUndefined } from 'lodash';
-import {
-  outputFile,
-  ensureDir,
-  remove,
-  move,
-  readFile,
-  ensureFile,
-} from 'fs-extra';
+import fs from './fsExtraWithLogger';
 import { join as pathJoin } from 'path';
 import fm from 'front-matter';
 import {
@@ -27,6 +20,7 @@ import dayjs from 'dayjs';
 
 const GIT_DIR = pathJoin(APP_DIRECTORY, 'git_repository');
 const ITEM_DIR = 'notes';
+const { outputFile, ensureDir, remove, move, readFile, ensureFile } = fs;
 
 export default class FsGit implements Git {
   private readonly noteDao = container.resolve(NOTE_DAO_TOKEN);
