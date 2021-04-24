@@ -46,21 +46,19 @@ export default defineComponent({
         changedNotes.value.map((item) => ({
           isNote: Note.isA(item),
           item,
-          path: Note.isA(item) ? item.getPath() : item.file,
+          path: Note.isA(item)
+            ? item.gitStatus.value.from || item.getPath()
+            : item.file,
           title: Note.isA(item)
             ? item.actualTitle.value
             : ItemTree.getTitleWithoutSuffix(item.file),
-          status: Note.isA(item) ? item.gitStatus.value : item.status,
+          status: Note.isA(item) ? item.gitStatus.value.mode : item.status,
           isIndexNote: Note.isA(item)
             ? item.isIndexNote
             : item.file.endsWith(`${INDEX_NOTE_TITLE}${NOTE_SUFFIX}`),
         })),
       ),
-      openInEditor(item: unknown) {
-        if (Note.isA(item)) {
-          openInEditor(item);
-        }
-      },
+      openInEditor,
       commit,
       isActive,
       restore,
@@ -83,7 +81,7 @@ export default defineComponent({
           'cursor-pointer': note.isNote,
           'bg-gray-900': note.isNote && isActive(note.item).value,
         }"
-        @click="openInEditor(note.item)"
+        @click="note.isNote ? openInEditor(note.item) : null"
       >
         <span>
           <FolderOutlined v-if="note.isIndexNote" />

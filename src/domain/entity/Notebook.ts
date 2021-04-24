@@ -2,7 +2,6 @@ import dayjs, { Dayjs } from 'dayjs';
 import { NIL } from 'uuid';
 import { computed, ref, shallowRef } from '@vue/reactivity';
 import type { Ref } from '@vue/reactivity';
-import isValidFilename from 'valid-filename';
 import { Expose, Transform, Type } from 'class-transformer';
 import { without } from 'lodash';
 import { container } from 'tsyringe';
@@ -41,14 +40,12 @@ export enum TitleStatus {
   EmptyError,
   DuplicatedError,
   PreservedError,
-  InvalidFileNameError,
 }
 
 export const TITLE_STATUS_TEXT = {
   [TitleStatus.DuplicatedError]: '重复的标题',
   [TitleStatus.EmptyError]: '标题不得为空',
   [TitleStatus.PreservedError]: '不能作为标题',
-  [TitleStatus.InvalidFileNameError]: '包含非法字符',
   [TitleStatus.Valid]: '',
 } as const;
 @staticImplements<DataMapperStatic<NotebookDataObject>>()
@@ -165,10 +162,6 @@ export class Notebook
   ) {
     if (!title) {
       return TitleStatus.EmptyError;
-    }
-
-    if (!isValidFilename(title)) {
-      return TitleStatus.InvalidFileNameError;
     }
 
     const typeCheck =

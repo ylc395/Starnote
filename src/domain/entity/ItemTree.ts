@@ -299,7 +299,7 @@ export class ItemTree {
     let notebook = this.root;
 
     for (let i = 0; i < titles.length; i++) {
-      const title = titles[i];
+      const title = decodeURIComponent(titles[i]);
       const name = ItemTree.removeSuffix(title);
       const isNote = title.endsWith(NOTE_SUFFIX);
       const isLast = i === titles.length - 1;
@@ -351,6 +351,6 @@ export class ItemTree {
       throw new Error(`no file name in ${path}`);
     }
 
-    return ItemTree.removeSuffix(fileName);
+    return ItemTree.removeSuffix(decodeURIComponent(fileName));
   }
 }

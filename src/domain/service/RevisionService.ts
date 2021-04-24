@@ -26,6 +26,7 @@ export const GIT_TOKEN: InjectionToken<Git> = Symbol();
 interface FileGitStatus {
   status: GitStatusMark;
   file: string;
+  from?: string;
 }
 
 export interface Git {
@@ -58,10 +59,10 @@ export class RevisionService {
     const restoredNoteDO = await this.git.restore(path);
     const note = this.itemTree.indexedNotes.get(restoredNoteDO.id!, true);
 
-    // rename / move / modify / create
+    // rename / modify / create
     if (note) {
       // create
-      if (note.gitStatus.value === 'A') {
+      if (note.gitStatus.value.mode === 'A') {
         this.itemTree.deleteItem(note);
         return;
       }
@@ -69,7 +70,7 @@ export class RevisionService {
       note.content.value = restoredNoteDO.content!;
       note.title.value = restoredNoteDO.title!;
 
-      // rename / modify
+      // modify
       if (note.getPath() === path) {
         await this.noteRepository.updateNote(note, ['content', 'title']);
         await this.refreshGitStatus();
@@ -77,7 +78,7 @@ export class RevisionService {
       }
     }
 
-    // move / delete
+    // rename / delete
     const notebookPath = `/${path.split('/').slice(1, -1).join('/')}`;
     const notebook = this.itemTree.getItemByPath(
       notebookPath,
@@ -100,20 +101,21 @@ export class RevisionService {
     const statuses = await this.git.getStatus();
     const changedItems = [];
 
-    for (const { status, file } of statuses) {
+    for (const { status, file, from } of statuses) {
       if (!file.endsWith(NOTE_SUFFIX)) {
         continue;
       }
 
-      if (['D', 'R'].includes(status)) {
-        changedItems.push({ status, file });
+      if (status === 'D') {
+        changedItems.push({ status, file: decodeURIComponent(file) });
         continue;
       }
 
       const item = this.itemTree.getItemByPath(file);
 
       if (Note.isA(item)) {
-        item.gitStatus.value = status;
+        item.gitStatus.value.mode = status;
+        item.gitStatus.value.from = from || null;
         changedItems.push(item);
       } else {
         return;
@@ -122,7 +124,7 @@ export class RevisionService {
 
     difference(this.changedNotes.value, changedItems)
       .filter(Note.isA)
-      .forEach((note) => (note.gitStatus.value = 'unknown'));
+      .forEach((note) => (note.gitStatus.value.mode = 'unknown'));
 
     this.changedNotes.value = changedItems;
     this.isRefreshing.value = false;
@@ -213,7 +215,7 @@ export class RevisionService {
 
     return this.git.moveItem(item, {
       parent: oldParent,
-      title,
+      title: encodeURIComponent(title),
     });
   }
 }

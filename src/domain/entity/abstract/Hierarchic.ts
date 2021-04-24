@@ -76,7 +76,7 @@ export abstract class Hierarchic<
   }
 
   getPath() {
-    let path = `/${get(this, 'title.value')}`;
+    let path = `/${encodeURIComponent(get(this, 'title.value'))}`;
     let node: P | null = this._parent.value;
 
     while (node) {
@@ -85,7 +85,7 @@ export abstract class Hierarchic<
           break;
         }
 
-        path = `/${get(node, 'title.value')}${path}`;
+        path = `/${encodeURIComponent(get(node, 'title.value'))}${path}`;
         node = node.parent;
       } else {
         break;

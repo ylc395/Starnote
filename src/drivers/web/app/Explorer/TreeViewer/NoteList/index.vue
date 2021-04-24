@@ -147,7 +147,7 @@ export default defineComponent({
           >
             <span>{{ element.title.value || EMPTY_TITLE }}</span>
             <div>
-              <GitStatusMark :mark="element.gitStatus.value" />
+              <GitStatusMark :mark="element.gitStatus.value.mode" />
               <StarFilled
                 :class="{ invisible: !isStar(element).value }"
                 class="text-yellow-300 ml-2"

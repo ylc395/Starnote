@@ -166,10 +166,19 @@ export default class FsGit implements Git {
     );
 
     return statuses.map((status) => {
-      const marks = status.slice(0, 2);
-      const src = status.slice(3).replace(`${ITEM_DIR}/`, '/');
+      const reg = new RegExp(`^${ITEM_DIR}/`);
+      const mark = status.slice(0, 2)[0] as GitStatusMark;
+      let src = status.slice(3);
+      let from: string | undefined;
 
-      return { file: src, status: marks[0] as GitStatusMark };
+      if (mark === 'R') {
+        [from, src] = src.split(' ');
+        from = from.replace(reg, '/');
+      }
+
+      src = src.replace(reg, '/');
+
+      return { file: src, status: mark, from };
     });
   }
 
@@ -177,12 +186,13 @@ export default class FsGit implements Git {
     await this.call(['commit', '-m', msg]);
   }
 
-  async restore(path: string) {
-    const file = `${ITEM_DIR}${path}`;
-    const fsPath = pathJoin(GIT_DIR, ITEM_DIR, ...path.split('/').slice(1));
+  async restore(itemPath: string) {
+    const file = `${ITEM_DIR}${itemPath}`;
+    const fsPath = pathJoin(GIT_DIR, ITEM_DIR, ...itemPath.split('/').slice(1));
     await ensureFile(fsPath); // a workaround for https://github.com/petersalomonsen/wasm-git/issues/29
     await this.call(['checkout', '--', file]);
     const note = await FsGit.fileToNote(fsPath);
+    await remove(fsPath); // remove restored file. restored file will be created again in RevisionService
 
     return note;
   }

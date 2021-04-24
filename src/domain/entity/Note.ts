@@ -13,7 +13,7 @@ import {
 import { Hierarchic } from './abstract/Hierarchic';
 import { EntityTypes } from './abstract/Entity';
 import type { ListItem } from './abstract/ListItem';
-import type { GitItem } from './abstract/GitItem';
+import type { GitItem, GitStatusMark } from './abstract/GitItem';
 import { Notebook, TitleStatus } from './Notebook';
 import { staticImplements } from 'utils/types';
 
@@ -41,7 +41,10 @@ export class Note
   readonly sortOrder: Ref<number> = ref(0);
 
   readonly withContextmenu = ref(false);
-  readonly gitStatus: GitItem['gitStatus'] = ref('unknown');
+  readonly gitStatus: GitItem['gitStatus'] = ref({
+    mode: 'unknown' as GitStatusMark,
+    from: null,
+  });
 
   isJustCreated = false;
 

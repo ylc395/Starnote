@@ -44,7 +44,6 @@
     "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.0.2",
     "tsyringe": "^4.4.0",
     "uuid": "^8.3.2",
-    "valid-filename": "^3.1.0",
     "vue": "^3.0.11",
     "vue-resizable": "^2.0.1",
     "vuedraggable": "^4.0.1",
