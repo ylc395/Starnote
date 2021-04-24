@@ -17,7 +17,7 @@ export default defineComponent({
 </script>
 <template>
   <span
-    v-if="mark !== 'unknown'"
+    v-if="mark !== 'none'"
     :class="{
       'bg-red-500': mark === 'D',
       'bg-green-500': mark === 'A',

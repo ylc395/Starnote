@@ -40,7 +40,7 @@ export interface Git {
   clone(url: string): Promise<void>;
   commit(commitMessage: string): Promise<void>;
   getStatus(): Promise<FileGitStatus[]>;
-  restore(path: string): Promise<NoteDataObject>;
+  restore(path: string, commit?: string): Promise<NoteDataObject>;
 }
 
 export const token = Symbol();
@@ -124,7 +124,7 @@ export class RevisionService {
 
     difference(this.changedNotes.value, changedItems)
       .filter(Note.isA)
-      .forEach((note) => (note.gitStatus.value.mode = 'unknown'));
+      .forEach((note) => (note.gitStatus.value.mode = 'none'));
 
     this.changedNotes.value = changedItems;
     this.isRefreshing.value = false;

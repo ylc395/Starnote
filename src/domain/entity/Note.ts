@@ -42,7 +42,7 @@ export class Note
 
   readonly withContextmenu = ref(false);
   readonly gitStatus: GitItem['gitStatus'] = ref({
-    mode: 'unknown' as GitStatusMark,
+    mode: 'none' as GitStatusMark,
     from: null,
   });
 

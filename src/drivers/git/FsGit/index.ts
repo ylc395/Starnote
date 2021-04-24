@@ -1,5 +1,5 @@
 import { container } from 'tsyringe';
-import { mapValues, groupBy, compact, isUndefined } from 'lodash';
+import { mapValues, groupBy, compact, isUndefined, isString } from 'lodash';
 import fs from './fsExtraWithLogger';
 import { join as pathJoin } from 'path';
 import fm from 'front-matter';
@@ -186,11 +186,15 @@ export default class FsGit implements Git {
     await this.call(['commit', '-m', msg]);
   }
 
-  async restore(itemPath: string) {
+  async restore(itemPath: string, commit?: string) {
     const file = `${ITEM_DIR}${itemPath}`;
     const fsPath = pathJoin(GIT_DIR, ITEM_DIR, ...itemPath.split('/').slice(1));
     await ensureFile(fsPath); // a workaround for https://github.com/petersalomonsen/wasm-git/issues/29
-    await this.call(['checkout', '--', file]);
+    if (isString(commit)) {
+      await this.call(['checkout', commit, '--', file]);
+    } else {
+      await this.call(['checkout', '--', file]);
+    }
     const note = await FsGit.fileToNote(fsPath);
     await remove(fsPath); // remove restored file. restored file will be created again in RevisionService
 
