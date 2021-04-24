@@ -1,6 +1,14 @@
 const WorkerPlugin = require('worker-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
+const ImplResolver = require('./build/ImplResolverPlugin');
+
+const isElectron = process.env.IS_ELECTRON;
+const driverResolver = {
+  'src/drivers/database/db': isElectron ? './sqlite' : '',
+  'src/drivers/git/git': isElectron ? './FsGit' : '',
+  'src/drivers/logger/logger': isElectron ? './FsLogger' : '',
+};
 
 module.exports = {
   pages: {
@@ -11,7 +19,9 @@ module.exports = {
   },
   configureWebpack: {
     target: process.env.IS_ELECTRON ? 'electron-renderer' : 'web',
-    resolve: { plugins: [new TsconfigPathsPlugin()] },
+    resolve: {
+      plugins: [new TsconfigPathsPlugin(), new ImplResolver(driverResolver)],
+    },
     plugins: [
       new WorkerPlugin(),
       new CopyPlugin([
@@ -26,6 +36,9 @@ module.exports = {
     electronBuilder: {
       chainWebpackMainProcess: (config) => {
         config.resolve.plugin('tsPath').use(TsconfigPathsPlugin);
+        config.resolve
+          .plugin('implResolver')
+          .use(ImplResolver, [driverResolver]);
       },
       mainProcessFile: 'src/drivers/electron/main.ts',
       mainProcessWatch: ['src/drivers/electron/*'],

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { container } from 'tsyringe';
 import { NotebookRepository, NoteRepository } from 'domain/repository';
-import { filter, concatMap, tap } from 'rxjs/operators';
+import { filter, concatMap } from 'rxjs/operators';
 import { Notebook, ItemTree, ItemTreeEvents } from 'domain/entity';
 import type {
   TreeItem,
@@ -9,14 +9,12 @@ import type {
   NoteDataObject,
 } from 'domain/entity';
 import { selfish } from 'utils/helper';
-import { LoggerService } from './LoggerService';
 
 export const token = Symbol();
 export class ItemTreeService {
   private readonly notebookRepository = container.resolve(NotebookRepository);
   private readonly noteRepository = container.resolve(NoteRepository);
   readonly itemTree = selfish(container.resolve(ItemTree));
-  private readonly logger = container.resolve(LoggerService);
   constructor() {
     this.initTree();
   }
@@ -26,7 +24,6 @@ export class ItemTreeService {
     const event$ = this.itemTree.event$;
     event$
       .pipe(
-        tap(({ event }) => this.logger.debug('itemTree', event)),
         filter(({ event }) =>
           [
             ItemTreeEvents.Created,

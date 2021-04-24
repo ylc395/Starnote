@@ -1,6 +1,6 @@
 import { shallowRef, shallowReactive, ref } from '@vue/reactivity';
 import type { Ref } from '@vue/reactivity';
-import { singleton } from 'tsyringe';
+import { container, singleton } from 'tsyringe';
 import { compact, pull, last } from 'lodash';
 import { Subject } from 'rxjs';
 import { Note, NoteDataObject, INDEX_NOTE_TITLE, NOTE_SUFFIX } from './Note';
@@ -14,6 +14,7 @@ import {
 } from './Notebook';
 import { SafeMap } from 'utils/helper';
 import { EntityTypes } from './abstract/Entity';
+import { token as loggerToken } from '../service/LoggerService';
 
 export enum ItemTreeEvents {
   Selected = 'SELECTED',
@@ -32,6 +33,7 @@ export type TreeItem = Notebook | Note;
 
 @singleton()
 export class ItemTree {
+  private readonly logger = container.resolve(loggerToken);
   readonly root: Notebook = Notebook.from({
     id: ROOT_NOTEBOOK_ID,
     title: 'ROOT',
@@ -48,8 +50,11 @@ export class ItemTree {
     fields?: (keyof NoteDataObject)[] | (keyof NotebookDataObject)[];
   }>();
 
-  get event$() {
-    return this._event$.asObservable();
+  readonly event$ = this._event$.asObservable();
+  constructor() {
+    this._event$.subscribe((payload) => {
+      this.logger.debug('itemTree', payload);
+    });
   }
 
   loadTree(rootItems: TreeItem[]) {

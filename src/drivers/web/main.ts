@@ -1,12 +1,12 @@
 import 'reflect-metadata';
 import { ready as dbReady } from 'drivers/database';
-import { ready as gitReady } from 'drivers/git';
-import { ready as loggerReady } from 'drivers/logger';
+import 'drivers/git';
+import 'drivers/logger';
 
 import { createApp } from 'vue';
 import App from './App.vue';
 import './main.css';
 
-Promise.all([dbReady, gitReady, loggerReady]).then(() => {
+Promise.all([dbReady]).then(() => {
   createApp(App).mount('#app');
 });

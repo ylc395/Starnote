@@ -1,6 +1,7 @@
 import knex from 'knex';
 import { IS_DEVELOPMENT } from 'utils/env';
 import { APP_DIRECTORY } from 'drivers/electron/constants';
+import logger from 'drivers/logger';
 import path from 'path';
 import { EntityTypes } from 'domain/entity';
 
@@ -10,6 +11,12 @@ export const db = knex({
   debug: IS_DEVELOPMENT,
   asyncStackTraces: IS_DEVELOPMENT,
   useNullAsDefault: true,
+  log: {
+    warn: logger.warn.bind(logger, 'sqlite'),
+    error: logger.error.bind(logger, 'sqlite'),
+    debug: logger.debug.bind(logger, 'sqlite'),
+    deprecate: logger.info.bind(logger, 'sqlite'),
+  },
 });
 
 export type TableBuilder = Parameters<typeof db['schema']['createTable']>[1];

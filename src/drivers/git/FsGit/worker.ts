@@ -1,3 +1,5 @@
+/*  eslint-env worker*/
+/* global FS, NODEFS */
 /// <reference lib="WebWorker" />
 const SCRIPTS_ROOT_PATH = '/wasm-git';
 const GIT_REPO_DIR = '/git_repository';

@@ -22,12 +22,13 @@ import type { TreeItem } from 'domain/entity';
 import { NOTE_DAO_TOKEN } from 'domain/repository';
 import type { Git } from 'domain/service/RevisionService';
 import { APP_DIRECTORY } from 'drivers/electron/constants';
+import logger from 'drivers/logger';
 import dayjs from 'dayjs';
 
 const GIT_DIR = pathJoin(APP_DIRECTORY, 'git_repository');
 const ITEM_DIR = 'notes';
 
-export class FsGit implements Git {
+export default class FsGit implements Git {
   private readonly noteDao = container.resolve(NOTE_DAO_TOKEN);
   private readonly worker = new Worker('./worker.ts', { type: 'module' });
   private workerReady: Promise<void>;
@@ -41,6 +42,7 @@ export class FsGit implements Git {
         if (event === 'ready') {
           resolve();
           this.worker.removeEventListener('message', readyCallback);
+          logger.debug('fsGit', { event: 'ready' });
         }
       };
       this.worker.addEventListener('message', readyCallback);
@@ -48,6 +50,7 @@ export class FsGit implements Git {
   }
 
   private call(args: string[]): Promise<string> {
+    logger.debug('git', { event: 'call', args });
     return new Promise((resolve) => {
       let output = '';
 
@@ -63,6 +66,7 @@ export class FsGit implements Git {
         if (event === 'done') {
           resolve(output);
           this.worker.removeEventListener('message', callback);
+          logger.debug('git', { event: 'done', stdout: output });
         }
       };
       this.worker.addEventListener('message', callback);

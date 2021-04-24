@@ -8,6 +8,7 @@ import { ref, shallowRef } from '@vue/reactivity';
 import { Class } from 'utils/types';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
+import { get, isFunction } from 'lodash';
 
 dayjs.extend(customParseFormat);
 
@@ -15,6 +16,12 @@ export const TIME_DATA_FORMAT = 'YYYY-MM-DD HH:mm:ss.SSS Z';
 
 export interface DataMapper<T> {
   toDataObject(): T;
+}
+
+export function isDataMapper(
+  instance: unknown,
+): instance is DataMapper<unknown> {
+  return isFunction(get(instance, 'toDataObject'));
 }
 
 export interface DataMapperStatic<T> {
