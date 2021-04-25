@@ -1,6 +1,6 @@
-import { computed, onMounted, Ref, ref, watch } from 'vue';
+import { computed, onMounted, Ref, ref, watch, onUnmounted } from 'vue';
 import { Editor, TITLE_STATUS_TEXT } from 'domain/entity';
-import { useCodemirror } from './useCodemirror';
+import { Editor as MarkdownEditor } from 'drivers/web/components/MarkdownEditor';
 export function useEditor(editor: Editor) {
   const titleRef: Ref<HTMLInputElement | null> = ref(null);
   const editorRef: Ref<HTMLElement | null> = ref(null);
@@ -21,8 +21,16 @@ export function useEditor(editor: Editor) {
   };
 
   onMounted(() => {
-    const codeMirrorEditor = useCodemirror(editor, editorRef.value!);
+    const markdownEditor = new MarkdownEditor({ el: editorRef.value! });
     const isNewNote = editor.isJustCreated;
+    let editingContent: null | string = null;
+
+    markdownEditor.event$.subscribe(({ event, data }) => {
+      if (event === 'update') {
+        editingContent = data;
+        editor.setContent(data);
+      }
+    });
 
     watch(
       () => editor.noteTitle.value,
@@ -34,11 +42,27 @@ export function useEditor(editor: Editor) {
       { immediate: true },
     );
 
+    watch(
+      () => editor.content.value,
+      (newContent) => {
+        if (editingContent === newContent) {
+          return;
+        }
+
+        markdownEditor.setContent(newContent);
+      },
+      { immediate: true },
+    );
+
     if (isNewNote && titleRef.value) {
       titleRef.value.select();
     } else {
-      codeMirrorEditor.focus();
+      markdownEditor.focus();
     }
+
+    onUnmounted(() => {
+      markdownEditor.destroy();
+    });
   });
 
   return {
