@@ -60,7 +60,7 @@
     "@vue/eslint-config-typescript": "^7.0.0",
     "babel-plugin-import": "^1.13.3",
     "cross-env": "^7.0.3",
-    "electron": "^11.3.0",
+    "electron": "11.4.3",
     "eslint": "^7.21.0",
     "eslint-config-prettier": "^8.1.0",
     "eslint-plugin-fp": "^2.3.0",
