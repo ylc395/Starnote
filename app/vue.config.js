@@ -17,6 +17,18 @@ module.exports = {
       template: 'src/drivers/web/assets/index.html',
     },
   },
+  css: {
+    loaderOptions: {
+      postcss: {
+        plugins: [
+          require('autoprefixer')(),
+          require('tailwindcss')(
+            require('./src/drivers/web/tailwind.config.js'),
+          ),
+        ],
+      },
+    },
+  },
   configureWebpack: {
     target: process.env.IS_ELECTRON ? 'electron-renderer' : 'web',
     resolve: {
@@ -25,7 +37,7 @@ module.exports = {
     plugins: [
       new WorkerPlugin(),
       new CopyPlugin([
-        { from: 'wasm-git/*.@(js|wasm)', context: 'node_modules' },
+        { from: 'wasm-git/*.@(js|wasm)', context: '../node_modules' },
       ]),
     ],
     externals: {
@@ -40,6 +52,7 @@ module.exports = {
           .plugin('implResolver')
           .use(ImplResolver, [driverResolver]);
       },
+      nodeModulesPath: ['../node_modules', './node_modules'], // https://github.com/nklayman/vue-cli-plugin-electron-builder/issues/170
       mainProcessFile: 'src/drivers/electron/main.ts',
       mainProcessWatch: ['src/drivers/electron/*'],
       mainProcessArgs: ['--arg-name', 'arg-value'],

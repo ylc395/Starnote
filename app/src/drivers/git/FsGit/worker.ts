@@ -1,5 +1,6 @@
 /*  eslint-env worker*/
 /* global FS, NODEFS */
+/* eslint-disable no-var,no-undef, @typescript-eslint/no-var-requires  */
 /// <reference lib="WebWorker" />
 const SCRIPTS_ROOT_PATH = '/wasm-git';
 const GIT_REPO_DIR = '/git_repository';

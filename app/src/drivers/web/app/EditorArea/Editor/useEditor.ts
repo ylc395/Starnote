@@ -1,6 +1,6 @@
 import { computed, onMounted, Ref, ref, watch, onUnmounted } from 'vue';
 import { Editor, TITLE_STATUS_TEXT } from 'domain/entity';
-import { Editor as MarkdownEditor } from 'drivers/web/components/MarkdownEditor';
+import { Editor as MarkdownEditor } from '@ylc395/markdown-editor';
 export function useEditor(editor: Editor) {
   const titleRef: Ref<HTMLInputElement | null> = ref(null);
   const editorRef: Ref<HTMLElement | null> = ref(null);

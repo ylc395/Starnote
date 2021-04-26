@@ -1,66 +1,18 @@
 {
-  "name": "note-app",
-  "version": "1.0.0",
+  "name": "starnote",
+  "version": "0.0.1",
   "private": true,
-  "author": {
-    "name": "ylc395"
+  "workspaces": [
+    "app",
+    "markdown-editor"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ylc395/Starnote.git"
   },
-  "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint",
-    "electron:build": "cross-env IS_ELECTRON=true vue-cli-service electron:build",
-    "electron:serve": "cross-env IS_ELECTRON=true ELECTRON_ENABLE_LOGGING=true vue-cli-service electron:serve",
-    "postinstall": "electron-builder install-app-deps",
-    "postuninstall": "electron-builder install-app-deps"
-  },
-  "dependencies": {
-    "@ant-design/icons-vue": "^6.0.1",
-    "@codemirror/commands": "^0.18.0",
-    "@codemirror/highlight": "^0.18.3",
-    "@codemirror/lang-markdown": "^0.18.1",
-    "@codemirror/state": "^0.18.3",
-    "@codemirror/view": "^0.18.3",
-    "@tailwindcss/postcss7-compat": "^2.0.2",
-    "@types/emscripten": "^1.39.4",
-    "@types/lodash": "^4.14.168",
-    "@types/sqlite3": "^3.1.7",
-    "@types/uuid": "^8.3.0",
-    "@vue/reactivity": "^3.0.11",
-    "ant-design-vue": "^2.1.2",
-    "autoprefixer": "^9",
-    "class-transformer": "^0.4.0",
-    "core-js": "^3.6.5",
-    "dayjs": "^1.10.4",
-    "front-matter": "^4.0.2",
-    "fs-extra": "^9.1.0",
-    "js-logger": "^1.6.1",
-    "knex": "^0.95.4",
-    "lodash": "^4.17.21",
-    "postcss": "^7",
-    "reflect-metadata": "^0.1.13",
-    "rxjs": "^6.6.7",
-    "sqlite3": "^5.0.2",
-    "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.0.2",
-    "tsyringe": "^4.4.0",
-    "uuid": "^8.3.2",
-    "vue": "^3.0.11",
-    "vue-resizable": "^2.0.1",
-    "vuedraggable": "^4.0.1",
-    "wasm-git": "^0.0.6"
-  },
+  "author": "ylc395",
+  "license": "MIT",
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^4.18.0",
-    "@typescript-eslint/parser": "^4.18.0",
-    "@vue/cli-plugin-babel": "~4.5.0",
-    "@vue/cli-plugin-eslint": "^5.0.0-alpha.7",
-    "@vue/cli-plugin-typescript": "~4.5.0",
-    "@vue/cli-service": "~4.5.0",
-    "@vue/compiler-sfc": "^3.0.11",
-    "@vue/eslint-config-typescript": "^7.0.0",
-    "babel-plugin-import": "^1.13.3",
-    "cross-env": "^7.0.3",
-    "electron": "11.4.3",
     "eslint": "^7.21.0",
     "eslint-config-prettier": "^8.1.0",
     "eslint-plugin-fp": "^2.3.0",
@@ -68,22 +20,6 @@
     "eslint-plugin-vue-scoped-css": "^1.1.0",
     "lint-staged": "^9.5.0",
     "prettier": "^2.2.1",
-    "tsconfig-paths-webpack-plugin": "^3.5.1",
-    "typescript": "^4.2.2",
-    "vue-cli-plugin-electron-builder": "~2.0.0-rc.6",
-    "vue-cli-plugin-tailwind": "~2.0.6",
-    "worker-plugin": "^5.0.0"
-  },
-  "_id": "note-app@1.0.0",
-  "gitHooks": {
-    "pre-commit": "lint-staged"
-  },
-  "license": "MIT",
-  "lint-staged": {
-    "*.{js,jsx,vue,ts,tsx}": [
-      "vue-cli-service lint --fix",
-      "git add"
-    ]
-  },
-  "readme": "ERROR: No README data found!"
+    "typescript": "^4.2.2"
+  }
 }
