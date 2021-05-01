@@ -1,5 +1,5 @@
 import type { TableBuilder } from './db';
-import { COLUMNS as NOTEBOOK_COLUMNS } from './NotebookTable';
+import * as NotebookTable from './NotebookTable';
 import { EntityTypes } from 'domain/entity';
 
 export const TABLE_NAME = EntityTypes.Note;
@@ -20,8 +20,8 @@ export const builder: TableBuilder = (table) => {
   table.uuid(COLUMNS.PARENT_ID).notNullable();
   table
     .foreign(COLUMNS.PARENT_ID)
-    .references(NOTEBOOK_COLUMNS.ID)
-    .inTable(EntityTypes.Notebook);
+    .references(NotebookTable.COLUMNS.ID)
+    .inTable(NotebookTable.TABLE_NAME);
   table.integer(COLUMNS.SORT_ORDER).notNullable();
   table.dateTime(COLUMNS.USER_CREATED_AT).notNullable();
   table.dateTime(COLUMNS.USER_MODIFIED_AT).notNullable();

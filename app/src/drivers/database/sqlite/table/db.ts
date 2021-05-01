@@ -19,9 +19,10 @@ export const db = knex({
   },
 });
 
+export type TableName = EntityTypes;
 export type TableBuilder = Parameters<typeof db['schema']['createTable']>[1];
 export const createTableIfNotExists = (
-  tableName: EntityTypes,
+  tableName: TableName,
   callback: TableBuilder,
 ) => {
   return db.schema.hasTable(tableName).then((existed) => {

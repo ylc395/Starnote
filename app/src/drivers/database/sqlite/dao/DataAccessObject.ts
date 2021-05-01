@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { EntityTypes, ObjectWithId } from 'domain/entity';
+import type { ObjectWithId } from 'domain/entity';
 import type { Dao, Query } from 'domain/repository';
 import {
   difference,
@@ -12,36 +12,35 @@ import {
   pickBy,
   without,
 } from 'lodash';
-import { db, NoteTable, NotebookTable, StarTable } from '../table';
+import { db, TableName } from '../table';
 
 interface Config {
   belongsTo?: {
-    entity: EntityTypes;
+    entity: TableName;
     foreignKey: string; // 本表的外键
     reference: string; // 目标表的主键
     as?: string;
     excludes?: string[];
     required?: boolean;
     scope?: Record<string, any>;
+    columns: Record<string, string>;
   };
   hasMany?: {
-    entity: EntityTypes;
+    entity: TableName;
     foreignKey: string; // 目标表的外键
+    columns?: Record<string, string>;
   }[];
   scope?: Record<string, any>;
 }
 
 type QueryBuilder = ReturnType<typeof db>;
 
-const COLUMNS_MAP = {
-  [EntityTypes.Note]: NoteTable.COLUMNS,
-  [EntityTypes.Notebook]: NotebookTable.COLUMNS,
-  [EntityTypes.Star]: StarTable.COLUMNS,
-} as const;
-
 export class DataAccessObject<T> implements Dao<T> {
   constructor(
-    private readonly tableName: EntityTypes,
+    private readonly table: {
+      name: TableName;
+      columns: Record<string, string>;
+    },
     private readonly config?: Config,
   ) {}
   private getFullWhere(where: Query<T> = {}) {
@@ -49,7 +48,7 @@ export class DataAccessObject<T> implements Dao<T> {
 
     return mapKeys(
       { ...scope, ...where },
-      (_, key) => `${this.tableName}.${key}`,
+      (_, key) => `${this.table.name}.${key}`,
     );
   }
 
@@ -58,7 +57,7 @@ export class DataAccessObject<T> implements Dao<T> {
       return query;
     }
 
-    const mapTableFields = (key: K | string) => `${this.tableName}.${key}`;
+    const mapTableFields = (key: K | string) => `${this.table.name}.${key}`;
     const {
       entity,
       as,
@@ -67,14 +66,15 @@ export class DataAccessObject<T> implements Dao<T> {
       excludes = [],
       required = false,
       scope = {},
+      columns,
     } = this.config.belongsTo;
 
     const keysInTable = attributes
       ? attributes.map(mapTableFields)
-      : Object.values(COLUMNS_MAP[this.tableName]).map(mapTableFields);
+      : Object.values(this.table.columns).map(mapTableFields);
 
     const keysInAssoc = as
-      ? difference(Object.values(COLUMNS_MAP[entity]), excludes).map(
+      ? difference(Object.values(columns), excludes).map(
           (key) => `${as}.${key} as ${as}.${key}`,
         )
       : [];
@@ -87,7 +87,7 @@ export class DataAccessObject<T> implements Dao<T> {
       as ? { [as]: entity } : entity, // set alias for joined table
       {
         ...mapKeys(scope, (_, key) => `${as || entity}.${key}`),
-        [`${this.tableName}.${foreignKey}`]: `${as || entity}.${reference}`,
+        [`${this.table.name}.${foreignKey}`]: `${as || entity}.${reference}`,
       },
     );
   }
@@ -115,7 +115,7 @@ export class DataAccessObject<T> implements Dao<T> {
   }
 
   one<K extends keyof Query<T>>(where: Query<T>, attributes?: K[]) {
-    const query = db(this.tableName)
+    const query = db(this.table.name)
       .select(...(attributes || ['*']))
       .where(this.getFullWhere(where));
 
@@ -125,7 +125,7 @@ export class DataAccessObject<T> implements Dao<T> {
   }
 
   all<K extends keyof Query<T>>(where?: Query<T> | K[], attributes?: K[]) {
-    let query = db(this.tableName);
+    let query = db(this.table.name);
 
     if (!where) {
       query = query.select('*');
@@ -142,22 +142,22 @@ export class DataAccessObject<T> implements Dao<T> {
     );
   }
 
-  async deleteByIds(ids: string[], lastStep = false, tableName?: EntityTypes) {
+  async deleteByIds(ids: string[], lastStep = false, tableName?: TableName) {
     if (!this.config?.hasMany || lastStep) {
-      return db(tableName || this.tableName)
+      return db(tableName || this.table.name)
         .whereIn('id', ids)
         .del()
         .then(() => undefined);
     }
 
     const idsMap = {
-      [this.tableName]: ids,
-    } as Record<EntityTypes, string[]>;
+      [this.table.name]: ids,
+    } as Record<TableName, string[]>;
     const self = this.config.hasMany.find(
-      ({ entity }) => entity === this.tableName,
+      ({ entity }) => entity === this.table.name,
     );
 
-    const getIds = (tableName: EntityTypes, reference: string, ids: string[]) =>
+    const getIds = (tableName: TableName, reference: string, ids: string[]) =>
       db(tableName)
         .select('id')
         .whereIn(reference, ids)
@@ -168,19 +168,23 @@ export class DataAccessObject<T> implements Dao<T> {
       let subIds: string[] = ids;
 
       do {
-        subIds = await getIds(this.tableName, foreignKey, subIds);
-        idsMap[this.tableName] = idsMap[this.tableName].concat(subIds);
+        subIds = await getIds(this.table.name, foreignKey, subIds);
+        idsMap[this.table.name] = idsMap[this.table.name].concat(subIds);
       } while (!isEmpty(subIds));
     }
 
     for (const assc of without(this.config.hasMany, self)) {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const { entity, foreignKey } = assc!;
-      idsMap[entity] = await getIds(entity, foreignKey, idsMap[this.tableName]);
+      idsMap[entity] = await getIds(
+        entity,
+        foreignKey,
+        idsMap[this.table.name],
+      );
     }
 
     for (const [entity, ids] of Object.entries(idsMap)) {
-      this.deleteByIds(ids, true, entity as EntityTypes);
+      this.deleteByIds(ids, true, entity as TableName);
     }
   }
 
@@ -189,14 +193,14 @@ export class DataAccessObject<T> implements Dao<T> {
   }
 
   update(dataObject: T & ObjectWithId) {
-    return db(this.tableName)
+    return db(this.table.name)
       .where({ id: dataObject.id })
       .update(omit(dataObject, ['id']))
       .then(() => undefined);
   }
 
   create(dataObject: T & ObjectWithId) {
-    return db(this.tableName)
+    return db(this.table.name)
       .insert(dataObject)
       .then(() => undefined);
   }

@@ -2,6 +2,7 @@ import * as NoteTable from './NoteTable';
 import * as NotebookTable from './NotebookTable';
 import * as StarTable from './StarTable';
 import { createTableIfNotExists, db } from './db';
+import type { TableName } from './db';
 
 const createTables = () =>
   Promise.all([
@@ -12,4 +13,4 @@ const createTables = () =>
 
 export const tablesReady = createTables();
 
-export { db, NoteTable, NotebookTable, StarTable };
+export { db, NoteTable, NotebookTable, StarTable, TableName };
