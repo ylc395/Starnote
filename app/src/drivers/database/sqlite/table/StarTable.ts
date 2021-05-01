@@ -1,7 +1,6 @@
-import type { TableBuilder } from './db';
+import type { Table } from './db';
 import { EntityTypes } from 'domain/entity';
 
-export const TABLE_NAME = EntityTypes.Star;
 export const COLUMNS = {
   ID: 'id',
   ENTITY_ID: 'entityId',
@@ -9,10 +8,16 @@ export const COLUMNS = {
   USER_CREATED_AT: 'userCreatedAt',
 } as const;
 
-export const builder: TableBuilder = (table) => {
-  table.uuid(COLUMNS.ID).primary();
-  table.uuid(COLUMNS.ENTITY_ID).notNullable();
-  table.integer(COLUMNS.SORT_ORDER).notNullable();
-  table.dateTime(COLUMNS.USER_CREATED_AT).notNullable();
-  table.unique([COLUMNS.ENTITY_ID]);
+const table: Table = {
+  name: EntityTypes.Star,
+  columns: COLUMNS,
+  builder: (table) => {
+    table.uuid(COLUMNS.ID).primary();
+    table.uuid(COLUMNS.ENTITY_ID).notNullable();
+    table.integer(COLUMNS.SORT_ORDER).notNullable();
+    table.dateTime(COLUMNS.USER_CREATED_AT).notNullable();
+    table.unique([COLUMNS.ENTITY_ID]);
+  },
 };
+
+export default table;

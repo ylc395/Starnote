@@ -1,9 +1,8 @@
-import type { TableBuilder } from './db';
-import * as NotebookTable from './NotebookTable';
+import notebookTable from './notebookTable';
 import { EntityTypes } from 'domain/entity';
+import type { Table } from './db';
 
-export const TABLE_NAME = EntityTypes.Note;
-export const COLUMNS = {
+const COLUMNS = {
   ID: 'id',
   TITLE: 'title',
   CONTENT: 'content',
@@ -13,17 +12,23 @@ export const COLUMNS = {
   USER_MODIFIED_AT: 'userModifiedAt',
 } as const;
 
-export const builder: TableBuilder = (table) => {
-  table.uuid(COLUMNS.ID).primary();
-  table.text(COLUMNS.TITLE).notNullable();
-  table.text(COLUMNS.CONTENT).notNullable();
-  table.uuid(COLUMNS.PARENT_ID).notNullable();
-  table
-    .foreign(COLUMNS.PARENT_ID)
-    .references(NotebookTable.COLUMNS.ID)
-    .inTable(NotebookTable.TABLE_NAME);
-  table.integer(COLUMNS.SORT_ORDER).notNullable();
-  table.dateTime(COLUMNS.USER_CREATED_AT).notNullable();
-  table.dateTime(COLUMNS.USER_MODIFIED_AT).notNullable();
-  table.unique([COLUMNS.PARENT_ID, COLUMNS.TITLE]);
+const table: Table = {
+  name: EntityTypes.Note,
+  columns: COLUMNS,
+  builder: (table) => {
+    table.uuid(COLUMNS.ID).primary();
+    table.text(COLUMNS.TITLE).notNullable();
+    table.text(COLUMNS.CONTENT).notNullable();
+    table.uuid(COLUMNS.PARENT_ID).notNullable();
+    table
+      .foreign(COLUMNS.PARENT_ID)
+      .references(notebookTable.columns.ID)
+      .inTable(notebookTable.name);
+    table.integer(COLUMNS.SORT_ORDER).notNullable();
+    table.dateTime(COLUMNS.USER_CREATED_AT).notNullable();
+    table.dateTime(COLUMNS.USER_MODIFIED_AT).notNullable();
+    table.unique([COLUMNS.PARENT_ID, COLUMNS.TITLE]);
+  },
 };
+
+export default table;

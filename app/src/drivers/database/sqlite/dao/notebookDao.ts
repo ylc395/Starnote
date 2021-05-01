@@ -1,25 +1,24 @@
 import { DataAccessObject } from './DataAccessObject';
 import { NotebookDataObject } from 'domain/entity';
-import { NoteTable, NotebookTable } from '../table';
+import { noteTable, notebookTable } from '../table';
 
 export const notebookDao = new DataAccessObject<NotebookDataObject>(
-  { name: NotebookTable.TABLE_NAME, columns: NotebookTable.COLUMNS },
+  notebookTable,
   {
     belongsTo: {
-      entity: NoteTable.TABLE_NAME,
-      foreignKey: NotebookTable.COLUMNS.INDEX_NOTE_ID,
-      reference: NoteTable.COLUMNS.ID,
+      table: noteTable,
+      foreignKey: notebookTable.columns.INDEX_NOTE_ID,
+      reference: noteTable.columns.ID,
       as: 'indexNote',
-      columns: NoteTable.COLUMNS,
       excludes: ['content'],
     },
     hasMany: [
       {
-        entity: NotebookTable.TABLE_NAME,
+        table: notebookTable,
         foreignKey: 'parentId',
       },
       {
-        entity: NoteTable.TABLE_NAME,
+        table: noteTable,
         foreignKey: 'parentId',
       },
     ],

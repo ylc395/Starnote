@@ -1,18 +1,11 @@
 import { DataAccessObject } from './DataAccessObject';
 import { StarDataObject } from 'domain/entity';
-import { NoteTable, StarTable } from '../table';
-export const starDao = new DataAccessObject<StarDataObject>(
-  {
-    name: StarTable.TABLE_NAME,
-    columns: StarTable.COLUMNS,
+import { noteTable, starTable } from '../table';
+export const starDao = new DataAccessObject<StarDataObject>(starTable, {
+  belongsTo: {
+    table: noteTable,
+    foreignKey: starTable.columns.ENTITY_ID,
+    reference: noteTable.columns.ID,
+    required: true,
   },
-  {
-    belongsTo: {
-      entity: NoteTable.TABLE_NAME,
-      foreignKey: StarTable.COLUMNS.ENTITY_ID,
-      reference: NoteTable.COLUMNS.ID,
-      required: true,
-      columns: NoteTable.COLUMNS,
-    },
-  },
-);
+});

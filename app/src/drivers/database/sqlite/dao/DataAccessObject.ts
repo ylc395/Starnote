@@ -12,35 +12,29 @@ import {
   pickBy,
   without,
 } from 'lodash';
-import { db, TableName } from '../table';
+import { db, TableName, Table } from '../table';
+import { Knex } from 'knex';
 
 interface Config {
   belongsTo?: {
-    entity: TableName;
+    table: Table;
     foreignKey: string; // 本表的外键
     reference: string; // 目标表的主键
     as?: string;
     excludes?: string[];
     required?: boolean;
     scope?: Record<string, any>;
-    columns: Record<string, string>;
   };
   hasMany?: {
-    entity: TableName;
+    table: Table;
     foreignKey: string; // 目标表的外键
-    columns?: Record<string, string>;
   }[];
   scope?: Record<string, any>;
 }
 
-type QueryBuilder = ReturnType<typeof db>;
-
 export class DataAccessObject<T> implements Dao<T> {
   constructor(
-    private readonly table: {
-      name: TableName;
-      columns: Record<string, string>;
-    },
+    private readonly table: Table,
     private readonly config?: Config,
   ) {}
   private getFullWhere(where: Query<T> = {}) {
@@ -52,21 +46,23 @@ export class DataAccessObject<T> implements Dao<T> {
     );
   }
 
-  private getQueryWithAssociation<K>(query: QueryBuilder, attributes?: K[]) {
+  private getQueryWithAssociation<K>(
+    query: Knex.QueryBuilder,
+    attributes?: K[],
+  ) {
     if (!this.config?.belongsTo) {
       return query;
     }
 
     const mapTableFields = (key: K | string) => `${this.table.name}.${key}`;
     const {
-      entity,
+      table: { name: entity, columns },
       as,
       foreignKey,
       reference,
       excludes = [],
       required = false,
       scope = {},
-      columns,
     } = this.config.belongsTo;
 
     const keysInTable = attributes
@@ -154,7 +150,7 @@ export class DataAccessObject<T> implements Dao<T> {
       [this.table.name]: ids,
     } as Record<TableName, string[]>;
     const self = this.config.hasMany.find(
-      ({ entity }) => entity === this.table.name,
+      ({ table: { name } }) => name === this.table.name,
     );
 
     const getIds = (tableName: TableName, reference: string, ids: string[]) =>
@@ -174,13 +170,13 @@ export class DataAccessObject<T> implements Dao<T> {
     }
 
     for (const assc of without(this.config.hasMany, self)) {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const { entity, foreignKey } = assc!;
-      idsMap[entity] = await getIds(
-        entity,
+      const {
+        table: { name },
         foreignKey,
-        idsMap[this.table.name],
-      );
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      } = assc!;
+
+      idsMap[name] = await getIds(name, foreignKey, idsMap[this.table.name]);
     }
 
     for (const [entity, ids] of Object.entries(idsMap)) {

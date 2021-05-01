@@ -1,9 +1,11 @@
-import knex from 'knex';
+import knex, { Knex } from 'knex';
 import { IS_DEVELOPMENT } from 'utils/env';
 import { APP_DIRECTORY } from 'drivers/electron/constants';
 import logger from 'drivers/logger';
 import path from 'path';
 import { EntityTypes } from 'domain/entity';
+
+type TableBuilder = (builder: Knex.CreateTableBuilder) => unknown;
 
 export const db = knex({
   client: 'sqlite3',
@@ -20,7 +22,6 @@ export const db = knex({
 });
 
 export type TableName = EntityTypes;
-export type TableBuilder = Parameters<typeof db['schema']['createTable']>[1];
 export const createTableIfNotExists = (
   tableName: TableName,
   callback: TableBuilder,
@@ -33,3 +34,9 @@ export const createTableIfNotExists = (
     return db.schema.createTable(tableName, callback).then();
   });
 };
+
+export interface Table {
+  readonly name: EntityTypes;
+  readonly columns: Record<string, string>;
+  readonly builder: TableBuilder;
+}
