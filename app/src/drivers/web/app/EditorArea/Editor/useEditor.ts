@@ -1,6 +1,9 @@
 import { computed, onMounted, Ref, ref, watch, onUnmounted } from 'vue';
 import { Editor, TITLE_STATUS_TEXT } from 'domain/entity';
-import { Editor as MarkdownEditor } from '@ylc395/markdown-editor';
+import {
+  Editor as MarkdownEditor,
+  Events as MarkdownEditorEvents,
+} from '@ylc395/markdown-editor';
 export function useEditor(editor: Editor) {
   const titleRef: Ref<HTMLInputElement | null> = ref(null);
   const editorRef: Ref<HTMLElement | null> = ref(null);
@@ -25,11 +28,9 @@ export function useEditor(editor: Editor) {
     const isNewNote = editor.isJustCreated;
     let editingContent: null | string = null;
 
-    markdownEditor.event$.subscribe(({ event, data }) => {
-      if (event === 'update') {
-        editingContent = data;
-        editor.setContent(data);
-      }
+    markdownEditor.on(MarkdownEditorEvents.Updated, (content) => {
+      editingContent = content;
+      editor.setContent(content);
     });
 
     watch(
