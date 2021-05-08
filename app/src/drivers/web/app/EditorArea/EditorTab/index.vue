@@ -51,4 +51,12 @@ export default defineComponent({
 :deep(.ant-tabs-bar) {
   margin-bottom: 0;
 }
+
+:deep(.ant-tabs-content) {
+  height: calc(100% - 40px); /* 40px is the height of tab bar */
+}
+
+:deep(.ant-tabs-tabpane-active) {
+  height: 100%;
+}
 </style>

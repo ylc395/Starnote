@@ -4,6 +4,7 @@ import { languages } from '@codemirror/language-data';
 import { markdown } from '@codemirror/lang-markdown';
 import { history } from '@codemirror/history';
 import { EditorOptions } from './types';
+import { wordCounter } from './panels/WordCounter';
 
 export const createState = (options: EditorOptions): EditorState => {
   return EditorState.create({
@@ -15,6 +16,7 @@ export const createState = (options: EditorOptions): EditorState => {
         addKeymap: false,
       }),
       defaultHighlightStyle,
+      wordCounter(),
     ],
   });
 };

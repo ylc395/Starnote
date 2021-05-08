@@ -27,7 +27,11 @@ export default defineComponent({
 });
 </script>
 <template>
-  <div @focusin="toggleAutoSave" @focusout="toggleAutoSave">
+  <div
+    @focusin="toggleAutoSave"
+    @focusout="toggleAutoSave"
+    class="h-full flex flex-col"
+  >
     <div>
       <input
         ref="titleRef"
@@ -39,6 +43,11 @@ export default defineComponent({
       />
       <span v-if="titleStatus">{{ titleStatus }}</span>
     </div>
-    <div ref="editorRef"></div>
+    <div ref="editorRef" class="flex-grow overflow-auto"></div>
   </div>
 </template>
+<style scoped>
+:deep(.cm-editor) {
+  height: 100%;
+}
+</style>
