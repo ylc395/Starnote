@@ -6,10 +6,13 @@
   "dependencies": {
     "@codemirror/commands": "^0.18.0",
     "@codemirror/highlight": "^0.18.3",
+    "@codemirror/history": "^0.18.1",
     "@codemirror/lang-markdown": "^0.18.1",
+    "@codemirror/language-data": "^0.18.0",
+    "@codemirror/panel": "^0.18.1",
     "@codemirror/state": "^0.18.3",
     "@codemirror/view": "^0.18.3",
-    "rxjs": "^6.6.7"
+    "eventemitter3": "^4.0.7"
   },
   "devDependencies": {
     "typescript": "*"

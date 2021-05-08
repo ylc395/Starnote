@@ -1,36 +1,32 @@
-import { EditorView, keymap, ViewUpdate } from '@codemirror/view';
-import { EditorState } from '@codemirror/state';
-import { markdown } from '@codemirror/lang-markdown';
-import { defaultHighlightStyle } from '@codemirror/highlight';
-import { defaultKeymap } from '@codemirror/commands';
-import { Subject } from 'rxjs';
+import { EditorView } from '@codemirror/view';
+import type { Transaction } from '@codemirror/state';
+import { createState } from './state';
+import { EditorOptions } from './types';
+import { EventEmitter } from 'eventemitter3';
 
-export class Editor {
+export enum Events {
+  Updated = 'Updated',
+}
+
+export class Editor extends EventEmitter {
   private readonly view: EditorView;
-  private readonly _event$ = new Subject<{ event: 'update'; data: string }>();
-  readonly event$ = this._event$.asObservable();
+  constructor(private readonly options: EditorOptions) {
+    super();
+    this.view = new EditorView({
+      parent: options.el,
+      state: createState(options),
+      dispatch: (transaction: Transaction) => {
+        if (transaction.docChanged) {
+          this.emit(Events.Updated, transaction.newDoc.toString());
+        }
 
-  constructor({ el }: { el: HTMLElement }) {
-    this.view = new EditorView({ parent: el });
+        this.view.update([transaction]);
+      },
+    });
   }
 
   setContent(text: string) {
-    this.view.setState(
-      EditorState.create({
-        doc: text,
-        extensions: [
-          markdown(),
-          defaultHighlightStyle,
-          keymap.of(defaultKeymap),
-          EditorView.updateListener.of((v: ViewUpdate) => {
-            if (v.docChanged) {
-              const content = v.state.doc.toJSON().join('\n');
-              this._event$.next({ event: 'update', data: content });
-            }
-          }),
-        ],
-      }),
-    );
+    this.view.setState(createState({ ...this.options, value: text }));
   }
 
   destroy() {
