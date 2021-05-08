@@ -50,4 +50,12 @@ export default defineComponent({
 :deep(.cm-editor) {
   height: 100%;
 }
+
+:deep(.cm-line) {
+  padding: 0 8px;
+}
+
+:deep(.cm-line:last-child) {
+  padding-bottom: 50%;
+}
 </style>

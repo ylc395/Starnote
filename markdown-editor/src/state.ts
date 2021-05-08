@@ -3,6 +3,7 @@ import { defaultHighlightStyle } from '@codemirror/highlight';
 import { languages } from '@codemirror/language-data';
 import { markdown } from '@codemirror/lang-markdown';
 import { history } from '@codemirror/history';
+import { EditorView } from '@codemirror/view';
 import { EditorOptions } from './types';
 import { wordCounter } from './panels/WordCounter';
 
@@ -17,6 +18,7 @@ export const createState = (options: EditorOptions): EditorState => {
       }),
       defaultHighlightStyle,
       wordCounter(),
+      EditorView.lineWrapping,
     ],
   });
 };
