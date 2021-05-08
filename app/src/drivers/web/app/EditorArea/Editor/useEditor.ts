@@ -4,6 +4,7 @@ import {
   Editor as MarkdownEditor,
   Events as MarkdownEditorEvents,
 } from '@ylc395/markdown-editor';
+import { wordCounter } from '@ylc395/markdown-editor/dist/statusbar';
 export function useEditor(editor: Editor) {
   const titleRef: Ref<HTMLInputElement | null> = ref(null);
   const editorRef: Ref<HTMLElement | null> = ref(null);
@@ -24,7 +25,11 @@ export function useEditor(editor: Editor) {
   };
 
   onMounted(() => {
-    const markdownEditor = new MarkdownEditor({ el: editorRef.value! });
+    const markdownEditor = new MarkdownEditor({
+      el: editorRef.value!,
+      statusbar: [wordCounter()],
+    });
+
     const isNewNote = editor.isJustCreated;
     let editingContent: null | string = null;
 

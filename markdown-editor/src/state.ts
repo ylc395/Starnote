@@ -5,11 +5,11 @@ import { markdown } from '@codemirror/lang-markdown';
 import { history } from '@codemirror/history';
 import { EditorView } from '@codemirror/view';
 import { EditorOptions } from './types';
-import { wordCounter } from './panels/WordCounter';
+import { getStatusbar } from './statusbar';
 
-export const createState = (options: EditorOptions): EditorState => {
+export const createState = (options: Required<EditorOptions>): EditorState => {
   return EditorState.create({
-    doc: options.value || '',
+    doc: options.value,
     extensions: [
       history(),
       markdown({
@@ -17,8 +17,10 @@ export const createState = (options: EditorOptions): EditorState => {
         addKeymap: false,
       }),
       defaultHighlightStyle,
-      wordCounter(),
       EditorView.lineWrapping,
+      ...(options.statusbar.length > 0
+        ? [getStatusbar(options.statusbar)]
+        : []),
     ],
   });
 };

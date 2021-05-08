@@ -10,11 +10,16 @@ export enum Events {
 
 export class Editor extends EventEmitter {
   private readonly view: EditorView;
-  constructor(private readonly options: EditorOptions) {
+  private get options() {
+    return { value: '', toolbar: [], statusbar: [], ...this.userOptions };
+  }
+
+  constructor(private readonly userOptions: EditorOptions) {
     super();
+
     this.view = new EditorView({
-      parent: options.el,
-      state: createState(options),
+      parent: this.options.el,
+      state: createState(this.options),
       dispatch: (transaction: Transaction) => {
         if (transaction.docChanged) {
           this.emit(Events.Updated, transaction.newDoc.toString());
