@@ -34,26 +34,19 @@ export function useEditor(editor: Editor) {
     });
 
     watch(
-      () => editor.noteTitle.value,
-      (newTitle) => {
-        if (titleRef.value && newTitle !== titleRef.value.value) {
-          titleRef.value.value = newTitle;
-        }
-      },
-      { immediate: true },
-    );
-
-    watch(
       () => editor.content.value,
       (newContent) => {
-        if (editingContent === newContent) {
-          return;
+        if (editingContent !== newContent) {
+          // editor content is modified by others, instead of user
+          markdownEditor.setContent(newContent);
         }
-
-        markdownEditor.setContent(newContent);
       },
       { immediate: true },
     );
+
+    if (titleRef.value) {
+      titleRef.value.value = editor.title.value;
+    }
 
     if (isNewNote && titleRef.value) {
       titleRef.value.select();
@@ -66,11 +59,20 @@ export function useEditor(editor: Editor) {
     });
   });
 
+  const resetTitle = () => {
+    if (!titleRef.value) {
+      return;
+    }
+
+    titleRef.value.value = editor.title.value;
+    editor.resetTitleStatus();
+  };
+
   return {
     titleRef,
     editorRef,
     titleStatus,
     toggleAutoSave,
-    resetTitle: editor.resetTitle,
+    resetTitle,
   };
 }

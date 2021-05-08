@@ -26,19 +26,14 @@ export class Editor {
   private readonly loadRunner: ReturnType<typeof effect>;
   private saveRunner: ReturnType<typeof effect> | null = null;
   private readonly _save$ = new Subject<NoteDataObject>();
-  save$ = this._save$.pipe(
+  readonly save$ = this._save$.pipe(
     buffer(this._save$.pipe(debounceTime(500))),
     map((snapshots) => snapshots[0]),
   );
-  private readonly title = ref('');
-  readonly noteTitle = computed(() => {
-    if (!this.note) {
-      throw new Error('no note when read title');
-    }
-    return this.note.title.value;
-  });
+  private readonly _title = ref('');
+  readonly title = computed(() => this._title.value);
   private readonly _titleStatus = ref(TitleStatus.Valid);
-  titleStatus = computed(() => this._titleStatus.value);
+  readonly titleStatus = computed(() => this._titleStatus.value);
 
   private checkTitle(title: string) {
     const note = this.note;
@@ -55,17 +50,12 @@ export class Editor {
     this._titleStatus.value = titleStatus;
 
     if (titleStatus === TitleStatus.Valid) {
-      this.title.value = title;
+      this._title.value = title;
     }
   }
 
-  resetTitle() {
-    if (!this._titleStatus.value) {
-      return;
-    }
-
+  resetTitleStatus() {
     this._titleStatus.value = TitleStatus.Valid;
-    this.title.value = this.noteTitle.value;
   }
 
   setContent(content: string) {
@@ -87,7 +77,7 @@ export class Editor {
         throw new Error('empty content');
       }
 
-      this.title.value = noteTitle;
+      this._title.value = noteTitle;
       this._content.value = noteContent;
     });
   }
@@ -102,7 +92,7 @@ export class Editor {
     const note = this.note;
     const snapshot = note.toDataObject();
 
-    note.title.value = this.title.value;
+    note.title.value = this._title.value;
     note.content.value = this._content.value;
     note.userModifiedAt.value = dayjs();
     note.isJustCreated = false;
@@ -119,7 +109,7 @@ export class Editor {
     this.saveRunner = effect(() => {
       const note = this.note;
       const editorContent = this._content.value;
-      const editorTitle = this.title.value;
+      const editorTitle = this._title.value;
 
       if (!note) {
         throw new Error('no note to save');
