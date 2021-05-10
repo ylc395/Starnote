@@ -29,16 +29,14 @@ function countDoc(doc: Text) {
   return `words: ${count}`;
 }
 
-export function wordCounter(): StatusbarItem {
-  return {
-    className: 'editor-statusbar-word-counter',
-    onMounted(view, itemEl) {
-      itemEl.textContent = countDoc(view.state.doc);
-    },
-    onUpdate(update, view, itemEl) {
-      if (update.docChanged) {
-        itemEl.textContent = countDoc(update.state.doc);
-      }
-    },
-  };
-}
+export const wordCounter: StatusbarItem = {
+  className: 'editor-statusbar-word-counter',
+  onMounted(view, itemEl) {
+    itemEl.textContent = countDoc(view.state.doc);
+  },
+  onUpdate(update, view, itemEl) {
+    if (update.docChanged) {
+      itemEl.textContent = countDoc(update.state.doc);
+    }
+  },
+};

@@ -20,14 +20,12 @@ function getPosition(state: EditorState) {
   return `${line}:${col}`;
 }
 
-export function cursorPosition(): StatusbarItem {
-  return {
-    className: 'editor-statusbar-cursor-position',
-    onMounted(view, itemEl) {
-      itemEl.textContent = getPosition(view.state);
-    },
-    onUpdate(update, view, itemEl) {
-      itemEl.textContent = getPosition(update.state);
-    },
-  };
-}
+export const cursorPosition: StatusbarItem = {
+  className: 'editor-statusbar-cursor-position',
+  onMounted(view, itemEl) {
+    itemEl.textContent = getPosition(view.state);
+  },
+  onUpdate(update, view, itemEl) {
+    itemEl.textContent = getPosition(update.state);
+  },
+};

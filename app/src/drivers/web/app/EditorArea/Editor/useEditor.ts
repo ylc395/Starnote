@@ -9,6 +9,7 @@ import {
   lineCounter,
   cursorPosition,
 } from '@ylc395/markdown-editor/dist/statusbar';
+import { boldIcon } from '@ylc395/markdown-editor/dist/toolbar';
 export function useEditor(editor: Editor) {
   const titleRef: Ref<HTMLInputElement | null> = ref(null);
   const editorRef: Ref<HTMLElement | null> = ref(null);
@@ -31,7 +32,8 @@ export function useEditor(editor: Editor) {
   onMounted(() => {
     const markdownEditor = new MarkdownEditor({
       el: editorRef.value!,
-      statusbar: [wordCounter(), lineCounter(), cursorPosition()],
+      statusbar: [wordCounter, lineCounter, cursorPosition],
+      toolbar: [boldIcon],
     });
 
     const isNewNote = editor.isJustCreated;
@@ -46,7 +48,7 @@ export function useEditor(editor: Editor) {
       () => editor.content.value,
       (newContent) => {
         if (editingContent !== newContent) {
-          // editor content is modified by others, instead of user
+          // editor content is modified by app, instead of user
           markdownEditor.setContent(newContent);
         }
       },
