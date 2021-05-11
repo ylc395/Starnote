@@ -26,8 +26,8 @@ export const createState = (
     extensions: [
       history(),
       markdown({
-        // GFM parser. add some feature on commonMark
-        // @see https://github.com/lezer-parser/markdown#user-content-gfm
+        // with GFM and some other extensions enabled
+        // @see https://github.com/codemirror/lang-markdown/blob/3778e85ca81514d5f768d92095e9c341a8272fa0/src/markdown.ts#L52
         base: markdownLanguage,
         codeLanguages: languages,
         addKeymap: false,

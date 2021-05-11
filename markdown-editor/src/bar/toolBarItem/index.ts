@@ -65,4 +65,10 @@ function getInlineIcon(title: string, mark: string): BarItem {
 export const boldIcon = getInlineIcon('Bold', '**');
 export const italicIcon = getInlineIcon('Italic', '*');
 export const codeIcon = getInlineIcon('Code', '`');
+
+/** supported by codemirror `markdownLanguage` parser
+ * @see https://github.com/codemirror/lang-markdown/blob/3778e85ca81514d5f768d92095e9c341a8272fa0/src/markdown.ts#L52
+ */
 export const strikeThroughIcon = getInlineIcon('StrikeThrough', '~~');
+export const superscript = getInlineIcon('Superscript', '^');
+export const subscript = getInlineIcon('Subscript', '~');
