@@ -9,6 +9,9 @@ import {
   lineCounter,
   cursorPosition,
   boldIcon,
+  italicIcon,
+  codeIcon,
+  strikeThroughIcon,
 } from '@ylc395/markdown-editor/dist/bar';
 export function useEditor(editor: Editor) {
   const titleRef: Ref<HTMLInputElement | null> = ref(null);
@@ -33,7 +36,7 @@ export function useEditor(editor: Editor) {
     const markdownEditor = new MarkdownEditor({
       el: editorRef.value!,
       statusbar: [wordCounter, lineCounter, cursorPosition],
-      toolbar: [boldIcon],
+      toolbar: [boldIcon, italicIcon, codeIcon, strikeThroughIcon],
     });
 
     const isNewNote = editor.isJustCreated;

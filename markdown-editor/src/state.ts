@@ -1,7 +1,7 @@
 import { EditorState, Extension } from '@codemirror/state';
 import { defaultHighlightStyle } from '@codemirror/highlight';
 import { languages } from '@codemirror/language-data';
-import { markdown } from '@codemirror/lang-markdown';
+import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
 import { history } from '@codemirror/history';
 import { EditorView } from '@codemirror/view';
 import { showPanel } from '@codemirror/panel';
@@ -26,6 +26,9 @@ export const createState = (
     extensions: [
       history(),
       markdown({
+        // GFM parser. add some feature on commonMark
+        // @see https://github.com/lezer-parser/markdown#user-content-gfm
+        base: markdownLanguage,
         codeLanguages: languages,
         addKeymap: false,
       }),
