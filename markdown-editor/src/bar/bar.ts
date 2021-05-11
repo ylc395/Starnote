@@ -5,11 +5,7 @@ export interface BarItem {
   className?: string;
   title?: string;
   onMounted?: (view: EditorView, itemEl: HTMLElement) => void;
-  onUpdate?: (
-    update: ViewUpdate,
-    view: EditorView,
-    itemEl: HTMLElement,
-  ) => void;
+  onUpdate?: (update: ViewUpdate, itemEl: HTMLElement) => void;
   onClick?: (view: EditorView, itemEl: HTMLElement) => void;
 }
 
@@ -60,7 +56,7 @@ function bar(items: BarItem[], { top, itemClassName, className }: BarOption) {
       },
       update(update) {
         items.forEach((item, index) =>
-          item.onUpdate?.(update, view, itemsDom[index]),
+          item.onUpdate?.(update, itemsDom[index]),
         );
       },
     };

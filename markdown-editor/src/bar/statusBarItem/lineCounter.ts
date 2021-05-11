@@ -10,7 +10,7 @@ export const lineCounter: BarItem = {
   onMounted(view, itemEl) {
     itemEl.textContent = getLines(view.state);
   },
-  onUpdate(update, view, itemEl) {
+  onUpdate(update, itemEl) {
     if (update.docChanged) {
       itemEl.textContent = getLines(update.state);
     }

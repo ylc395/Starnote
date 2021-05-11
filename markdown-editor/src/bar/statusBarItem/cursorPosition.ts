@@ -25,7 +25,7 @@ export const cursorPosition: BarItem = {
   onMounted(view, itemEl) {
     itemEl.textContent = getPosition(view.state);
   },
-  onUpdate(update, view, itemEl) {
+  onUpdate(update, itemEl) {
     itemEl.textContent = getPosition(update.state);
   },
 };

@@ -34,7 +34,7 @@ export const wordCounter: BarItem = {
   onMounted(view, itemEl) {
     itemEl.textContent = countDoc(view.state.doc);
   },
-  onUpdate(update, view, itemEl) {
+  onUpdate(update, itemEl) {
     if (update.docChanged) {
       itemEl.textContent = countDoc(update.state.doc);
     }
