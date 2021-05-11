@@ -1,6 +1,6 @@
 import { EditorSelection, Transaction } from '@codemirror/state';
 import type { EditorView } from '@codemirror/view';
-import type { ToolbarItem } from './bar';
+import type { BarItem } from '../bar';
 
 export function toggleBold(view: EditorView) {
   const changes = view.state.changeByRange((range) => {
@@ -27,8 +27,8 @@ export function toggleBold(view: EditorView) {
   return true;
 }
 
-export const boldIcon: ToolbarItem = {
-  className: 'editor-toolbar-bold-icon',
+export const boldIcon: BarItem = {
+  className: 'editor-toolbar-icon editor-toolbar-bold-icon',
   title: 'Bold',
-  action: toggleBold,
+  onClick: toggleBold,
 };

@@ -8,8 +8,8 @@ import {
   wordCounter,
   lineCounter,
   cursorPosition,
-} from '@ylc395/markdown-editor/dist/statusbar';
-import { boldIcon } from '@ylc395/markdown-editor/dist/toolbar';
+  boldIcon,
+} from '@ylc395/markdown-editor/dist/bar';
 export function useEditor(editor: Editor) {
   const titleRef: Ref<HTMLInputElement | null> = ref(null);
   const editorRef: Ref<HTMLElement | null> = ref(null);

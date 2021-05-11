@@ -1,5 +1,5 @@
 import type { Text } from '@codemirror/text';
-import type { StatusbarItem } from './bar';
+import type { BarItem } from '../bar';
 
 const pattern = /[a-zA-Z0-9_\u0392-\u03c9\u00c0-\u00ff\u0600-\u06ff\u0400-\u04ff]+|[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff\u3040-\u309f\uac00-\ud7af]+/g;
 
@@ -29,7 +29,7 @@ function countDoc(doc: Text) {
   return `words: ${count}`;
 }
 
-export const wordCounter: StatusbarItem = {
+export const wordCounter: BarItem = {
   className: 'editor-statusbar-word-counter',
   onMounted(view, itemEl) {
     itemEl.textContent = countDoc(view.state.doc);

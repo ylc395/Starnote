@@ -1,9 +1,8 @@
-import type { StatusbarItem } from './statusbar';
-import type { ToolbarItem } from './toolbar';
+import type { BarItem } from './bar/bar';
 
 export interface EditorOptions {
   el: HTMLElement;
   value?: string;
-  toolbar?: ToolbarItem[];
-  statusbar?: StatusbarItem[];
+  toolbar?: BarItem[];
+  statusbar?: BarItem[];
 }

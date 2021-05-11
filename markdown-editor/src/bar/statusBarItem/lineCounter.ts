@@ -1,11 +1,11 @@
 import type { EditorState } from '@codemirror/state';
-import type { StatusbarItem } from './bar';
+import type { BarItem } from '../bar';
 
 function getLines(state: EditorState) {
   return `lines: ${state.doc.lines}`;
 }
 
-export const lineCounter: StatusbarItem = {
+export const lineCounter: BarItem = {
   className: 'editor-statusbar-line-counter',
   onMounted(view, itemEl) {
     itemEl.textContent = getLines(view.state);

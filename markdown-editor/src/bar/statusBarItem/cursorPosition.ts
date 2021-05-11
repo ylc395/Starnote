@@ -1,5 +1,5 @@
 import type { EditorState, Text } from '@codemirror/state';
-import type { StatusbarItem } from './bar';
+import type { BarItem } from '../bar';
 
 function getLineAndCol(pos: number, doc: Text) {
   const line = doc.lineAt(pos).number;
@@ -20,7 +20,7 @@ function getPosition(state: EditorState) {
   return `${line}:${col}`;
 }
 
-export const cursorPosition: StatusbarItem = {
+export const cursorPosition: BarItem = {
   className: 'editor-statusbar-cursor-position',
   onMounted(view, itemEl) {
     itemEl.textContent = getPosition(view.state);
