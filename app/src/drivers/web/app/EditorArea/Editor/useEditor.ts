@@ -12,6 +12,8 @@ import {
   italicIcon,
   codeIcon,
   strikeThroughIcon,
+  superscriptIcon,
+  subscriptIcon,
 } from '@ylc395/markdown-editor/dist/bar';
 export function useEditor(editor: Editor) {
   const titleRef: Ref<HTMLInputElement | null> = ref(null);
@@ -36,7 +38,14 @@ export function useEditor(editor: Editor) {
     const markdownEditor = new MarkdownEditor({
       el: editorRef.value!,
       statusbar: [wordCounter, lineCounter, cursorPosition],
-      toolbar: [boldIcon, italicIcon, codeIcon, strikeThroughIcon],
+      toolbar: [
+        boldIcon,
+        italicIcon,
+        codeIcon,
+        strikeThroughIcon,
+        superscriptIcon,
+        subscriptIcon,
+      ],
     });
 
     const isNewNote = editor.isJustCreated;
