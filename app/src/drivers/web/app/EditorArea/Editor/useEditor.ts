@@ -16,6 +16,8 @@ import {
   subscriptIcon,
   heading1Icon,
   blockquoteIcon,
+  bulletListIcon,
+  orderedListIcon,
 } from '@ylc395/markdown-editor/dist/bar';
 export function useEditor(editor: Editor) {
   const titleRef: Ref<HTMLInputElement | null> = ref(null);
@@ -49,6 +51,8 @@ export function useEditor(editor: Editor) {
         subscriptIcon,
         heading1Icon,
         blockquoteIcon,
+        bulletListIcon,
+        orderedListIcon,
       ],
     });
 
