@@ -10,7 +10,7 @@ function getLineAndCol(pos: number, doc: Text) {
     passedChar += l.length + 1; // 1 means line break
   }
 
-  return { line, col: pos - passedChar };
+  return { line: doc.lineAt(pos).number, col: pos - passedChar };
 }
 
 function getPosition(state: EditorState) {
