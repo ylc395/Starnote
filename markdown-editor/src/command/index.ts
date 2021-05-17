@@ -109,11 +109,14 @@ function toggleBlockRange(
         insert: '',
       });
 
+      let length = blockMark.symbol.length;
+
       if (i === firstLine.number) {
-        newRange.from -= blockMark.symbol.length;
+        length = Math.min(blockMark.symbol.length, range.from - line.from);
+        newRange.from -= length;
       }
 
-      newRange.to -= blockMark.symbol.length;
+      newRange.to -= length;
 
       if (blockMark.type === type) {
         continue;

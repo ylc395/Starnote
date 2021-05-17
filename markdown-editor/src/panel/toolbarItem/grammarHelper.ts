@@ -1,7 +1,7 @@
 import { syntaxTree } from '@codemirror/language';
 import { EditorState } from '@codemirror/state';
 import * as commands from '../../command';
-import * as MARKS from '../..//command/marks';
+import * as MARKS from '../../command/marks';
 import type { Command } from '@codemirror/view';
 import type { BarItem } from '@/panel/bar';
 
