@@ -6,7 +6,7 @@ import { history } from '@codemirror/history';
 import { EditorView } from '@codemirror/view';
 import { showPanel } from '@codemirror/panel';
 import { EditorOptions } from './types';
-import { statusbar, toolbar } from './bar/bar';
+import { statusbar, toolbar } from './panel/bar';
 export const createState = (
   options: Required<EditorOptions>,
   extensions: Extension[] = [],

@@ -1,4 +1,4 @@
-import type { BarItem } from './bar/bar';
+import type { BarItem } from './panel/bar';
 
 export interface EditorOptions {
   el: HTMLElement;
