@@ -18,7 +18,11 @@ import {
   blockquoteIcon,
   bulletListIcon,
   orderedListIcon,
-} from '@ylc395/markdown-editor/dist/bar';
+  linkIcon,
+  imageIcon,
+  horizontalLineIcon,
+  taskIcon,
+} from '@ylc395/markdown-editor/dist/panel';
 export function useEditor(editor: Editor) {
   const titleRef: Ref<HTMLInputElement | null> = ref(null);
   const editorRef: Ref<HTMLElement | null> = ref(null);
@@ -53,6 +57,10 @@ export function useEditor(editor: Editor) {
         blockquoteIcon,
         bulletListIcon,
         orderedListIcon,
+        linkIcon,
+        imageIcon,
+        horizontalLineIcon,
+        taskIcon,
       ],
     });
 

@@ -1,7 +1,7 @@
 import { syntaxTree } from '@codemirror/language';
 import { EditorState } from '@codemirror/state';
-import * as commands from '@/command';
-import * as MARKS from '@/command/marks';
+import * as commands from '../../command';
+import * as MARKS from '../..//command/marks';
 import type { Command } from '@codemirror/view';
 import type { BarItem } from '@/panel/bar';
 
@@ -91,6 +91,12 @@ export const orderedListIcon = icon(
   commands.toggleOrderedList,
 );
 
+export const taskIcon = icon(
+  MARKS.TASK,
+  'toggle task item',
+  commands.toggleTask,
+);
+
 export const strikeThroughIcon = icon(
   MARKS.STRIKE_THROUGH,
   'toggle Strike Through',
@@ -105,4 +111,18 @@ export const subscriptIcon = icon(
   MARKS.SUBSCRIPT,
   'toggle Subscript',
   commands.toggleSubscript,
+);
+
+export const linkIcon = icon(MARKS.LINK, 'insert Link', commands.insertLink);
+
+export const imageIcon = icon(
+  MARKS.IMAGE,
+  'insert Image',
+  commands.insertImage,
+);
+
+export const horizontalLineIcon = icon(
+  MARKS.HORIZONTAL_LINE,
+  'insert horizontal line',
+  commands.insertHorizontalLine,
 );

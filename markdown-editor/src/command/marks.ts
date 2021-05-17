@@ -2,6 +2,7 @@ export interface Mark {
   readonly symbol: string;
   readonly type: string; // @see https://github.com/lezer-parser/markdown/blob/e25c643b5c6feea66a97df58008904584683e350/test/spec.ts#L4
   readonly markType?: string; // for some grammar, marks will be treated as a standalone structure
+  readonly newLine?: boolean;
 }
 
 export const BOLD = {
@@ -67,6 +68,22 @@ export const ORDERED_LIST = {
   markType: 'ListItem',
 };
 
+export const LINK = {
+  symbol: '[]()',
+  type: 'Link',
+};
+
+export const IMAGE = {
+  symbol: '![]()',
+  type: 'Image',
+};
+
+export const HORIZONTAL_LINE = {
+  symbol: '-----',
+  type: 'HorizontalRule',
+  newLine: true,
+};
+
 /** supported by codemirror `markdownLanguage` parser
  * @see https://github.com/codemirror/lang-markdown/blob/3778e85ca81514d5f768d92095e9c341a8272fa0/src/markdown.ts#L52
  */
@@ -85,6 +102,12 @@ export const SUBSCRIPT = {
   type: 'Subscript',
 };
 
+export const TASK = {
+  symbol: '- [ ] ',
+  type: 'Task',
+  markType: 'TaskMarker',
+};
+
 export const BLOCK_MARKS: Mark[] = [
   HEADING1,
   HEADING2,
@@ -93,6 +116,9 @@ export const BLOCK_MARKS: Mark[] = [
   HEADING5,
   HEADING6,
   BLOCKQUOTE,
+  TASK, // Task must be before BULLET_LIST and ORDERED_LIST
   BULLET_LIST,
   ORDERED_LIST,
 ];
+
+export const TO_INSERT_MARKS: Mark[] = [LINK, IMAGE, HORIZONTAL_LINE];

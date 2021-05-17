@@ -13,7 +13,11 @@ type SyntaxNode = ReturnType<SyntaxTree['resolve']>;
 export function isMarkOf(node: SyntaxNode, mark: MARKS.Mark) {
   return (
     node.type.is(mark.type) ||
-    node.type.is(mark.markType || `${mark.type}MARKS.Mark`)
+    (mark.markType &&
+      node.type.is(mark.markType) &&
+      node.parent &&
+      node.parent.type.is(mark.type)) ||
+    node.type.is(`${mark.type}Mark`)
   );
 }
 
@@ -133,9 +137,28 @@ function toggleBlockRange(
   };
 }
 
+function insert(
+  range: SelectionRange,
+  { symbol, newLine }: MARKS.Mark,
+  tree: SyntaxTree,
+  view: EditorView,
+) {
+  const line = view.state.doc.lineAt(range.from);
+
+  return {
+    range,
+    changes: {
+      from: newLine ? line.to : range.to,
+      insert: newLine ? `\n${symbol}\n` : symbol,
+    },
+  };
+}
+
 function toggle(mark: MARKS.Mark): Command {
   return function (view: EditorView) {
-    const toggle = MARKS.BLOCK_MARKS.includes(mark)
+    const toggle = MARKS.TO_INSERT_MARKS.includes(mark)
+      ? insert
+      : MARKS.BLOCK_MARKS.includes(mark)
       ? toggleBlockRange
       : toggleInlineRange;
     const tree = syntaxTree(view.state);
@@ -168,6 +191,10 @@ export const toggleHeading6 = toggle(MARKS.HEADING6);
 export const toggleBlockquote = toggle(MARKS.BLOCKQUOTE);
 export const toggleBulletList = toggle(MARKS.BULLET_LIST);
 export const toggleOrderedList = toggle(MARKS.ORDERED_LIST);
+export const toggleTask = toggle(MARKS.TASK);
 export const toggleStrikeThrough = toggle(MARKS.STRIKE_THROUGH);
 export const toggleSuperscript = toggle(MARKS.SUPERSCRIPT);
 export const toggleSubscript = toggle(MARKS.SUBSCRIPT);
+export const insertLink = toggle(MARKS.LINK);
+export const insertImage = toggle(MARKS.IMAGE);
+export const insertHorizontalLine = toggle(MARKS.HORIZONTAL_LINE);
