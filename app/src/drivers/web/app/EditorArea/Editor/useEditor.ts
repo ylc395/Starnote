@@ -3,8 +3,6 @@ import { Editor, TITLE_STATUS_TEXT } from 'domain/entity';
 import {
   Editor as MarkdownEditor,
   Events as MarkdownEditorEvents,
-} from '@ylc395/markdown-editor';
-import {
   wordCounter,
   lineCounter,
   cursorPosition,
@@ -22,7 +20,7 @@ import {
   imageIcon,
   horizontalLineIcon,
   taskIcon,
-} from '@ylc395/markdown-editor/dist/panel';
+} from '@ylc395/markdown-editor';
 export function useEditor(editor: Editor) {
   const titleRef: Ref<HTMLInputElement | null> = ref(null);
   const editorRef: Ref<HTMLElement | null> = ref(null);
