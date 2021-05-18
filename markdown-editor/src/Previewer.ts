@@ -20,6 +20,7 @@ export class Previewer {
     this.editor.on(EditorEvents.Updated, this.render.bind(this));
   }
   render(text: string) {
+    debugger;
     this.el.innerHTML = this.renderer.render(text);
   }
 }

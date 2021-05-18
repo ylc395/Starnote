@@ -19,10 +19,13 @@
     "markdown-it": "^12.0.6"
   },
   "devDependencies": {
+    "@rollup/plugin-node-resolve": "^13.0.0",
+    "rollup": "^2.48.0",
+    "rollup-plugin-typescript2": "^0.30.0",
     "typescript": "*"
   },
   "main": "dist/index.js",
   "scripts": {
-    "serve": "tsc -w"
+    "serve": "rollup -cw"
   }
 }
