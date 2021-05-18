@@ -1,0 +1,8 @@
+.previewer {
+  position: absolute;
+  width: 50%;
+  right: 0;
+  overflow: auto;
+  border-left: 1px solid #ccc;
+  box-sizing: border-box;
+}

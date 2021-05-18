@@ -1,0 +1,16 @@
+.toolbar,
+.statusbar {
+  display: flex;
+}
+
+.toolbar {
+  flex-wrap: wrap;
+}
+
+.toolbar-item {
+  background-color: red;
+}
+
+.status-item {
+  margin-right: 10px;
+}

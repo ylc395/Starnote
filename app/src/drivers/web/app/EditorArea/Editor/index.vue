@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, onMounted } from 'vue';
 import { Editor } from 'domain/entity';
 import { useEditor } from './useEditor';
 
@@ -16,6 +16,12 @@ export default defineComponent({
       toggleAutoSave,
     } = useEditor(editor);
 
+    onMounted(() => {
+      editorRef.value!.style.height = `calc(100% - ${
+        titleRef.value?.clientHeight ?? 0
+      }px)`;
+    });
+
     return {
       titleRef,
       editorRef,
@@ -27,11 +33,7 @@ export default defineComponent({
 });
 </script>
 <template>
-  <div
-    @focusin="toggleAutoSave"
-    @focusout="toggleAutoSave"
-    class="h-full flex flex-col"
-  >
+  <div @focusin="toggleAutoSave" @focusout="toggleAutoSave" class="h-full">
     <div>
       <input
         ref="titleRef"
@@ -43,19 +45,6 @@ export default defineComponent({
       />
       <span v-if="titleStatus">{{ titleStatus }}</span>
     </div>
-    <div ref="editorRef" class="flex-grow"></div>
+    <div ref="editorRef"></div>
   </div>
 </template>
-<style scoped>
-:deep(.cm-editor) {
-  height: 100%;
-}
-
-:deep(.cm-line) {
-  padding: 0 8px;
-}
-
-:deep(.cm-line:last-child) {
-  padding-bottom: 50%;
-}
-</style>

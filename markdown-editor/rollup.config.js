@@ -1,5 +1,6 @@
 import typescript from 'rollup-plugin-typescript2';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
+import postcss from 'rollup-plugin-postcss';
 
 export default {
   input: './src/index.ts',
@@ -8,5 +9,9 @@ export default {
     sourcemap: true,
   },
   external: [/node_modules/],
-  plugins: [typescript(), nodeResolve()],
+  plugins: [
+    typescript(),
+    nodeResolve(),
+    postcss({ extract: true, modules: true }),
+  ],
 };

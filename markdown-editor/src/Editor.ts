@@ -9,7 +9,16 @@ export enum Events {
 }
 
 export class Editor extends EventEmitter {
-  private readonly view: EditorView;
+  private readonly _view: EditorView;
+
+  get view() {
+    return this._view;
+  }
+
+  get el() {
+    return this.options.el;
+  }
+
   private readonly previewer: Previewer;
   private get options() {
     return { value: '', toolbar: [], statusbar: [], ...this.userOptions };
@@ -24,36 +33,23 @@ export class Editor extends EventEmitter {
   constructor(private readonly userOptions: EditorOptions) {
     super();
 
-    const { editorEl, previewerEl } = this.initDom(this.options.el);
-
-    this.previewer = new Previewer({
-      editor: this,
-      el: previewerEl,
-      text: this.options.value,
-    });
-
-    this.view = new EditorView({
-      parent: editorEl,
+    this._view = new EditorView({
+      parent: this.options.el,
       state: createState(this.options, [
         EditorView.updateListener.of(this.updateListener),
       ]),
     });
-  }
 
-  private initDom(rootEl: HTMLElement) {
-    const containerEl = document.createElement('div');
-    const editorEl = document.createElement('div');
-    const previewerEl = document.createElement('div');
+    this._view.dom.style.height = '100%';
 
-    editorEl.className = 'editor-editor';
-    containerEl.append(editorEl, previewerEl);
-    rootEl.append(containerEl);
-
-    return { editorEl, previewerEl };
+    this.previewer = new Previewer({
+      editor: this,
+      text: this.options.value,
+    });
   }
 
   setContent(text: string) {
-    this.view.setState(
+    this._view.setState(
       createState({ ...this.options, value: text }, [
         EditorView.updateListener.of(this.updateListener),
       ]),
@@ -62,10 +58,10 @@ export class Editor extends EventEmitter {
   }
 
   destroy() {
-    this.view.destroy();
+    this._view.destroy();
   }
 
   focus() {
-    this.view.focus();
+    this._view.focus();
   }
 }

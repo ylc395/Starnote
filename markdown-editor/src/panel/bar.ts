@@ -1,5 +1,6 @@
 import type { Panel } from '@codemirror/panel';
 import type { EditorView, ViewUpdate } from '@codemirror/view';
+import style from './style.css';
 
 export interface BarItem {
   className?: string;
@@ -65,15 +66,15 @@ function bar(items: BarItem[], { top, itemClassName, className }: BarOption) {
 
 export const statusbar = (items: BarItem[]) => {
   return bar(items, {
-    className: 'editor-status',
-    itemClassName: 'editor-status-item',
+    className: style['statusbar'],
+    itemClassName: style['status-item'],
   });
 };
 
 export const toolbar = (items: BarItem[]) => {
   return bar(items, {
-    className: 'editor-toolbar',
-    itemClassName: 'editor-toolbar-item',
+    className: style['toolbar'],
+    itemClassName: style['toolbar-item'],
     top: true,
   });
 };

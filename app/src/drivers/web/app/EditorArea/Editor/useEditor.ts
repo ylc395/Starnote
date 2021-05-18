@@ -21,6 +21,8 @@ import {
   horizontalLineIcon,
   taskIcon,
 } from '@ylc395/markdown-editor';
+import '@ylc395/markdown-editor/dist/index.css';
+
 export function useEditor(editor: Editor) {
   const titleRef: Ref<HTMLInputElement | null> = ref(null);
   const editorRef: Ref<HTMLElement | null> = ref(null);
