@@ -8,8 +8,8 @@ export default defineComponent({
 });
 </script>
 <template>
-  <section class="flex-grow">
-    <EditorTab class="h-screen">
+  <section class="flex-grow h-full w-1/2">
+    <EditorTab class="h-full">
       <template v-slot="{ editor }">
         <Editor :editor="editor" />
       </template>

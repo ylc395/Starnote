@@ -33,7 +33,7 @@ export default defineComponent({
 });
 </script>
 <template>
-  <main class="flex">
+  <main class="flex h-screen w-screen">
     <Explorer />
     <EditorArea />
   </main>

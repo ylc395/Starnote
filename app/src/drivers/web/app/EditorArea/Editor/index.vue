@@ -43,7 +43,7 @@ export default defineComponent({
       />
       <span v-if="titleStatus">{{ titleStatus }}</span>
     </div>
-    <div ref="editorRef" class="flex-grow overflow-auto"></div>
+    <div ref="editorRef" class="flex-grow"></div>
   </div>
 </template>
 <style scoped>

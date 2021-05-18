@@ -24,9 +24,9 @@ export default defineComponent({
 });
 </script>
 <template>
-  <div class="flex h-screen">
+  <div class="flex h-full">
     <Resizable
-      class="tree-viewer h-full pt-4"
+      class="tree-viewer h-full py-4 overflow-y-auto overflow-x-hidden"
       :active="['r']"
       :disableAttributes="['h']"
       :minWidth="180"
