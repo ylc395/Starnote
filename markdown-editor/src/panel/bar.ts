@@ -5,6 +5,8 @@ import style from './style.css';
 export interface BarItem {
   className?: string;
   title?: string;
+  htmlContent?: string;
+  htmlTag?: string;
   onMounted?: (view: EditorView, itemEl: HTMLElement) => void;
   onUpdate?: (update: ViewUpdate, itemEl: HTMLElement) => void;
   onClick?: (view: EditorView, itemEl: HTMLElement) => void;
@@ -22,7 +24,7 @@ function bar(items: BarItem[], { top, itemClassName, className }: BarOption) {
     barDom.classList.add(className);
 
     const itemsDom = items.map((item) => {
-      const dom = document.createElement('div');
+      const dom = document.createElement(item.htmlTag || 'div');
 
       if (itemClassName) {
         dom.classList.add(itemClassName);
@@ -30,8 +32,10 @@ function bar(items: BarItem[], { top, itemClassName, className }: BarOption) {
 
       if (item.title) {
         dom.title = item.title;
-        // todo: remove this
-        dom.textContent = item.title;
+      }
+
+      if (item.htmlContent) {
+        dom.innerHTML = item.htmlContent;
       }
 
       if (item.className) {

@@ -1,9 +1,26 @@
 import { syntaxTree } from '@codemirror/language';
 import { EditorState } from '@codemirror/state';
+import boldIcon from 'bootstrap-icons/icons/type-bold.svg';
+import italicIcon from 'bootstrap-icons/icons/type-italic.svg';
+import codeIcon from 'bootstrap-icons/icons/code-slash.svg';
+import h1Icon from 'bootstrap-icons/icons/type-h1.svg';
+import h2Icon from 'bootstrap-icons/icons/type-h2.svg';
+import h3Icon from 'bootstrap-icons/icons/type-h3.svg';
+import blockquoteIcon from 'bootstrap-icons/icons/blockquote-left.svg';
+import ulIcon from 'bootstrap-icons/icons/list-ul.svg';
+import olIcon from 'bootstrap-icons/icons/list-ol.svg';
+import taskIcon from 'bootstrap-icons/icons/list-task.svg';
+import strikethroughIcon from 'bootstrap-icons/icons/type-strikethrough.svg';
+import linkIcon from 'bootstrap-icons/icons/link.svg';
+import imageIcon from 'bootstrap-icons/icons/image.svg';
+import dashIcon from 'bootstrap-icons/icons/dash.svg';
+import subtractIcon from 'bootstrap-icons/icons/subtract.svg';
+import type { Command } from '@codemirror/view';
+
 import * as commands from '../../command';
 import * as MARKS from '../../command/marks';
-import type { Command } from '@codemirror/view';
 import type { BarItem } from '@/panel/bar';
+import style from '../style.css';
 
 const syntaxTreeCache = new WeakMap<EditorState, commands.SyntaxTree>();
 function updateIconStatus(mark: MARKS.Mark): BarItem['onUpdate'] {
@@ -25,104 +42,143 @@ function updateIconStatus(mark: MARKS.Mark): BarItem['onUpdate'] {
   };
 }
 
-function icon(mark: MARKS.Mark, title: string, action: Command): BarItem {
+function button({
+  title,
+  action,
+  mark,
+  icon,
+}: {
+  mark: MARKS.Mark;
+  title: string;
+  action: Command;
+  icon: string;
+}): BarItem {
   return {
-    className: `editor-toolbar-icon editor-toolbar-${mark.type}-icon`,
+    className: style['toolbar-item-button'],
+    htmlTag: 'button',
+    htmlContent: icon,
     title: title,
     onClick: action,
     onUpdate: updateIconStatus(mark),
   };
 }
 
-export const boldIcon = icon(MARKS.BOLD, 'toggle Bold', commands.toggleBold);
-export const italicIcon = icon(
-  MARKS.ITALIC,
-  'toggle Italic',
-  commands.toggleItalic,
-);
-export const codeIcon = icon(
-  MARKS.INLINE_CODE,
-  'toggle Inline Code',
-  commands.toggleInlineCode,
-);
-export const heading1Icon = icon(
-  MARKS.HEADING1,
-  'toggle Heading1',
-  commands.toggleHeading1,
-);
-export const heading2Icon = icon(
-  MARKS.HEADING2,
-  'toggle Heading2',
-  commands.toggleHeading2,
-);
-export const heading3Icon = icon(
-  MARKS.HEADING3,
-  'toggle Heading3',
-  commands.toggleHeading3,
-);
-export const heading4Icon = icon(
-  MARKS.HEADING4,
-  'toggle Heading4',
-  commands.toggleHeading4,
-);
-export const heading5Icon = icon(
-  MARKS.HEADING5,
-  'toggle Heading',
-  commands.toggleHeading5,
-);
-export const heading6Icon = icon(
-  MARKS.HEADING6,
-  'toggle Heading6',
-  commands.toggleHeading6,
-);
-export const blockquoteIcon = icon(
-  MARKS.BLOCKQUOTE,
-  'toggle Blockquote',
-  commands.toggleBlockquote,
-);
-export const bulletListIcon = icon(
-  MARKS.BULLET_LIST,
-  'toggle Bullet List',
-  commands.toggleBulletList,
-);
-export const orderedListIcon = icon(
-  MARKS.ORDERED_LIST,
-  'toggle Ordered List',
-  commands.toggleOrderedList,
-);
+export const boldButton = button({
+  mark: MARKS.BOLD,
+  title: 'toggle Bold',
+  action: commands.toggleBold,
+  icon: boldIcon,
+});
+export const italicButton = button({
+  mark: MARKS.ITALIC,
+  title: 'toggle Italic',
+  action: commands.toggleItalic,
+  icon: italicIcon,
+});
+export const codeButton = button({
+  mark: MARKS.INLINE_CODE,
+  title: 'toggle Inline Code',
+  action: commands.toggleInlineCode,
+  icon: codeIcon,
+});
+export const heading1Button = button({
+  mark: MARKS.HEADING1,
+  title: 'toggle Heading1',
+  action: commands.toggleHeading1,
+  icon: h1Icon,
+});
+export const heading2Button = button({
+  mark: MARKS.HEADING2,
+  title: 'toggle Heading2',
+  action: commands.toggleHeading2,
+  icon: h2Icon,
+});
+export const heading3Button = button({
+  mark: MARKS.HEADING3,
+  title: 'toggle Heading3',
+  action: commands.toggleHeading3,
+  icon: h3Icon,
+});
+export const heading4Button = button({
+  mark: MARKS.HEADING4,
+  title: 'toggle Heading4',
+  action: commands.toggleHeading4,
+  icon: h3Icon,
+});
+export const heading5Button = button({
+  mark: MARKS.HEADING5,
+  title: 'toggle Heading',
+  action: commands.toggleHeading5,
+  icon: h3Icon,
+});
+export const heading6Button = button({
+  mark: MARKS.HEADING6,
+  title: 'toggle Heading6',
+  action: commands.toggleHeading6,
+  icon: h3Icon,
+});
+export const blockquoteButton = button({
+  mark: MARKS.BLOCKQUOTE,
+  title: 'toggle Blockquote',
+  action: commands.toggleBlockquote,
+  icon: blockquoteIcon,
+});
+export const bulletListButton = button({
+  mark: MARKS.BULLET_LIST,
+  title: 'toggle Bullet List',
+  action: commands.toggleBulletList,
+  icon: ulIcon,
+});
+export const orderedListButton = button({
+  mark: MARKS.ORDERED_LIST,
+  title: 'toggle Ordered List',
+  action: commands.toggleOrderedList,
+  icon: olIcon,
+});
 
-export const taskIcon = icon(
-  MARKS.TASK,
-  'toggle task item',
-  commands.toggleTask,
-);
+export const taskButton = button({
+  mark: MARKS.TASK,
+  title: 'toggle task item',
+  action: commands.toggleTask,
+  icon: taskIcon,
+});
 
-export const strikeThroughIcon = icon(
-  MARKS.STRIKE_THROUGH,
-  'toggle Strike Through',
-  commands.toggleStrikeThrough,
-);
-export const superscriptIcon = icon(
-  MARKS.SUPERSCRIPT,
-  'toggle Superscript',
-  commands.toggleSuperscript,
-);
-export const subscriptIcon = icon(
-  MARKS.SUBSCRIPT,
-  'toggle Subscript',
-  commands.toggleSubscript,
-);
+export const strikeThroughButton = button({
+  mark: MARKS.STRIKE_THROUGH,
+  title: 'toggle Strike Through',
+  action: commands.toggleStrikeThrough,
+  icon: strikethroughIcon,
+});
+export const superscriptButton = button({
+  mark: MARKS.SUPERSCRIPT,
+  title: 'toggle Superscript',
+  action: commands.toggleSuperscript,
+  icon: subtractIcon,
+});
+export const subscriptButton = button({
+  mark: MARKS.SUBSCRIPT,
+  title: 'toggle Subscript',
+  action: commands.toggleSubscript,
+  icon: subtractIcon,
+});
 
-export const linkIcon = icon(MARKS.LINK, 'insert Link', commands.insertLink);
+export const linkButton = button({
+  mark: MARKS.LINK,
+  title: 'insert Link',
+  action: commands.insertLink,
+  icon: linkIcon,
+});
 
-export const imageIcon = icon(
-  MARKS.IMAGE,
-  'insert Image',
-  commands.insertImage,
-);
+export const imageButton = button({
+  mark: MARKS.IMAGE,
+  title: 'insert Image',
+  action: commands.insertImage,
+  icon: imageIcon,
+});
 
-export const horizontalLineIcon = icon(
-  MARKS.HORIZONTAL_LINE,
-  'insert horizontal line',
-  commands.insertHorizontalLine,
-);
+export const horizontalLineButton = button({
+  mark: MARKS.HORIZONTAL_LINE,
+  title: 'insert horizontal line',
+  action: commands.insertHorizontalLine,
+  icon: dashIcon,
+});

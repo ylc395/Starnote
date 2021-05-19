@@ -4,6 +4,7 @@
   "author": "ylc395",
   "license": "MIT",
   "dependencies": {
+    "@ant-design/icons-svg": "^4.1.0",
     "@codemirror/commands": "^0.18.0",
     "@codemirror/highlight": "^0.18.3",
     "@codemirror/history": "^0.18.1",
@@ -20,9 +21,11 @@
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^13.0.0",
+    "bootstrap-icons": "^1.5.0",
     "postcss": "^8.2.15",
     "rollup": "^2.48.0",
     "rollup-plugin-postcss": "^4.0.0",
+    "rollup-plugin-svg": "^2.0.0",
     "rollup-plugin-typescript2": "^0.30.0",
     "typescript": "*"
   },

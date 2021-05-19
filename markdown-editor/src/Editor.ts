@@ -41,6 +41,7 @@ export class Editor extends EventEmitter {
     });
 
     this._view.dom.style.height = '100%';
+    this._view.dom.style.outline = 'none';
 
     this.previewer = new Previewer({
       editor: this,
