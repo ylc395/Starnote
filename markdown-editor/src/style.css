@@ -6,3 +6,7 @@
   border-left: 1px solid #ccc;
   box-sizing: border-box;
 }
+
+.previewer-focused-line {
+  background-color: red;
+}

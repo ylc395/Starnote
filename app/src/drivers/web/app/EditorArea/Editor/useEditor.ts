@@ -67,7 +67,7 @@ export function useEditor(editor: Editor) {
     const isNewNote = editor.isJustCreated;
     let editingContent: null | string = null;
 
-    markdownEditor.on(MarkdownEditorEvents.Updated, (content) => {
+    markdownEditor.on(MarkdownEditorEvents.DocChanged, (content) => {
       editingContent = content;
       editor.setContent(content);
     });
