@@ -1,7 +1,7 @@
 import MarkdownIt from 'markdown-it';
-import markdownItSourceMap from 'markdown-it-source-map';
 import EventEmitter from 'eventemitter3';
 import type { ViewUpdate } from '@codemirror/view';
+import { sourceMap } from './markdown-it-plugins';
 import { Events as EditorEvents, Events } from '../Editor';
 import type { Editor } from '../Editor';
 import style from '../style.css';
@@ -12,9 +12,7 @@ interface PreviewerOption {
 }
 
 export class Previewer extends EventEmitter {
-  private readonly renderer = new MarkdownIt({ breaks: true }).use(
-    markdownItSourceMap,
-  );
+  private readonly renderer = new MarkdownIt({ breaks: true }).use(sourceMap);
   private readonly el = document.createElement('article');
   private readonly editor: Editor;
   constructor({ text, editor }: PreviewerOption) {
@@ -53,9 +51,9 @@ export class Previewer extends EventEmitter {
     const className = style['previewer-focused-line'];
     const ranges = update.state.selection.ranges;
     const focusedLineEls = ranges
-      .map(({ head }) => update.state.doc.lineAt(head).number)
+      .map(({ head }) => update.state.doc.lineAt(head).number - 1)
       .map((number) => {
-        for (let i = number; i >= 1; i--) {
+        for (let i = number; i >= 0; i--) {
           const el = this.el.querySelector(`[data-source-line="${i}"]`);
           if (el) {
             return el;

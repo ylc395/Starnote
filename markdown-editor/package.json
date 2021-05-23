@@ -4,7 +4,6 @@
   "author": "ylc395",
   "license": "MIT",
   "dependencies": {
-    "@ant-design/icons-svg": "^4.1.0",
     "@codemirror/commands": "^0.18.0",
     "@codemirror/highlight": "^0.18.3",
     "@codemirror/history": "^0.18.1",
@@ -17,8 +16,7 @@
     "@codemirror/view": "^0.18.3",
     "@types/markdown-it": "^12.0.1",
     "eventemitter3": "^4.0.7",
-    "markdown-it": "^12.0.6",
-    "markdown-it-source-map": "^0.1.1"
+    "markdown-it": "^12.0.6"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^13.0.0",
