@@ -17,7 +17,7 @@ export function sourceMap(md: MarkdownIt) {
       const token = tokens[idx];
 
       if (token.map && token.map.length) {
-        token.attrSet('data-source-line', String(token.map[0]));
+        token.attrSet('data-source-line', String(token.map[0] + 1));
       }
 
       if (original) {

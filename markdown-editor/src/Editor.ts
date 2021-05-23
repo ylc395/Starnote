@@ -11,11 +11,6 @@ export enum Events {
 
 export class Editor extends EventEmitter {
   readonly view: EditorView;
-
-  get containerEl() {
-    return this.options.el;
-  }
-
   private readonly previewer: Previewer;
   private get options() {
     return { value: '', toolbar: [], statusbar: [], ...this.userOptions };

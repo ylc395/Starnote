@@ -15,10 +15,12 @@ export class Previewer extends EventEmitter {
   private readonly renderer = new MarkdownIt({ breaks: true }).use(sourceMap);
   private readonly el = document.createElement('article');
   private readonly editor: Editor;
+  private readonly editorTop: number;
   constructor({ text, editor }: PreviewerOption) {
     super();
 
     this.editor = editor;
+    this.editorTop = editor.view.scrollDOM.getBoundingClientRect().top;
     this.editor.on(EditorEvents.StateChanged, this.highlightFocusedLine);
     this.editor.on(EditorEvents.DocChanged, this.render);
     this.initDom();
@@ -31,8 +33,7 @@ export class Previewer extends EventEmitter {
 
   private initDom() {
     const {
-      view: { scrollDOM },
-      containerEl,
+      view: { scrollDOM, dom: containerEl },
     } = this.editor;
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const topPanel = containerEl.querySelector('.cm-panels-top')!;
@@ -45,23 +46,25 @@ export class Previewer extends EventEmitter {
 
     scrollDOM.after(this.el);
     scrollDOM.style.width = '50%';
+    scrollDOM.addEventListener('scroll', this.scrollToTopLineInEditor);
+  }
+
+  private getLineEl(line: number) {
+    for (let i = line; i >= 1; i--) {
+      const el = this.el.querySelector(`[data-source-line="${i}"]`);
+      if (el) {
+        return el as HTMLElement;
+      }
+    }
+    return null;
   }
 
   private highlightFocusedLine = (update: ViewUpdate) => {
     const className = style['previewer-focused-line'];
     const ranges = update.state.selection.ranges;
     const focusedLineEls = ranges
-      .map(({ head }) => update.state.doc.lineAt(head).number - 1)
-      .map((number) => {
-        for (let i = number; i >= 0; i--) {
-          const el = this.el.querySelector(`[data-source-line="${i}"]`);
-          if (el) {
-            return el;
-          }
-        }
-
-        return null;
-      });
+      .map(({ head }) => update.state.doc.lineAt(head).number)
+      .map(this.getLineEl.bind(this));
 
     for (const el of this.el.querySelectorAll(`.${className}`)) {
       el.classList.remove(className);
@@ -72,6 +75,20 @@ export class Previewer extends EventEmitter {
         el.classList.add(className);
       }
     }
+  };
+
+  private scrollToTopLineInEditor = () => {
+    const lineBlock = this.editor.view.visualLineAtHeight(this.editorTop);
+    const line = this.editor.view.state.doc.lineAt(lineBlock.from);
+    const lineEl = this.getLineEl(line.number);
+
+    if (!lineEl) {
+      return;
+    }
+
+    const top = lineEl.offsetTop;
+
+    this.el.scrollTo({ top });
   };
 
   destroy() {
