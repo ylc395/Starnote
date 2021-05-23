@@ -2,7 +2,7 @@ import MarkdownIt from 'markdown-it';
 import markdownItSourceMap from 'markdown-it-source-map';
 import EventEmitter from 'eventemitter3';
 import type { ViewUpdate } from '@codemirror/view';
-import { Events as EditorEvents } from '../Editor';
+import { Events as EditorEvents, Events } from '../Editor';
 import type { Editor } from '../Editor';
 import style from '../style.css';
 
@@ -16,28 +16,26 @@ export class Previewer extends EventEmitter {
     markdownItSourceMap,
   );
   private readonly el = document.createElement('article');
-  readonly editor: Editor;
+  private readonly editor: Editor;
   constructor({ text, editor }: PreviewerOption) {
     super();
 
     this.editor = editor;
-
-    this.editor.on(
-      EditorEvents.StateChanged,
-      this.highlightFocusedLine.bind(this),
-    );
-    this.editor.on(EditorEvents.DocChanged, this.render.bind(this));
-
+    this.editor.on(EditorEvents.StateChanged, this.highlightFocusedLine);
+    this.editor.on(EditorEvents.DocChanged, this.render);
     this.initDom();
     this.render(text);
   }
-  render(text: string) {
+  render = (text: string) => {
     this.el.innerHTML = this.renderer.render(text);
     this.emit('rendered');
-  }
+  };
 
   private initDom() {
-    const { editorEl, containerEl } = this.editor;
+    const {
+      view: { scrollDOM },
+      containerEl,
+    } = this.editor;
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const topPanel = containerEl.querySelector('.cm-panels-top')!;
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -47,11 +45,11 @@ export class Previewer extends EventEmitter {
     this.el.style.top = `${topPanel.clientHeight}px`;
     this.el.style.bottom = `${bottomPanel.clientHeight}px`;
 
-    editorEl.after(this.el);
-    editorEl.style.width = '50%';
+    scrollDOM.after(this.el);
+    scrollDOM.style.width = '50%';
   }
 
-  private highlightFocusedLine(update: ViewUpdate) {
+  private highlightFocusedLine = (update: ViewUpdate) => {
     const className = style['previewer-focused-line'];
     const ranges = update.state.selection.ranges;
     const focusedLineEls = ranges
@@ -76,5 +74,10 @@ export class Previewer extends EventEmitter {
         el.classList.add(className);
       }
     }
+  };
+
+  destroy() {
+    this.editor.off(Events.StateChanged, this.highlightFocusedLine);
+    this.editor.off(Events.DocChanged, this.render);
   }
 }

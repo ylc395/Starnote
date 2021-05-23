@@ -10,14 +10,10 @@ export enum Events {
 }
 
 export class Editor extends EventEmitter {
-  private readonly view: EditorView;
+  readonly view: EditorView;
 
   get containerEl() {
     return this.options.el;
-  }
-
-  get editorEl() {
-    return this.view.scrollDOM;
   }
 
   private readonly previewer: Previewer;
@@ -62,6 +58,7 @@ export class Editor extends EventEmitter {
   }
 
   destroy() {
+    this.previewer.destroy();
     this.view.destroy();
   }
 
