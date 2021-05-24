@@ -1,5 +1,3 @@
-import { syntaxTree } from '@codemirror/language';
-import { EditorState } from '@codemirror/state';
 import boldIcon from 'bootstrap-icons/icons/type-bold.svg';
 import italicIcon from 'bootstrap-icons/icons/type-italic.svg';
 import codeIcon from 'bootstrap-icons/icons/code-slash.svg';
@@ -19,19 +17,16 @@ import type { Command } from '@codemirror/view';
 
 import * as commands from '../../command';
 import * as MARKS from '../../command/marks';
+import { getSyntaxTreeOfState } from '../..//state';
 import type { BarItem } from '@/panel/bar';
 import style from '../style.css';
 
-const syntaxTreeCache = new WeakMap<EditorState, commands.SyntaxTree>();
 function updateIconStatus(mark: MARKS.Mark): BarItem['onUpdate'] {
   return function (update, itemEl) {
-    if (!syntaxTreeCache.has(update.state)) {
-      syntaxTreeCache.set(update.state, syntaxTree(update.state));
-    }
-
     const { from } = update.state.selection.main;
+    const syntaxTree = getSyntaxTreeOfState(update.state);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const node = syntaxTreeCache.get(update.state)!.resolve(from);
+    const node = syntaxTree.resolve(from);
     const CHECKED_CLASS_NAME = 'editor-toolbar-item-checked';
 
     if (commands.isMarkOf(node, mark)) {

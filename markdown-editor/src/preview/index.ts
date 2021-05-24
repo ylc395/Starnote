@@ -4,6 +4,8 @@ import { sourceMap } from './markdown-it-plugins';
 import { Events as EditorEvents, Events } from '../Editor';
 import type { Editor } from '../Editor';
 import style from '../style.css';
+import { getSyntaxTreeOfState } from '../state';
+import type { SyntaxNode } from '../types';
 
 interface PreviewerOption {
   text: string;
@@ -57,20 +59,57 @@ export class Previewer {
         ) {
           // Fenched code blocks are a special case since the `code-line` can only be marked on
           // the `<code>` element and not the parent `<pre>` element.
-          return el.parentElement;
+          return { el: el.parentElement, line: i };
         }
 
-        return el as HTMLElement;
+        return { el: el as HTMLElement, line: i };
       }
     }
 
     return null;
   }
 
+  private getLineBlockOfEditorTop() {
+    const view = this.editor.view;
+    const block = view.visualLineAtHeight(this.editorTop);
+    const syntaxTree = getSyntaxTreeOfState(view.state);
+    const node = syntaxTree.resolve(block.from, 1);
+    const getParentFencedCode = (node: SyntaxNode): SyntaxNode | null => {
+      if (!node.parent) {
+        return null;
+      }
+
+      if (node.parent.type.is('FencedCode')) {
+        return node.parent;
+      }
+
+      return getParentFencedCode(node.parent);
+    };
+    const parentFencedCode = getParentFencedCode(node);
+
+    if (parentFencedCode) {
+      const contentDomTop = view.contentDOM.getBoundingClientRect().top;
+      const firstBlock = view.visualLineAt(
+        parentFencedCode.from,
+        contentDomTop,
+      );
+
+      const lastBlock = view.visualLineAt(parentFencedCode.to, contentDomTop);
+
+      return {
+        from: firstBlock.from,
+        top: firstBlock.top,
+        height: lastBlock.bottom - firstBlock.top,
+      };
+    }
+
+    return block;
+  }
+
   private highlightFocusedLine = (update: ViewUpdate) => {
     const className = style['previewer-focused-line'];
     const ranges = update.state.selection.ranges;
-    const focusedLineEls = ranges
+    const focusedLines = ranges
       .map(({ head }) => update.state.doc.lineAt(head).number)
       .map((line) => this.getLineEl(line));
 
@@ -78,25 +117,27 @@ export class Previewer {
       el.classList.remove(className);
     }
 
-    for (const el of focusedLineEls) {
-      if (el) {
-        el.classList.add(className);
+    for (const line of focusedLines) {
+      if (line) {
+        line.el.classList.add(className);
       }
     }
   };
 
   private scrollToTopLineInEditor = () => {
-    const lineBlock = this.editor.view.visualLineAtHeight(this.editorTop);
-    const line = this.editor.view.state.doc.lineAt(lineBlock.from);
-    const lineEl = this.getLineEl(line.number);
+    const lineBlock = this.getLineBlockOfEditorTop();
+    const lineInEditor = this.editor.view.state.doc.lineAt(lineBlock.from);
+    const lineInPreview = this.getLineEl(lineInEditor.number);
 
-    if (!lineEl || Number(lineEl.dataset.sourceLine) < line.number) {
+    if (!lineInPreview || lineInPreview.line < lineInEditor.number) {
       return;
     }
 
     const pastHeight = this.editorTop - lineBlock.top;
     const progress = pastHeight / lineBlock.height;
-    const top = lineEl.offsetTop + Math.max(lineEl.clientHeight * progress, 0);
+    const top =
+      lineInPreview.el.offsetTop +
+      Math.max(lineInPreview.el.clientHeight * progress, 0);
 
     this.el.scrollTo({ top });
   };
@@ -104,5 +145,9 @@ export class Previewer {
   destroy() {
     this.editor.off(Events.StateChanged, this.highlightFocusedLine);
     this.editor.off(Events.DocChanged, this.render);
+    this.editor.view.scrollDOM.removeEventListener(
+      'scroll',
+      this.scrollToTopLineInEditor,
+    );
   }
 }

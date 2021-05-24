@@ -1,11 +1,12 @@
 import { EditorState, Extension } from '@codemirror/state';
+import { syntaxTree } from '@codemirror/language';
 import { defaultHighlightStyle } from '@codemirror/highlight';
 import { languages } from '@codemirror/language-data';
 import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
 import { history } from '@codemirror/history';
 import { EditorView } from '@codemirror/view';
 import { showPanel } from '@codemirror/panel';
-import { EditorOptions } from './types';
+import { EditorOptions, SyntaxTree } from './types';
 import { statusbar, toolbar } from './panel/bar';
 export const createState = (
   options: Required<EditorOptions>,
@@ -39,3 +40,12 @@ export const createState = (
     ],
   });
 };
+
+const syntaxTreeCache = new WeakMap<EditorState, SyntaxTree>();
+export function getSyntaxTreeOfState(state: EditorState) {
+  if (!syntaxTreeCache.has(state)) {
+    syntaxTreeCache.set(state, syntaxTree(state));
+  }
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  return syntaxTreeCache.get(state)!;
+}

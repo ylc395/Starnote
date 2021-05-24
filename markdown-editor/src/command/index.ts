@@ -1,4 +1,3 @@
-import { syntaxTree } from '@codemirror/language';
 import type { EditorView, Command } from '@codemirror/view';
 import {
   EditorSelection,
@@ -6,9 +5,8 @@ import {
   Transaction,
 } from '@codemirror/state';
 import * as MARKS from './marks';
-
-export type SyntaxTree = ReturnType<typeof syntaxTree>;
-type SyntaxNode = ReturnType<SyntaxTree['resolve']>;
+import type { SyntaxTree, SyntaxNode } from '../types';
+import { getSyntaxTreeOfState } from '../state';
 
 export function isMarkOf(node: SyntaxNode, mark: MARKS.Mark) {
   return (
@@ -164,7 +162,7 @@ function toggle(mark: MARKS.Mark): Command {
       : MARKS.BLOCK_MARKS.includes(mark)
       ? toggleBlockRange
       : toggleInlineRange;
-    const tree = syntaxTree(view.state);
+    const tree = getSyntaxTreeOfState(view.state);
     const changes = view.state.changeByRange((range) =>
       toggle(range, mark, tree, view),
     );
