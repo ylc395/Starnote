@@ -33,18 +33,24 @@ export class Previewer {
     const {
       view: { scrollDOM, dom: rootDOM, contentDOM },
     } = this.editor;
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const topPanel = rootDOM.querySelector('.cm-panels-top')!;
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const bottomPanel = rootDOM.querySelector('.cm-panels-bottom')!;
 
     this.el.className = style['previewer'];
-    this.el.style.top = `${topPanel.clientHeight}px`;
-    this.el.style.bottom = `${bottomPanel.clientHeight}px`;
 
     scrollDOM.after(this.el);
     scrollDOM.style.width = '50%';
     window.requestAnimationFrame(() => {
+      const {
+        top: rootTop,
+        bottom: rootBottom,
+      } = rootDOM.getBoundingClientRect();
+      const {
+        top: scrollTop,
+        bottom: scrollBottom,
+      } = scrollDOM.getBoundingClientRect();
+
+      this.el.style.top = `${scrollTop - rootTop}px`;
+      this.el.style.bottom = `${rootBottom - scrollBottom}px`;
+
       contentDOM.style.paddingBottom = `${scrollDOM.clientHeight}px`;
       this.el.style.paddingBottom = `${this.el.clientHeight}px`;
     });
