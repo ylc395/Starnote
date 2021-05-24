@@ -1,5 +1,4 @@
 import MarkdownIt from 'markdown-it';
-import EventEmitter from 'eventemitter3';
 import type { ViewUpdate } from '@codemirror/view';
 import { sourceMap } from './markdown-it-plugins';
 import { Events as EditorEvents, Events } from '../Editor';
@@ -11,14 +10,12 @@ interface PreviewerOption {
   editor: Editor;
 }
 
-export class Previewer extends EventEmitter {
+export class Previewer {
   private readonly renderer = new MarkdownIt({ breaks: true }).use(sourceMap);
   private readonly el = document.createElement('article');
   private readonly editor: Editor;
   private readonly editorTop: number;
   constructor({ text, editor }: PreviewerOption) {
-    super();
-
     this.editor = editor;
     this.editorTop = editor.view.scrollDOM.getBoundingClientRect().top;
     this.editor.on(EditorEvents.StateChanged, this.highlightFocusedLine);
@@ -28,7 +25,6 @@ export class Previewer extends EventEmitter {
   }
   render = (text: string) => {
     this.el.innerHTML = this.renderer.render(text);
-    this.emit('rendered');
   };
 
   private initDom() {
@@ -52,10 +48,22 @@ export class Previewer extends EventEmitter {
   private getLineEl(line: number) {
     for (let i = line; i >= 1; i--) {
       const el = this.el.querySelector(`[data-source-line="${i}"]`);
+
       if (el) {
+        if (
+          el.tagName === 'CODE' &&
+          el.parentElement &&
+          el.parentElement.tagName === 'PRE'
+        ) {
+          // Fenched code blocks are a special case since the `code-line` can only be marked on
+          // the `<code>` element and not the parent `<pre>` element.
+          return el.parentElement;
+        }
+
         return el as HTMLElement;
       }
     }
+
     return null;
   }
 
@@ -64,7 +72,7 @@ export class Previewer extends EventEmitter {
     const ranges = update.state.selection.ranges;
     const focusedLineEls = ranges
       .map(({ head }) => update.state.doc.lineAt(head).number)
-      .map(this.getLineEl.bind(this));
+      .map((line) => this.getLineEl(line));
 
     for (const el of this.el.querySelectorAll(`.${className}`)) {
       el.classList.remove(className);
@@ -82,11 +90,13 @@ export class Previewer extends EventEmitter {
     const line = this.editor.view.state.doc.lineAt(lineBlock.from);
     const lineEl = this.getLineEl(line.number);
 
-    if (!lineEl) {
+    if (!lineEl || Number(lineEl.dataset.sourceLine) < line.number) {
       return;
     }
 
-    const top = lineEl.offsetTop;
+    const pastHeight = this.editorTop - lineBlock.top;
+    const progress = pastHeight / lineBlock.height;
+    const top = lineEl.offsetTop + Math.max(lineEl.clientHeight * progress, 0);
 
     this.el.scrollTo({ top });
   };
