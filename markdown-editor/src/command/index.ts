@@ -21,16 +21,10 @@ export function isMarkOf(node: SyntaxNode, mark: MARKS.Mark) {
 
 function getBlockMark(tree: SyntaxTree, lineFrom: number) {
   for (const mark of MARKS.BLOCK_MARKS) {
-    const node = tree.resolve(lineFrom + mark.symbol.length);
+    const node = tree.resolve(lineFrom, 1);
 
-    if (node.type.is(mark.type)) {
+    if (isMarkOf(node, mark)) {
       return mark;
-    }
-
-    if (mark.markType && node.type.is(mark.markType)) {
-      if (node.parent && node.parent.type.is(mark.type)) {
-        return mark;
-      }
     }
   }
 

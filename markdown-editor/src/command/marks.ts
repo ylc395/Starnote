@@ -24,36 +24,43 @@ export const INLINE_CODE = {
 export const HEADING1 = {
   symbol: '# ',
   type: 'ATXHeading1',
+  markType: 'HeaderMark',
 };
 
 export const HEADING2 = {
   symbol: '## ',
   type: 'ATXHeading2',
+  markType: 'HeaderMark',
 };
 
 export const HEADING3 = {
   symbol: '### ',
   type: 'ATXHeading3',
+  markType: 'HeaderMark',
 };
 
 export const HEADING4 = {
   symbol: '#### ',
   type: 'ATXHeading4',
+  markType: 'HeaderMark',
 };
 
 export const HEADING5 = {
   symbol: '##### ',
   type: 'ATXHeading5',
+  markType: 'HeaderMark',
 };
 
 export const HEADING6 = {
   symbol: '###### ',
   type: 'ATXHeading6',
+  markType: 'HeaderMark',
 };
 
 export const BLOCKQUOTE = {
   symbol: '> ',
   type: 'Blockquote',
+  markType: 'QuoteMark',
 };
 
 export const BULLET_LIST = {
