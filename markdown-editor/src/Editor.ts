@@ -11,7 +11,7 @@ export enum Events {
 
 export class Editor extends EventEmitter {
   readonly view: EditorView;
-  private readonly previewer: Previewer;
+  private previewer: Previewer;
   private get options() {
     return { value: '', toolbar: [], statusbar: [], ...this.userOptions };
   }
@@ -49,7 +49,8 @@ export class Editor extends EventEmitter {
         EditorView.updateListener.of(this.updateListener),
       ]),
     );
-    this.previewer.render(text);
+    this.previewer.destroy();
+    this.previewer = new Previewer({ editor: this, text });
   }
 
   destroy() {

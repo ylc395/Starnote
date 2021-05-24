@@ -20,23 +20,23 @@ export class Previewer {
   constructor({ text, editor }: PreviewerOption) {
     this.editor = editor;
     this.editorTop = editor.view.scrollDOM.getBoundingClientRect().top;
-    this.editor.on(EditorEvents.StateChanged, this.highlightFocusedLine);
-    this.editor.on(EditorEvents.DocChanged, this.render);
-    this.initDom();
+
+    this.layout();
+    this.initListeners();
     this.render(text);
   }
   render = (text: string) => {
     this.el.innerHTML = this.renderer.render(text);
   };
 
-  private initDom() {
+  private layout() {
     const {
-      view: { scrollDOM, dom: containerEl },
+      view: { scrollDOM, dom: rootDOM, contentDOM },
     } = this.editor;
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const topPanel = containerEl.querySelector('.cm-panels-top')!;
+    const topPanel = rootDOM.querySelector('.cm-panels-top')!;
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const bottomPanel = containerEl.querySelector('.cm-panels-bottom')!;
+    const bottomPanel = rootDOM.querySelector('.cm-panels-bottom')!;
 
     this.el.className = style['previewer'];
     this.el.style.top = `${topPanel.clientHeight}px`;
@@ -44,7 +44,18 @@ export class Previewer {
 
     scrollDOM.after(this.el);
     scrollDOM.style.width = '50%';
-    scrollDOM.addEventListener('scroll', this.scrollToTopLineInEditor);
+    window.requestAnimationFrame(() => {
+      contentDOM.style.paddingBottom = `${scrollDOM.clientHeight}px`;
+    });
+  }
+
+  private initListeners() {
+    this.editor.on(EditorEvents.StateChanged, this.highlightFocusedLine);
+    this.editor.on(EditorEvents.DocChanged, this.render);
+    this.editor.view.scrollDOM.addEventListener(
+      'scroll',
+      this.scrollToTopLineInEditor,
+    );
   }
 
   private getLineEl(line: number) {
@@ -143,6 +154,7 @@ export class Previewer {
   };
 
   destroy() {
+    this.el.remove();
     this.editor.off(Events.StateChanged, this.highlightFocusedLine);
     this.editor.off(Events.DocChanged, this.render);
     this.editor.view.scrollDOM.removeEventListener(
