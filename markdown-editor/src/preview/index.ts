@@ -46,6 +46,7 @@ export class Previewer {
     scrollDOM.style.width = '50%';
     window.requestAnimationFrame(() => {
       contentDOM.style.paddingBottom = `${scrollDOM.clientHeight}px`;
+      this.el.style.paddingBottom = `${this.el.clientHeight}px`;
     });
   }
 
@@ -54,8 +55,9 @@ export class Previewer {
     this.editor.on(EditorEvents.DocChanged, this.render);
     this.editor.view.scrollDOM.addEventListener(
       'scroll',
-      this.scrollToTopLineInEditor,
+      this.scrollToTopLineOfEditor,
     );
+    this.el.addEventListener('scroll', this.scrollToTopLineOfPreviewer);
   }
 
   private getLineEl(line: number) {
@@ -82,9 +84,9 @@ export class Previewer {
 
   private getLineBlockOfEditorTop() {
     const view = this.editor.view;
-    const block = view.visualLineAtHeight(this.editorTop);
+    const { top, from, height } = view.visualLineAtHeight(this.editorTop);
     const syntaxTree = getSyntaxTreeOfState(view.state);
-    const node = syntaxTree.resolve(block.from, 1);
+    const node = syntaxTree.resolve(from, 1);
     const getParentFencedCode = (node: SyntaxNode): SyntaxNode | null => {
       if (!node.parent) {
         return null;
@@ -104,17 +106,19 @@ export class Previewer {
         parentFencedCode.from,
         contentDomTop,
       );
-
       const lastBlock = view.visualLineAt(parentFencedCode.to, contentDomTop);
+      const { number } = this.editor.view.state.doc.lineAt(firstBlock.from);
 
       return {
         from: firstBlock.from,
         top: firstBlock.top,
         height: lastBlock.bottom - firstBlock.top,
+        line: number,
       };
     }
 
-    return block;
+    const { number } = this.editor.view.state.doc.lineAt(from);
+    return { from, top, height, line: number };
   }
 
   private highlightFocusedLine = (update: ViewUpdate) => {
@@ -135,31 +139,84 @@ export class Previewer {
     }
   };
 
-  private scrollToTopLineInEditor = () => {
+  private scrollToTopLineOfEditor = () => {
     const lineBlock = this.getLineBlockOfEditorTop();
-    const lineInEditor = this.editor.view.state.doc.lineAt(lineBlock.from);
-    const lineInPreview = this.getLineEl(lineInEditor.number);
+    const lineInPreview = this.getLineEl(lineBlock.line);
 
-    if (!lineInPreview || lineInPreview.line < lineInEditor.number) {
+    if (!lineInPreview || lineInPreview.line < lineBlock.line) {
       return;
     }
 
+    const lineEl = lineInPreview.el;
     const pastHeight = this.editorTop - lineBlock.top;
     const progress = pastHeight / lineBlock.height;
-    const top =
-      lineInPreview.el.offsetTop +
-      Math.max(lineInPreview.el.clientHeight * progress, 0);
 
-    this.el.scrollTo({ top });
+    this.el.scrollTo({
+      top: lineEl.offsetTop + lineEl.clientHeight * progress,
+    });
+  };
+
+  private getFirstVisibleLineInPreviewer() {
+    const children = [...this.el.children] as HTMLElement[];
+    const find = (els: HTMLElement[]): HTMLElement | null => {
+      for (const el of els) {
+        const top = el.getBoundingClientRect().top;
+        const isInFirstLine = top - this.editorTop + el.clientHeight > 0;
+
+        if (!isInFirstLine) {
+          continue;
+        }
+
+        if ((el as HTMLElement).dataset.sourceLine) {
+          return el;
+        }
+
+        if (el.children.length > 0) {
+          const childLine = find([...el.children] as HTMLElement[]);
+
+          if (childLine) {
+            return childLine;
+          }
+        }
+      }
+
+      return null;
+    };
+
+    return find(children);
+  }
+
+  private scrollToTopLineOfPreviewer = () => {
+    const firstLineEl = this.getFirstVisibleLineInPreviewer();
+
+    if (!firstLineEl) {
+      return;
+    }
+
+    const line = Number(
+      firstLineEl.dataset.sourceLine ??
+        (firstLineEl.firstElementChild &&
+          (firstLineEl.firstElementChild as HTMLElement).dataset.sourceLine),
+    );
+
+    const lineInEditor = this.editor.view.state.doc.line(line);
+    const block = this.editor.view.visualLineAt(lineInEditor.from);
+    const { top, height } = firstLineEl.getBoundingClientRect();
+    const progress = (this.editorTop - top) / height;
+
+    this.editor.view.scrollDOM.scrollTo({
+      top: block.top + block.height * progress,
+    });
   };
 
   destroy() {
     this.el.remove();
+    this.el.removeEventListener('scroll', this.scrollToTopLineOfPreviewer);
     this.editor.off(Events.StateChanged, this.highlightFocusedLine);
     this.editor.off(Events.DocChanged, this.render);
     this.editor.view.scrollDOM.removeEventListener(
       'scroll',
-      this.scrollToTopLineInEditor,
+      this.scrollToTopLineOfEditor,
     );
   }
 }
