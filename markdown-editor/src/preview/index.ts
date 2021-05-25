@@ -18,6 +18,7 @@ export class Previewer {
   private readonly el = document.createElement('article');
   private readonly editor: Editor;
   private readonly editorTop: number;
+  private isScrolling = false;
   constructor({ text, editor }: PreviewerOption) {
     this.editor = editor;
     this.editorTop = editor.view.scrollDOM.getBoundingClientRect().top;
@@ -147,6 +148,11 @@ export class Previewer {
   };
 
   private scrollToTopLineOfEditor = throttle(() => {
+    if (this.isScrolling) {
+      this.isScrolling = false;
+      return;
+    }
+
     const lineBlock = this.getLineBlockOfEditorTop();
     const lineInPreview = this.getLineEl(lineBlock.line);
 
@@ -154,7 +160,6 @@ export class Previewer {
       return;
     }
 
-    this.el.removeEventListener('scroll', this.scrollToTopLineOfPreviewer);
     const lineEl = lineInPreview.el;
     const pastHeight = this.editorTop - lineBlock.top;
     const progress = pastHeight / lineBlock.height;
@@ -162,11 +167,8 @@ export class Previewer {
     this.el.scrollTo({
       top: lineEl.offsetTop + lineEl.clientHeight * progress,
     });
-
-    window.requestAnimationFrame(() => {
-      this.el.addEventListener('scroll', this.scrollToTopLineOfPreviewer);
-    });
-  }, 100);
+    this.isScrolling = true;
+  }, 80);
 
   private getFirstVisibleLineInPreviewer() {
     const children = [...this.el.children] as HTMLElement[];
@@ -199,16 +201,16 @@ export class Previewer {
   }
 
   private scrollToTopLineOfPreviewer = throttle(() => {
+    if (this.isScrolling) {
+      this.isScrolling = false;
+      return;
+    }
+
     const firstLineEl = this.getFirstVisibleLineInPreviewer();
 
     if (!firstLineEl || !firstLineEl.dataset.sourceLine) {
       return;
     }
-
-    this.editor.view.scrollDOM.removeEventListener(
-      'scroll',
-      this.scrollToTopLineOfEditor,
-    );
 
     const line = Number(firstLineEl.dataset.sourceLine);
     const lineInEditor = this.editor.view.state.doc.line(line);
@@ -219,13 +221,8 @@ export class Previewer {
     this.editor.view.scrollDOM.scrollTo({
       top: block.top + block.height * progress,
     });
-    window.requestAnimationFrame(() => {
-      this.editor.view.scrollDOM.addEventListener(
-        'scroll',
-        this.scrollToTopLineOfEditor,
-      );
-    });
-  }, 100);
+    this.isScrolling = true;
+  }, 80);
 
   destroy() {
     this.el.remove();

@@ -25,7 +25,6 @@ function updateIconStatus(mark: MARKS.Mark): BarItem['onUpdate'] {
   return function (update, itemEl) {
     const { from } = update.state.selection.main;
     const syntaxTree = getSyntaxTreeOfState(update.state);
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const node = syntaxTree.resolve(from);
     const CHECKED_CLASS_NAME = 'editor-toolbar-item-checked';
 
