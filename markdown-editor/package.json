@@ -14,11 +14,14 @@
     "@codemirror/state": "^0.18.3",
     "@codemirror/text": "^0.18.0",
     "@codemirror/view": "^0.18.3",
+    "@types/lodash.throttle": "^4.1.6",
     "@types/markdown-it": "^12.0.1",
     "eventemitter3": "^4.0.7",
+    "lodash.throttle": "^4.1.1",
     "markdown-it": "^12.0.6"
   },
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^19.0.0",
     "@rollup/plugin-node-resolve": "^13.0.0",
     "bootstrap-icons": "^1.5.0",
     "postcss": "^8.2.15",
