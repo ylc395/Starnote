@@ -15,9 +15,9 @@ import dashIcon from 'bootstrap-icons/icons/dash.svg';
 import subtractIcon from 'bootstrap-icons/icons/subtract.svg';
 import type { Command } from '@codemirror/view';
 
-import * as commands from '../../command';
-import * as MARKS from '../../command/marks';
-import { getSyntaxTreeOfState } from '../..//state';
+import * as commands from '../../markdown';
+import * as MARKS from '../../markdown/marks';
+import { getSyntaxTreeOfState } from '../../markdown/syntaxTree';
 import type { BarItem } from '@/panel/bar';
 import style from '../style.css';
 

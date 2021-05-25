@@ -5,8 +5,8 @@ import {
   Transaction,
 } from '@codemirror/state';
 import * as MARKS from './marks';
-import type { SyntaxTree, SyntaxNode } from '../types';
-import { getSyntaxTreeOfState } from '../state';
+import { getSyntaxTreeOfState } from './syntaxTree';
+import type { SyntaxTree, SyntaxNode } from './syntaxTree';
 
 export function isMarkOf(node: SyntaxNode, mark: MARKS.Mark) {
   return (

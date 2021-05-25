@@ -2,12 +2,12 @@ import MarkdownIt from 'markdown-it';
 import type { ViewUpdate } from '@codemirror/view';
 import throttle from 'lodash.throttle';
 import debounce from 'lodash.debounce';
-import { sourceMap } from './markdown-it-plugins';
+import { sourceMap } from './markdownItPlugins';
 import { Events as EditorEvents } from '../editor';
 import type { Editor } from '../editor';
 import style from '../style.css';
-import { getSyntaxTreeOfState } from '../state';
-import type { SyntaxNode } from '../types';
+import { getSyntaxTreeOfState } from '../markdown/syntaxTree';
+import type { SyntaxNode } from '../markdown/syntaxTree';
 
 interface PreviewerOption {
   text: string;
@@ -30,6 +30,7 @@ export class Previewer {
   }
   render: (text: string) => void = debounce((text: string) => {
     this.el.innerHTML = this.renderer.render(text);
+    this.highlightFocusedLine();
   }, 200);
 
   private layout(destroy = false) {
@@ -134,11 +135,12 @@ export class Previewer {
     return { from, top, height, line: number };
   }
 
-  private highlightFocusedLine = (update: ViewUpdate) => {
+  private highlightFocusedLine = (update?: ViewUpdate) => {
+    const state = update ? update.state : this.editor.view.state;
     const className = style['previewer-focused-line'];
-    const ranges = update.state.selection.ranges;
+    const ranges = state.selection.ranges;
     const focusedLines = ranges
-      .map(({ head }) => update.state.doc.lineAt(head).number)
+      .map(({ head }) => state.doc.lineAt(head).number)
       .map((line) => this.getLineEl(line));
 
     for (const el of this.el.querySelectorAll(`.${className}`)) {
