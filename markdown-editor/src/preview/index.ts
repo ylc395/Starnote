@@ -1,8 +1,9 @@
 import MarkdownIt from 'markdown-it';
 import type { ViewUpdate } from '@codemirror/view';
 import throttle from 'lodash.throttle';
+import debounce from 'lodash.debounce';
 import { sourceMap } from './markdown-it-plugins';
-import { Events as EditorEvents, Events } from '../editor';
+import { Events as EditorEvents } from '../editor';
 import type { Editor } from '../editor';
 import style from '../style.css';
 import { getSyntaxTreeOfState } from '../state';
@@ -27,17 +28,22 @@ export class Previewer {
     this.initListeners();
     this.render(text);
   }
-  render = (text: string) => {
+  render: (text: string) => void = debounce((text: string) => {
     this.el.innerHTML = this.renderer.render(text);
-  };
+  }, 200);
 
-  private layout() {
+  private layout(destroy = false) {
     const {
       view: { scrollDOM, dom: rootDOM, contentDOM },
     } = this.editor;
 
-    this.el.className = style['previewer'];
+    if (destroy) {
+      this.el.remove();
+      scrollDOM.style.width = 'auto';
+      return;
+    }
 
+    this.el.className = style['previewer'];
     scrollDOM.after(this.el);
     scrollDOM.style.width = '50%';
     window.requestAnimationFrame(() => {
@@ -52,9 +58,8 @@ export class Previewer {
 
       this.el.style.top = `${scrollTop - rootTop}px`;
       this.el.style.bottom = `${rootBottom - scrollBottom}px`;
-
-      contentDOM.style.paddingBottom = `${scrollDOM.clientHeight}px`;
       this.el.style.paddingBottom = `${this.el.clientHeight}px`;
+      contentDOM.style.paddingBottom = `${scrollDOM.clientHeight}px`;
     });
   }
 
@@ -225,13 +230,13 @@ export class Previewer {
   }, 80);
 
   destroy() {
-    this.el.remove();
     this.el.removeEventListener('scroll', this.scrollToTopLineOfPreviewer);
-    this.editor.off(Events.StateChanged, this.highlightFocusedLine);
-    this.editor.off(Events.DocChanged, this.render);
+    this.editor.off(EditorEvents.StateChanged, this.highlightFocusedLine);
+    this.editor.off(EditorEvents.DocChanged, this.render);
     this.editor.view.scrollDOM.removeEventListener(
       'scroll',
       this.scrollToTopLineOfEditor,
     );
+    this.layout(true);
   }
 }

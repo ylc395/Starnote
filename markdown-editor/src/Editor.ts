@@ -11,7 +11,7 @@ export enum Events {
 
 export class Editor extends EventEmitter {
   readonly view: EditorView;
-  private previewer: Previewer;
+  private previewer: Previewer | null = null;
   private get options() {
     return { value: '', toolbar: [], statusbar: [], ...this.userOptions };
   }
@@ -36,11 +36,7 @@ export class Editor extends EventEmitter {
 
     this.view.dom.style.height = '100%';
     this.view.dom.style.outline = 'none';
-
-    this.previewer = new Previewer({
-      editor: this,
-      text: this.options.value,
-    });
+    this.loadPreviewer(this.options.value);
   }
 
   setContent(text: string) {
@@ -49,16 +45,20 @@ export class Editor extends EventEmitter {
         EditorView.updateListener.of(this.updateListener),
       ]),
     );
-    this.previewer.destroy();
-    this.previewer = new Previewer({ editor: this, text });
+    this.loadPreviewer(text);
   }
 
   destroy() {
-    this.previewer.destroy();
+    this.previewer?.destroy();
     this.view.destroy();
   }
 
   focus() {
     this.view.focus();
+  }
+
+  loadPreviewer(text: string) {
+    this.previewer?.destroy();
+    this.previewer = new Previewer({ editor: this, text });
   }
 }
