@@ -201,7 +201,7 @@ export class Previewer {
   private scrollToTopLineOfPreviewer = throttle(() => {
     const firstLineEl = this.getFirstVisibleLineInPreviewer();
 
-    if (!firstLineEl) {
+    if (!firstLineEl || !firstLineEl.dataset.sourceLine) {
       return;
     }
 
@@ -209,12 +209,8 @@ export class Previewer {
       'scroll',
       this.scrollToTopLineOfEditor,
     );
-    const line = Number(
-      firstLineEl.dataset.sourceLine ??
-        (firstLineEl.firstElementChild &&
-          (firstLineEl.firstElementChild as HTMLElement).dataset.sourceLine),
-    );
 
+    const line = Number(firstLineEl.dataset.sourceLine);
     const lineInEditor = this.editor.view.state.doc.line(line);
     const block = this.editor.view.visualLineAt(lineInEditor.from);
     const { top, height } = firstLineEl.getBoundingClientRect();
