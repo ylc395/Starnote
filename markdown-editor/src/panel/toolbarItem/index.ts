@@ -1,2 +1,2 @@
 export * from './grammarHelper';
-export * from './previewer';
+export * from './layout';

@@ -21,6 +21,7 @@ import {
   horizontalLineButton,
   taskButton,
   togglePreviewButton,
+  toggleFullscreen,
 } from '@ylc395/markdown-editor';
 import '@ylc395/markdown-editor/dist/index.css';
 
@@ -63,6 +64,7 @@ export function useEditor(editor: Editor) {
         horizontalLineButton,
         taskButton,
         togglePreviewButton,
+        toggleFullscreen,
       ],
     });
 

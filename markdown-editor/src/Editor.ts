@@ -42,6 +42,7 @@ export class Editor extends EventEmitter {
     this.setState(this.options.value);
     this.view.dom.style.height = '100%';
     this.view.dom.style.outline = 'none';
+    this.view.dom.style.backgroundColor = '#fff';
     this.previewer = new Previewer(this);
   }
 
@@ -70,6 +71,24 @@ export class Editor extends EventEmitter {
     }
 
     this.previewer.toggleLayout();
+  }
+
+  toggleFullscreen() {
+    const dom = this.view.dom;
+
+    if (dom.style.getPropertyValue('position') === 'fixed') {
+      dom.style.position = '';
+      dom.style.top = '';
+      dom.style.bottom = '';
+      dom.style.right = '';
+      dom.style.left = '';
+    } else {
+      dom.style.setProperty('position', 'fixed', 'important');
+      dom.style.top = '0px';
+      dom.style.bottom = '0px';
+      dom.style.right = '0px';
+      dom.style.left = '0px';
+    }
   }
 
   private setState(content: string) {

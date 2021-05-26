@@ -155,7 +155,7 @@ export class Previewer {
     }
   };
 
-  private scrollToTopLineOfEditor = throttle((forced = false) => {
+  private scrollToTopLineOfEditor = throttle(() => {
     if (this.isScrolling) {
       this.isScrolling = false;
       return;
@@ -164,7 +164,7 @@ export class Previewer {
     const lineBlock = this.getLineBlockOfEditorTop();
     const lineInPreview = this.getLineEl(lineBlock.line);
 
-    if (!lineInPreview || (!forced && lineInPreview.line < lineBlock.line)) {
+    if (!lineInPreview || lineInPreview.line < lineBlock.line) {
       return;
     }
 
@@ -176,7 +176,7 @@ export class Previewer {
       top: lineEl.offsetTop + lineEl.clientHeight * progress,
     });
     this.isScrolling = true;
-  }, 80);
+  }, 50);
 
   private getFirstVisibleLineInPreviewer() {
     const children = [...this.el.children] as HTMLElement[];
@@ -230,7 +230,7 @@ export class Previewer {
       top: block.top + block.height * progress,
     });
     this.isScrolling = true;
-  }, 80);
+  }, 50);
 
   destroy() {
     this.el.removeEventListener('scroll', this.scrollToTopLineOfPreviewer);
