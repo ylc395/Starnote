@@ -15,23 +15,38 @@ import dashIcon from 'bootstrap-icons/icons/dash.svg';
 import subtractIcon from 'bootstrap-icons/icons/subtract.svg';
 import type { Command } from '@codemirror/view';
 
-import * as commands from '../../markdown';
+import * as commands from '../../markdown/commands';
 import * as MARKS from '../../markdown/marks';
-import { getSyntaxTreeOfState } from '../../markdown/syntaxTree';
-import type { BarItem } from '@/panel/bar';
+import {
+  getSyntaxTreeOfState,
+  isMarkOf,
+  getBlockMark,
+} from '../../markdown/syntaxTree';
 import style from '../style.css';
+import type { BarItem } from '../bar';
 
 function updateIconStatus(mark: MARKS.Mark): BarItem['onUpdate'] {
   return function (update, itemEl) {
     const { from } = update.state.selection.main;
     const syntaxTree = getSyntaxTreeOfState(update.state);
     const node = syntaxTree.resolve(from);
-    const CHECKED_CLASS_NAME = 'editor-toolbar-item-checked';
+    const className = style['toolbar-item-checked'];
 
-    if (commands.isMarkOf(node, mark)) {
-      itemEl.classList.add(CHECKED_CLASS_NAME);
+    if (MARKS.BLOCK_MARKS.includes(mark)) {
+      const lineStart = update.state.doc.lineAt(from).from;
+      const blockMark = getBlockMark(syntaxTree, lineStart);
+
+      if (blockMark === mark) {
+        itemEl.classList.add(className);
+      } else {
+        itemEl.classList.remove(className);
+      }
     } else {
-      itemEl.classList.remove(CHECKED_CLASS_NAME);
+      if (isMarkOf(node, mark)) {
+        itemEl.classList.add(className);
+      } else {
+        itemEl.classList.remove(className);
+      }
     }
   };
 }
@@ -48,7 +63,6 @@ function button({
   icon: string;
 }): BarItem {
   return {
-    className: style['toolbar-item-button'],
     htmlTag: 'button',
     htmlContent: icon,
     title: title,

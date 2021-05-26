@@ -66,13 +66,13 @@ export const BLOCKQUOTE = {
 export const BULLET_LIST = {
   symbol: '+ ',
   type: 'BulletList',
-  markType: 'ListItem',
+  markType: 'ListMark',
 };
 
 export const ORDERED_LIST = {
   symbol: '1. ',
   type: 'OrderedList',
-  markType: 'ListItem',
+  markType: 'Number',
 };
 
 export const LINK = {

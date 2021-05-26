@@ -21,13 +21,17 @@ interface BarOption {
 function bar(items: BarItem[], { top, itemClassName, className }: BarOption) {
   return function (view: EditorView): Panel {
     const barDom = document.createElement('div');
-    barDom.classList.add(className);
+    barDom.className = className;
 
     const itemsDom = items.map((item) => {
       const dom = document.createElement(item.htmlTag || 'div');
 
       if (itemClassName) {
-        dom.classList.add(itemClassName);
+        dom.className = itemClassName;
+      }
+
+      if (item.htmlTag?.toLowerCase() === 'button') {
+        dom.classList.add(style['toolbar-item-button']);
       }
 
       if (item.title) {
@@ -68,17 +72,22 @@ function bar(items: BarItem[], { top, itemClassName, className }: BarOption) {
   };
 }
 
-export const statusbar = (items: BarItem[]) => {
+interface Bar {
+  items: BarItem[];
+  classNamePrefix: string;
+}
+
+export const statusbar = ({ items, classNamePrefix }: Bar) => {
   return bar(items, {
-    className: style['statusbar'],
-    itemClassName: style['status-item'],
+    className: `${style['statusbar']} ${classNamePrefix}editor-statusbar`,
+    itemClassName: `${classNamePrefix}editor-statusbar-item`,
   });
 };
 
-export const toolbar = (items: BarItem[]) => {
+export const toolbar = ({ items, classNamePrefix }: Bar) => {
   return bar(items, {
-    className: style['toolbar'],
-    itemClassName: style['toolbar-item'],
+    className: `${style['toolbar']} ${classNamePrefix}editor-toolbar`,
+    itemClassName: `${classNamePrefix}editor-toolbar-item`,
     top: true,
   });
 };

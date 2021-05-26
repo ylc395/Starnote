@@ -30,7 +30,6 @@ function countDoc(doc: Text) {
 }
 
 export const wordCounter: BarItem = {
-  className: 'editor-statusbar-word-counter',
   onMounted(view, itemEl) {
     itemEl.textContent = countDoc(view.state.doc);
   },

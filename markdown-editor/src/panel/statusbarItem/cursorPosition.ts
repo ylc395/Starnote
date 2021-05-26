@@ -21,7 +21,6 @@ function getPosition(state: EditorState) {
 }
 
 export const cursorPosition: BarItem = {
-  className: 'editor-statusbar-cursor-position',
   onMounted(view, itemEl) {
     itemEl.textContent = getPosition(view.state);
   },

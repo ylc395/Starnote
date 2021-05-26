@@ -7,6 +7,6 @@
   box-sizing: border-box;
 }
 
-.previewer-focused-line {
-  background-color: red;
+.focused-line {
+  border-left: 2px solid blue;
 }

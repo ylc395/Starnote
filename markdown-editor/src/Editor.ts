@@ -16,6 +16,7 @@ export enum Events {
 }
 export interface EditorOptions {
   el: HTMLElement;
+  classNamePrefix?: string;
   value?: string;
   toolbar?: BarItem[];
   statusbar?: BarItem[];
@@ -24,8 +25,14 @@ export interface EditorOptions {
 export class Editor extends EventEmitter {
   readonly view: EditorView;
   private previewer: Previewer | null = null;
-  private get options() {
-    return { value: '', toolbar: [], statusbar: [], ...this.userOptions };
+  get options() {
+    return {
+      value: '',
+      toolbar: [] as BarItem[],
+      statusbar: [] as BarItem[],
+      classNamePrefix: '',
+      ...this.userOptions,
+    };
   }
 
   constructor(private readonly userOptions: EditorOptions) {
@@ -59,14 +66,24 @@ export class Editor extends EventEmitter {
 
   private setState(content: string) {
     const panels = [];
+    const {
+      statusbar: statusbarItems,
+      toolbar: toolbarItems,
+      classNamePrefix,
+    } = this.options;
 
-    if (this.options.statusbar.length > 0) {
-      panels.push(showPanel.of(statusbar(this.options.statusbar)));
+    if (statusbarItems.length > 0) {
+      panels.push(
+        showPanel.of(statusbar({ items: statusbarItems, classNamePrefix })),
+      );
     }
 
-    if (this.options.toolbar.length > 0) {
-      panels.push(showPanel.of(toolbar(this.options.toolbar)));
+    if (toolbarItems.length > 0) {
+      panels.push(
+        showPanel.of(toolbar({ items: toolbarItems, classNamePrefix })),
+      );
     }
+
     this.view.setState(
       EditorState.create({
         doc: content,

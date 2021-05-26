@@ -1,15 +1,11 @@
 .toolbar,
 .statusbar {
   display: flex;
-}
-
-.toolbar {
   flex-wrap: wrap;
 }
 
 .toolbar-item-button {
-  width: 30px;
-  height: 30px;
+  min-height: 30px;
   border-radius: 3px;
   border: 1px solid transparent;
   box-sizing: border-box;
@@ -17,6 +13,6 @@
   align-items: center;
 }
 
-.status-item {
-  margin-right: 10px;
+.toolbar-item-checked {
+  border-color: #95a5a6;
 }

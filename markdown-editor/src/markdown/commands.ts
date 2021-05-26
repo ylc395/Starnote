@@ -5,31 +5,8 @@ import {
   Transaction,
 } from '@codemirror/state';
 import * as MARKS from './marks';
-import { getSyntaxTreeOfState } from './syntaxTree';
-import type { SyntaxTree, SyntaxNode } from './syntaxTree';
-
-export function isMarkOf(node: SyntaxNode, mark: MARKS.Mark) {
-  return (
-    node.type.is(mark.type) ||
-    (mark.markType &&
-      node.type.is(mark.markType) &&
-      node.parent &&
-      node.parent.type.is(mark.type)) ||
-    node.type.is(`${mark.type}Mark`)
-  );
-}
-
-function getBlockMark(tree: SyntaxTree, lineFrom: number) {
-  for (const mark of MARKS.BLOCK_MARKS) {
-    const node = tree.resolve(lineFrom, 1);
-
-    if (isMarkOf(node, mark)) {
-      return mark;
-    }
-  }
-
-  return null;
-}
+import { getSyntaxTreeOfState, isMarkOf, getBlockMark } from './syntaxTree';
+import type { SyntaxTree } from './syntaxTree';
 
 function toggleInlineRange(
   range: SelectionRange,

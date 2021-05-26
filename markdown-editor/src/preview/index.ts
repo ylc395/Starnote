@@ -5,7 +5,7 @@ import debounce from 'lodash.debounce';
 import { sourceMap } from './markdownItPlugins';
 import { Events as EditorEvents } from '../editor';
 import type { Editor } from '../editor';
-import style from '../style.css';
+import style from './style.css';
 import { getSyntaxTreeOfState } from '../markdown/syntaxTree';
 import type { SyntaxNode } from '../markdown/syntaxTree';
 
@@ -44,7 +44,7 @@ export class Previewer {
       return;
     }
 
-    this.el.className = style['previewer'];
+    this.el.className = `${style['previewer']} ${this.editor.options.classNamePrefix}editor-previewer`;
     scrollDOM.after(this.el);
     scrollDOM.style.width = '50%';
     window.requestAnimationFrame(() => {
@@ -137,19 +137,22 @@ export class Previewer {
 
   private highlightFocusedLine = (update?: ViewUpdate) => {
     const state = update ? update.state : this.editor.view.state;
-    const className = style['previewer-focused-line'];
+    const classNames = [
+      style['focused-line'],
+      `${this.editor.options.classNamePrefix}editor-previewer-focused-line`,
+    ];
     const ranges = state.selection.ranges;
     const focusedLines = ranges
       .map(({ head }) => state.doc.lineAt(head).number)
       .map((line) => this.getLineEl(line));
 
-    for (const el of this.el.querySelectorAll(`.${className}`)) {
-      el.classList.remove(className);
+    for (const el of this.el.querySelectorAll(`.${style['focused-line']}`)) {
+      (el as HTMLElement).classList.remove(...classNames);
     }
 
     for (const line of focusedLines) {
       if (line) {
-        line.el.classList.add(className);
+        line.el.classList.add(...classNames);
       }
     }
   };
