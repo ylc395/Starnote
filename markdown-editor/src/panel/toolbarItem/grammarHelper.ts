@@ -17,36 +17,28 @@ import type { Command } from '@codemirror/view';
 
 import * as commands from '../../markdown/commands';
 import * as MARKS from '../../markdown/marks';
-import {
-  getSyntaxTreeOfState,
-  isMarkOf,
-  getBlockMark,
-} from '../../markdown/syntaxTree';
+import { getNodeAt, isMarkOf, getBlockMark } from '../../markdown/syntaxTree';
 import style from '../style.css';
 import type { BarItem } from '../bar';
 
 function updateIconStatus(mark: MARKS.Mark): BarItem['onUpdate'] {
   return function (update, itemEl) {
     const { from } = update.state.selection.main;
-    const syntaxTree = getSyntaxTreeOfState(update.state);
-    const node = syntaxTree.resolve(from);
+    const node = getNodeAt(update.state, from);
     const className = style['toolbar-item-checked'];
 
-    if (MARKS.BLOCK_MARKS.includes(mark)) {
-      const lineStart = update.state.doc.lineAt(from).from;
-      const blockMark = getBlockMark(syntaxTree, lineStart);
+    const isMark = (() => {
+      if (mark.isBlock) {
+        return getBlockMark(update.state, from) === mark;
+      }
 
-      if (blockMark === mark) {
-        itemEl.classList.add(className);
-      } else {
-        itemEl.classList.remove(className);
-      }
+      return isMarkOf(node, mark);
+    })();
+
+    if (isMark) {
+      itemEl.classList.add(className);
     } else {
-      if (isMarkOf(node, mark)) {
-        itemEl.classList.add(className);
-      } else {
-        itemEl.classList.remove(className);
-      }
+      itemEl.classList.remove(className);
     }
   };
 }
@@ -67,7 +59,7 @@ function button({
     htmlContent: icon,
     title: title,
     onClick: action,
-    onUpdate: updateIconStatus(mark),
+    onUpdate: mark.isToggleable ? updateIconStatus(mark) : undefined,
   };
 }
 

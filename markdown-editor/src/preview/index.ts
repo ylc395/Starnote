@@ -6,7 +6,7 @@ import { sourceMap } from './markdownItPlugins';
 import { Events as EditorEvents } from '../editor';
 import type { Editor } from '../editor';
 import style from './style.css';
-import { getSyntaxTreeOfState } from '../markdown/syntaxTree';
+import { getNodeAt } from '../markdown/syntaxTree';
 import type { SyntaxNode } from '../markdown/syntaxTree';
 
 interface PreviewerOption {
@@ -99,8 +99,7 @@ export class Previewer {
   private getLineBlockOfEditorTop() {
     const view = this.editor.view;
     const { top, from, height } = view.visualLineAtHeight(this.editorTop);
-    const syntaxTree = getSyntaxTreeOfState(view.state);
-    const node = syntaxTree.resolve(from, 1);
+    const node = getNodeAt(view.state, from, 1);
     const getParentFencedCode = (node: SyntaxNode): SyntaxNode | null => {
       if (!node.parent) {
         return null;

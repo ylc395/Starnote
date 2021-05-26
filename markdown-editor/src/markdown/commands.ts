@@ -5,16 +5,15 @@ import {
   Transaction,
 } from '@codemirror/state';
 import * as MARKS from './marks';
-import { getSyntaxTreeOfState, isMarkOf, getBlockMark } from './syntaxTree';
-import type { SyntaxTree } from './syntaxTree';
+import { getNodeAt, isMarkOf, getBlockMark } from './syntaxTree';
 
 function toggleInlineRange(
   range: SelectionRange,
   mark: MARKS.Mark,
-  tree: SyntaxTree,
+  view: EditorView,
 ) {
   const { from, to } = range;
-  const node = tree.resolve(from);
+  const node = getNodeAt(view.state, from);
 
   if (isMarkOf(node, mark)) {
     const { firstChild, lastChild } = node.type.is(mark.type)
@@ -59,7 +58,6 @@ function toggleInlineRange(
 function toggleBlockRange(
   range: SelectionRange,
   { symbol, type }: MARKS.Mark,
-  tree: SyntaxTree,
   view: EditorView,
 ) {
   const firstLine = view.state.doc.lineAt(range.from);
@@ -69,7 +67,7 @@ function toggleBlockRange(
 
   for (let i = firstLine.number; i <= lastLine.number; i++) {
     const line = view.state.doc.line(i);
-    const blockMark = getBlockMark(tree, line.from);
+    const blockMark = getBlockMark(view.state, line.from);
 
     if (blockMark) {
       changes.push({
@@ -112,7 +110,6 @@ function toggleBlockRange(
 function insert(
   range: SelectionRange,
   { symbol, newLine }: MARKS.Mark,
-  tree: SyntaxTree,
   view: EditorView,
 ) {
   const line = view.state.doc.lineAt(range.from);
@@ -128,14 +125,13 @@ function insert(
 
 function toggle(mark: MARKS.Mark): Command {
   return function (view: EditorView) {
-    const toggle = MARKS.TO_INSERT_MARKS.includes(mark)
-      ? insert
-      : MARKS.BLOCK_MARKS.includes(mark)
-      ? toggleBlockRange
-      : toggleInlineRange;
-    const tree = getSyntaxTreeOfState(view.state);
+    const toggle = mark.isToggleable
+      ? mark.isBlock
+        ? toggleBlockRange
+        : toggleInlineRange
+      : insert;
     const changes = view.state.changeByRange((range) =>
-      toggle(range, mark, tree, view),
+      toggle(range, mark, view),
     );
 
     const update = view.state.update(changes, {
