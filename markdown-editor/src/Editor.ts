@@ -42,12 +42,17 @@ export class Editor extends EventEmitter {
     this.setState(this.options.value);
     this.view.dom.style.height = '100%';
     this.view.dom.style.outline = 'none';
-    this.loadPreviewer(this.options.value);
+    this.previewer = new Previewer(this);
   }
 
   setContent(text: string) {
     this.setState(text);
-    this.loadPreviewer(text);
+    this.previewer?.destroy();
+    this.previewer = new Previewer(this);
+  }
+
+  getContent() {
+    return this.view.state.doc.toJSON().join('\n');
   }
 
   destroy() {
@@ -59,29 +64,24 @@ export class Editor extends EventEmitter {
     this.view.focus();
   }
 
-  loadPreviewer(text: string) {
-    this.previewer?.destroy();
-    this.previewer = new Previewer({ editor: this, text });
+  toggleLayout() {
+    if (!this.previewer) {
+      throw new Error('no previewer when toggle layout');
+    }
+
+    this.previewer.toggleLayout();
   }
 
   private setState(content: string) {
     const panels = [];
-    const {
-      statusbar: statusbarItems,
-      toolbar: toolbarItems,
-      classNamePrefix,
-    } = this.options;
+    const { statusbar: statusbarItems, toolbar: toolbarItems } = this.options;
 
     if (statusbarItems.length > 0) {
-      panels.push(
-        showPanel.of(statusbar({ items: statusbarItems, classNamePrefix })),
-      );
+      panels.push(showPanel.of(statusbar(this)));
     }
 
     if (toolbarItems.length > 0) {
-      panels.push(
-        showPanel.of(toolbar({ items: toolbarItems, classNamePrefix })),
-      );
+      panels.push(showPanel.of(toolbar(this)));
     }
 
     this.view.setState(

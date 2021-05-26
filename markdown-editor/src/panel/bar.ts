@@ -1,15 +1,16 @@
 import type { Panel } from '@codemirror/panel';
 import type { EditorView, ViewUpdate } from '@codemirror/view';
 import style from './style.css';
+import type { Editor } from '../editor';
 
 export interface BarItem {
   className?: string;
   title?: string;
   htmlContent?: string;
   htmlTag?: string;
-  onMounted?: (view: EditorView, itemEl: HTMLElement) => void;
-  onUpdate?: (update: ViewUpdate, itemEl: HTMLElement) => void;
-  onClick?: (view: EditorView, itemEl: HTMLElement) => void;
+  onMounted?: (view: EditorView, itemEl: HTMLElement, editor: Editor) => void;
+  onUpdate?: (update: ViewUpdate, itemEl: HTMLElement, editor: Editor) => void;
+  onClick?: (view: EditorView, itemEl: HTMLElement, editor: Editor) => void;
 }
 
 interface BarOption {
@@ -18,19 +19,23 @@ interface BarOption {
   className: string;
 }
 
-function bar(items: BarItem[], { top, itemClassName, className }: BarOption) {
+function bar(
+  items: BarItem[],
+  { top, itemClassName, className }: BarOption,
+  editor: Editor,
+) {
   return function (view: EditorView): Panel {
     const barDom = document.createElement('div');
     barDom.className = className;
 
     const itemsDom = items.map((item) => {
-      const dom = document.createElement(item.htmlTag || 'div');
+      const dom = document.createElement(item.htmlTag || 'button');
 
       if (itemClassName) {
         dom.className = itemClassName;
       }
 
-      if (item.htmlTag?.toLowerCase() === 'button') {
+      if (dom.tagName.toLowerCase() === 'button') {
         dom.classList.add(style['toolbar-item-button']);
       }
 
@@ -47,7 +52,10 @@ function bar(items: BarItem[], { top, itemClassName, className }: BarOption) {
       }
 
       if (item.onClick) {
-        dom.addEventListener('click', item.onClick.bind(null, view, dom));
+        dom.addEventListener(
+          'click',
+          item.onClick.bind(null, view, dom, editor),
+        );
       }
 
       return dom;
@@ -60,12 +68,12 @@ function bar(items: BarItem[], { top, itemClassName, className }: BarOption) {
       top,
       mount() {
         items.forEach((item, index) => {
-          item.onMounted?.(view, itemsDom[index]);
+          item.onMounted?.(view, itemsDom[index], editor);
         });
       },
       update(update) {
         items.forEach((item, index) =>
-          item.onUpdate?.(update, itemsDom[index]),
+          item.onUpdate?.(update, itemsDom[index], editor),
         );
       },
     };
@@ -77,17 +85,29 @@ interface Bar {
   classNamePrefix: string;
 }
 
-export const statusbar = ({ items, classNamePrefix }: Bar) => {
-  return bar(items, {
-    className: `${style['statusbar']} ${classNamePrefix}editor-statusbar`,
-    itemClassName: `${classNamePrefix}editor-statusbar-item`,
-  });
+export const statusbar = (editor: Editor) => {
+  const { statusbar: items, classNamePrefix } = editor.options;
+
+  return bar(
+    items,
+    {
+      className: `${style['statusbar']} ${classNamePrefix}editor-statusbar`,
+      itemClassName: `${classNamePrefix}editor-statusbar-item`,
+    },
+    editor,
+  );
 };
 
-export const toolbar = ({ items, classNamePrefix }: Bar) => {
-  return bar(items, {
-    className: `${style['toolbar']} ${classNamePrefix}editor-toolbar`,
-    itemClassName: `${classNamePrefix}editor-toolbar-item`,
-    top: true,
-  });
+export const toolbar = (editor: Editor) => {
+  const { toolbar: items, classNamePrefix } = editor.options;
+
+  return bar(
+    items,
+    {
+      className: `${style['toolbar']} ${classNamePrefix}editor-toolbar`,
+      itemClassName: `${classNamePrefix}editor-toolbar-item`,
+      top: true,
+    },
+    editor,
+  );
 };

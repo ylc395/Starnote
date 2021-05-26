@@ -55,9 +55,8 @@ function button({
   icon: string;
 }): BarItem {
   return {
-    htmlTag: 'button',
     htmlContent: icon,
-    title: title,
+    title,
     onClick: action,
     onUpdate: mark.isToggleable ? updateIconStatus(mark) : undefined,
   };

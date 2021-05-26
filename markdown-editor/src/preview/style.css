@@ -5,6 +5,16 @@
   overflow: auto;
   border-left: 1px solid #ccc;
   box-sizing: border-box;
+  background-color: #fff;
+}
+
+.previewer-full {
+  width: auto;
+  left: 0;
+}
+
+.previewer-invisible {
+  display: none;
 }
 
 .focused-line {

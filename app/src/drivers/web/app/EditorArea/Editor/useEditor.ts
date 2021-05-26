@@ -20,6 +20,7 @@ import {
   imageButton,
   horizontalLineButton,
   taskButton,
+  togglePreviewButton,
 } from '@ylc395/markdown-editor';
 import '@ylc395/markdown-editor/dist/index.css';
 
@@ -61,6 +62,7 @@ export function useEditor(editor: Editor) {
         imageButton,
         horizontalLineButton,
         taskButton,
+        togglePreviewButton,
       ],
     });
 

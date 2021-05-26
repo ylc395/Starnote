@@ -9,29 +9,28 @@ import style from './style.css';
 import { getNodeAt } from '../markdown/syntaxTree';
 import type { SyntaxNode } from '../markdown/syntaxTree';
 
-interface PreviewerOption {
-  text: string;
-  editor: Editor;
-}
-
 export class Previewer {
   private readonly renderer = new MarkdownIt({ breaks: true }).use(sourceMap);
   private readonly el = document.createElement('article');
   private readonly editor: Editor;
   private readonly editorTop: number;
   private isScrolling = false;
-  constructor({ text, editor }: PreviewerOption) {
+  constructor(editor: Editor) {
     this.editor = editor;
     this.editorTop = editor.view.scrollDOM.getBoundingClientRect().top;
 
+    this.render(editor.getContent());
     this.layout();
     this.initListeners();
-    this.render(text);
   }
-  render: (text: string) => void = debounce((text: string) => {
-    this.el.innerHTML = this.renderer.render(text);
-    this.highlightFocusedLine();
-  }, 200);
+  render: (text: string) => void = debounce(
+    (text: string) => {
+      this.el.innerHTML = this.renderer.render(text);
+      this.highlightFocusedLine();
+    },
+    200,
+    { leading: true },
+  );
 
   private layout(destroy = false) {
     const {
@@ -156,7 +155,7 @@ export class Previewer {
     }
   };
 
-  private scrollToTopLineOfEditor = throttle(() => {
+  private scrollToTopLineOfEditor = throttle((forced = false) => {
     if (this.isScrolling) {
       this.isScrolling = false;
       return;
@@ -165,7 +164,7 @@ export class Previewer {
     const lineBlock = this.getLineBlockOfEditorTop();
     const lineInPreview = this.getLineEl(lineBlock.line);
 
-    if (!lineInPreview || lineInPreview.line < lineBlock.line) {
+    if (!lineInPreview || (!forced && lineInPreview.line < lineBlock.line)) {
       return;
     }
 
@@ -242,5 +241,25 @@ export class Previewer {
       this.scrollToTopLineOfEditor,
     );
     this.layout(true);
+  }
+
+  get isFull() {
+    return this.el.classList.contains(style['previewer-full']);
+  }
+  get isHidden() {
+    return this.el.classList.contains(style['previewer-invisible']);
+  }
+
+  toggleLayout() {
+    if (this.isHidden) {
+      this.el.classList.remove(style['previewer-invisible']);
+      this.el.classList.add(style['previewer-full']);
+    } else if (this.isFull) {
+      this.el.classList.remove(style['previewer-full']);
+      this.editor.view.scrollDOM.style.width = '50%';
+    } else {
+      this.el.classList.add(style['previewer-invisible']);
+      this.editor.view.scrollDOM.style.width = 'auto';
+    }
   }
 }
