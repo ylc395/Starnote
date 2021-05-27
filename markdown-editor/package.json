@@ -10,6 +10,7 @@
     "@codemirror/lang-markdown": "^0.18.1",
     "@codemirror/language": "^0.18.1",
     "@codemirror/language-data": "^0.18.0",
+    "@codemirror/lint": "^0.18.3",
     "@codemirror/panel": "^0.18.1",
     "@codemirror/state": "^0.18.3",
     "@codemirror/text": "^0.18.0",

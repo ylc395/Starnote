@@ -1,15 +1,14 @@
+import type { EditorView } from '@codemirror/view';
+import type { Diagnostic } from '@codemirror/lint';
 import type {
   TextlintWorkerCommandResponse,
-  TextlintWorkerCommandMergeConfig,
   TextlintWorkerCommandResponseLint,
   TextlintWorkerCommandResponseFix,
 } from '@textlint/script-compiler';
-import { Editor, Events as EditorEvents } from '../editor';
-import debounce from 'lodash.debounce';
 
 export class Linter {
   private busy: Promise<void>;
-  constructor(private editor: Editor, private readonly worker: Worker) {
+  constructor(private readonly worker: Worker) {
     this.busy = new Promise((resolve) => {
       const readyCallback = (event: {
         data: TextlintWorkerCommandResponse;
@@ -24,28 +23,30 @@ export class Linter {
 
       this.worker.addEventListener('message', readyCallback);
     });
-
-    this.lint();
-    this.editor.on(EditorEvents.DocChanged, this.lint);
-    this.editor.on(EditorEvents.ContentSet, this.lint);
   }
 
-  private call(command: 'lint'): Promise<TextlintWorkerCommandResponseLint>;
-  private call(command: 'fix'): Promise<TextlintWorkerCommandResponseFix>;
+  private call(
+    command: 'lint',
+    text: string,
+  ): Promise<TextlintWorkerCommandResponseLint>;
+  private call(
+    command: 'fix',
+    text: string,
+  ): Promise<TextlintWorkerCommandResponseFix>;
   private call(
     command: 'merge-config',
     rc: Record<string, unknown>,
-  ): Promise<TextlintWorkerCommandMergeConfig>;
+  ): Promise<void>;
   private call(
     command: 'merge-config' | 'lint' | 'fix',
-    payload?: Record<string, unknown>,
+    payload?: string | Record<string, unknown>,
   ) {
     const task = new Promise((resolve) => {
       const resultCallback = (event: {
         data: TextlintWorkerCommandResponse;
       }) => {
         if (event.data.command !== 'init') {
-          resolve(event.data.result);
+          resolve(event.data);
         } else {
           throw new Error('wrong order for init call');
         }
@@ -54,38 +55,45 @@ export class Linter {
       };
 
       this.busy = this.busy.then(() => {
-        this.worker.addEventListener('message', resultCallback);
+        if (command !== 'merge-config') {
+          this.worker.addEventListener('message', resultCallback);
+        }
+
         this.worker.postMessage({
           command,
           ...(command === 'merge-config'
             ? { textlintrc: payload }
-            : { text: this.editor.getContent(), ext: '.md' }),
+            : { text: payload, ext: '.md' }),
         });
-        return task as Promise<void>;
+        return command === 'merge-config'
+          ? Promise.resolve()
+          : (task as Promise<void>);
       });
     });
 
     return task;
   }
 
-  readonly lint: () => void = debounce(async () => {
-    const result = await this.call('lint');
-    //todo: editor display
-    // eslint-disable-next-line no-console
-    console.log(result);
-  }, 3000);
+  async lint(view: EditorView): Promise<Diagnostic[]> {
+    const { result } = await this.call(
+      'lint',
+      view.state.doc.toJSON().join('\n'),
+    );
 
-  fix() {
-    return this.call('fix');
+    return result.messages.map(({ severity, index, message, ruleId }) => {
+      const severityMap = ['info', 'warning', 'error'] as const;
+
+      return {
+        from: index,
+        to: index,
+        message,
+        source: ruleId,
+        severity: severityMap[severity],
+      };
+    });
   }
 
   mergeConfig(rc: Record<string, unknown>) {
     return this.call('merge-config', rc);
-  }
-
-  destroy() {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (this.lint as any).cancel();
-    this.editor.off(EditorEvents.DocChanged, this.lint);
   }
 }

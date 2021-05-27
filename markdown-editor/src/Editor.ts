@@ -6,6 +6,7 @@ import { languages } from '@codemirror/language-data';
 import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
 import { history } from '@codemirror/history';
 import { showPanel } from '@codemirror/panel';
+import { linter } from '@codemirror/lint';
 import { Previewer } from './preview';
 import { statusbar, toolbar } from './panel/bar';
 import { Linter } from './linter';
@@ -44,17 +45,17 @@ export class Editor extends EventEmitter {
     textlintWorker?: Worker,
   ) {
     super();
-
     this.view = new EditorView({ parent: this.options.el });
+
+    if (textlintWorker) {
+      this.linter = new Linter(textlintWorker);
+    }
+
     this.setState(this.options.value);
     this.view.dom.style.height = '100%';
     this.view.dom.style.outline = 'none';
     this.view.dom.style.backgroundColor = '#fff';
     this.previewer = new Previewer(this);
-
-    if (textlintWorker) {
-      this.linter = new Linter(this, textlintWorker);
-    }
   }
 
   setContent(text: string) {
@@ -69,7 +70,6 @@ export class Editor extends EventEmitter {
   }
 
   destroy() {
-    this.linter?.destroy();
     this.previewer?.destroy();
     this.view.destroy();
   }
@@ -105,15 +105,19 @@ export class Editor extends EventEmitter {
   }
 
   private setState(content: string) {
-    const panels = [];
+    const extensions = [];
     const { statusbar: statusbarItems, toolbar: toolbarItems } = this.options;
 
     if (statusbarItems.length > 0) {
-      panels.push(showPanel.of(statusbar(this)));
+      extensions.push(showPanel.of(statusbar(this)));
     }
 
     if (toolbarItems.length > 0) {
-      panels.push(showPanel.of(toolbar(this)));
+      extensions.push(showPanel.of(toolbar(this)));
+    }
+
+    if (this.linter) {
+      extensions.push(linter(this.linter.lint.bind(this.linter)));
     }
 
     this.view.setState(
@@ -140,7 +144,7 @@ export class Editor extends EventEmitter {
               this.emit(Events.StateChanged, update);
             }
           }),
-          ...panels,
+          ...extensions,
         ],
       }),
     );

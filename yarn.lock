@@ -1228,6 +1228,17 @@
     "@codemirror/view" "^0.18.0"
     crelt "^1.0.5"
 
+"@codemirror/lint@^0.18.3":
+  version "0.18.3"
+  resolved "https://registry.npmjs.org/@codemirror/lint/-/lint-0.18.3.tgz#31c629485e910b3f145e2b819d2f012cd17be016"
+  integrity sha512-ORD8bGQRv5FATJ/LUmhaVPz69ucNjMCQ53WF8TqYMw6KtlTwAFsi+GvEhYyav7CdXPAXS/Z/j0C0Op8d1Dp+lQ==
+  dependencies:
+    "@codemirror/panel" "^0.18.1"
+    "@codemirror/state" "^0.18.0"
+    "@codemirror/tooltip" "^0.18.4"
+    "@codemirror/view" "^0.18.0"
+    crelt "^1.0.5"
+
 "@codemirror/matchbrackets@^0.18.0":
   version "0.18.0"
   resolved "https://registry.npmjs.org/@codemirror/matchbrackets/-/matchbrackets-0.18.0.tgz#64a493090d942de19f15a9ed3cb0fa19ed55f18b"
