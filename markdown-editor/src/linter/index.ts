@@ -7,24 +7,8 @@ import type {
 } from '@textlint/script-compiler';
 
 export class Linter {
-  private busy: Promise<void>;
-  constructor(private readonly worker: Worker) {
-    this.busy = new Promise((resolve) => {
-      const readyCallback = (event: {
-        data: TextlintWorkerCommandResponse;
-      }) => {
-        if (event.data.command === 'init') {
-          resolve();
-          this.worker.removeEventListener('message', readyCallback);
-        } else {
-          throw new Error('wrong init timing');
-        }
-      };
-
-      this.worker.addEventListener('message', readyCallback);
-    });
-  }
-
+  private busy = Promise.resolve();
+  constructor(private readonly worker: Worker) {}
   private call(
     command: 'lint',
     text: string,
@@ -47,27 +31,31 @@ export class Linter {
       }) => {
         if (event.data.command !== 'init') {
           resolve(event.data);
-        } else {
-          throw new Error('wrong order for init call');
+        } else if (process.env.NODE_ENV !== 'production') {
+          // eslint-disable-next-line no-console
+          console.warn(
+            'lint worker should be initialize before passed into editor, or linter may miss some request',
+          );
         }
 
         this.worker.removeEventListener('message', resultCallback);
       };
 
       this.busy = this.busy.then(() => {
-        if (command !== 'merge-config') {
+        const isMergeConfig = command === 'merge-config';
+
+        if (!isMergeConfig) {
           this.worker.addEventListener('message', resultCallback);
         }
 
         this.worker.postMessage({
           command,
-          ...(command === 'merge-config'
+          ...(isMergeConfig
             ? { textlintrc: payload }
             : { text: payload, ext: '.md' }),
         });
-        return command === 'merge-config'
-          ? Promise.resolve()
-          : (task as Promise<void>);
+
+        return isMergeConfig ? Promise.resolve() : (task as Promise<void>);
       });
     });
 
