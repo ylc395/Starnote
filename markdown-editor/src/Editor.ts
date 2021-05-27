@@ -27,7 +27,7 @@ export interface EditorOptions {
 
 export class Editor extends EventEmitter {
   readonly view: EditorView;
-  private previewer?: Previewer;
+  private previewer: Previewer;
   private linter?: Linter;
 
   get options() {
@@ -52,17 +52,15 @@ export class Editor extends EventEmitter {
     }
 
     this.setState(this.options.value);
+    this.previewer = new Previewer(this);
     this.view.dom.style.height = '100%';
     this.view.dom.style.outline = 'none';
     this.view.dom.style.backgroundColor = '#fff';
-    this.previewer = new Previewer(this);
   }
 
   setContent(text: string) {
     this.setState(text);
-    this.previewer?.destroy();
-    this.previewer = new Previewer(this);
-    this.emit(Events.ContentSet);
+    this.emit(Events.ContentSet, text);
   }
 
   getContent() {
@@ -70,7 +68,7 @@ export class Editor extends EventEmitter {
   }
 
   destroy() {
-    this.previewer?.destroy();
+    this.previewer.destroy();
     this.view.destroy();
   }
 

@@ -53,6 +53,7 @@ export function useEditor(editor: Editor) {
     markdownEditor = new MarkdownEditor(
       {
         el: editorRef.value!,
+        value: editor.content.value,
         statusbar: [wordCounter, lineCounter, cursorPosition],
         toolbar: [
           boldButton,
@@ -76,7 +77,6 @@ export function useEditor(editor: Editor) {
       lintWorker,
     );
 
-    const isNewNote = editor.isJustCreated;
     let editingContent: null | string = null;
 
     markdownEditor.on(MarkdownEditorEvents.DocChanged, (content) => {
@@ -92,14 +92,13 @@ export function useEditor(editor: Editor) {
           markdownEditor.setContent(newContent);
         }
       },
-      { immediate: true },
     );
 
     if (titleRef.value) {
       titleRef.value.value = editor.title.value;
     }
 
-    if (isNewNote && titleRef.value) {
+    if (editor.isJustCreated && titleRef.value) {
       titleRef.value.select();
     } else {
       markdownEditor.focus();

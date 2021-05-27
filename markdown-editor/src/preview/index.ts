@@ -32,21 +32,17 @@ export class Previewer {
     { leading: true },
   );
 
-  private layout(destroy = false) {
+  private layout() {
     const {
       view: { scrollDOM, dom: rootDOM, contentDOM },
     } = this.editor;
-
-    if (destroy) {
-      this.el.remove();
-      scrollDOM.style.width = 'auto';
-      return;
-    }
 
     this.el.className = `${style['previewer']} ${this.editor.options.classNamePrefix}editor-previewer`;
     scrollDOM.after(this.el);
     scrollDOM.style.width = '50%';
     window.requestAnimationFrame(() => {
+      contentDOM.style.paddingBottom = `${scrollDOM.clientHeight}px`;
+
       const {
         top: rootTop,
         bottom: rootBottom,
@@ -59,13 +55,13 @@ export class Previewer {
       this.el.style.top = `${scrollTop - rootTop}px`;
       this.el.style.bottom = `${rootBottom - scrollBottom}px`;
       this.el.style.paddingBottom = `${this.el.clientHeight}px`;
-      contentDOM.style.paddingBottom = `${scrollDOM.clientHeight}px`;
     });
   }
 
   private initListeners() {
     this.editor.on(EditorEvents.StateChanged, this.highlightFocusedLine);
     this.editor.on(EditorEvents.DocChanged, this.render);
+    this.editor.on(EditorEvents.ContentSet, this.render);
     this.editor.view.scrollDOM.addEventListener(
       'scroll',
       this.scrollToTopLineOfEditor,
@@ -236,11 +232,11 @@ export class Previewer {
     this.el.removeEventListener('scroll', this.scrollToTopLineOfPreviewer);
     this.editor.off(EditorEvents.StateChanged, this.highlightFocusedLine);
     this.editor.off(EditorEvents.DocChanged, this.render);
+    this.editor.off(EditorEvents.ContentSet, this.render);
     this.editor.view.scrollDOM.removeEventListener(
       'scroll',
       this.scrollToTopLineOfEditor,
     );
-    this.layout(true);
   }
 
   get isFull() {
