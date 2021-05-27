@@ -1,5 +1,4 @@
-import { computed, onMounted, Ref, ref, watch, onUnmounted } from 'vue';
-import { Editor, TITLE_STATUS_TEXT } from 'domain/entity';
+import { computed, onMounted, Ref, ref, watch, onUnmounted, inject } from 'vue';
 import {
   Editor as MarkdownEditor,
   Events as MarkdownEditorEvents,
@@ -24,6 +23,8 @@ import {
   toggleFullscreen,
 } from '@ylc395/markdown-editor';
 import '@ylc395/markdown-editor/dist/index.css';
+import { Editor, TITLE_STATUS_TEXT } from 'domain/entity';
+import { token as lintToken } from '../useLintWorker';
 
 export function useEditor(editor: Editor) {
   const titleRef: Ref<HTMLInputElement | null> = ref(null);
@@ -44,8 +45,12 @@ export function useEditor(editor: Editor) {
     }
   };
 
-  onMounted(() => {
-    const markdownEditor = new MarkdownEditor(
+  let markdownEditor: MarkdownEditor;
+
+  onMounted(async () => {
+    const lintWorker = await inject(lintToken);
+
+    markdownEditor = new MarkdownEditor(
       {
         el: editorRef.value!,
         statusbar: [wordCounter, lineCounter, cursorPosition],
@@ -68,7 +73,7 @@ export function useEditor(editor: Editor) {
           toggleFullscreen,
         ],
       },
-      new Worker('textlint/textlint-worker.js', { type: 'module' }),
+      lintWorker,
     );
 
     const isNewNote = editor.isJustCreated;
@@ -99,10 +104,10 @@ export function useEditor(editor: Editor) {
     } else {
       markdownEditor.focus();
     }
+  });
 
-    onUnmounted(() => {
-      markdownEditor.destroy();
-    });
+  onUnmounted(() => {
+    markdownEditor.destroy();
   });
 
   const resetTitle = () => {

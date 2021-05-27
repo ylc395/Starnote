@@ -2,9 +2,13 @@
 import { defineComponent } from 'vue';
 import Editor from './Editor/index.vue';
 import EditorTab from './EditorTab/index.vue';
+import { useLintWorker } from './useLintWorker';
 
 export default defineComponent({
   components: { Editor, EditorTab },
+  setup() {
+    useLintWorker();
+  },
 });
 </script>
 <template>
