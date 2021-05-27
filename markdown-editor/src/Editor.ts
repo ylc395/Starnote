@@ -8,11 +8,13 @@ import { history } from '@codemirror/history';
 import { showPanel } from '@codemirror/panel';
 import { Previewer } from './preview';
 import { statusbar, toolbar } from './panel/bar';
+import { Linter } from './linter';
 import type { BarItem } from './panel/bar';
 
 export enum Events {
   DocChanged = 'change:doc',
   StateChanged = 'change:state',
+  ContentSet = 'set:content',
 }
 export interface EditorOptions {
   el: HTMLElement;
@@ -24,7 +26,9 @@ export interface EditorOptions {
 
 export class Editor extends EventEmitter {
   readonly view: EditorView;
-  private previewer: Previewer | null = null;
+  private previewer?: Previewer;
+  private linter?: Linter;
+
   get options() {
     return {
       value: '',
@@ -35,7 +39,10 @@ export class Editor extends EventEmitter {
     };
   }
 
-  constructor(private readonly userOptions: EditorOptions) {
+  constructor(
+    private readonly userOptions: EditorOptions,
+    textlintWorker?: Worker,
+  ) {
     super();
 
     this.view = new EditorView({ parent: this.options.el });
@@ -44,12 +51,17 @@ export class Editor extends EventEmitter {
     this.view.dom.style.outline = 'none';
     this.view.dom.style.backgroundColor = '#fff';
     this.previewer = new Previewer(this);
+
+    if (textlintWorker) {
+      this.linter = new Linter(this, textlintWorker);
+    }
   }
 
   setContent(text: string) {
     this.setState(text);
     this.previewer?.destroy();
     this.previewer = new Previewer(this);
+    this.emit(Events.ContentSet);
   }
 
   getContent() {
@@ -57,6 +69,7 @@ export class Editor extends EventEmitter {
   }
 
   destroy() {
+    this.linter?.destroy();
     this.previewer?.destroy();
     this.view.destroy();
   }

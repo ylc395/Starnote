@@ -9,6 +9,7 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
+    "textlint:build": "textlint-script-compiler --textlintrc ./build/textlintConfig.js --output-dir ./textlint --metadataNamespace 'starnote' --metadataHomepage 'https://cyl.moe'",
     "electron:build": "cross-env IS_ELECTRON=true vue-cli-service electron:build",
     "electron:serve": "cross-env IS_ELECTRON=true ELECTRON_ENABLE_LOGGING=true vue-cli-service electron:serve",
     "postinstall": "electron-builder install-app-deps",
@@ -17,10 +18,7 @@
   "dependencies": {
     "@ant-design/icons-vue": "^6.0.1",
     "@tailwindcss/postcss7-compat": "^2.0.2",
-    "@types/emscripten": "^1.39.4",
-    "@types/lodash": "^4.14.168",
-    "@types/sqlite3": "^3.1.7",
-    "@types/uuid": "^8.3.0",
+    "@textlint/script-compiler": "^0.12.1",
     "@vue/reactivity": "^3.0.11",
     "@ylc395/markdown-editor": "0.0.1",
     "ant-design-vue": "^2.1.2",
@@ -38,6 +36,7 @@
     "rxjs": "^6.6.7",
     "sqlite3": "^5.0.2",
     "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.0.2",
+    "textlint-rule-no-todo": "^2.0.1",
     "tsyringe": "^4.4.0",
     "uuid": "^8.3.2",
     "vue": "^3.0.11",
@@ -46,6 +45,10 @@
     "wasm-git": "^0.0.6"
   },
   "devDependencies": {
+    "@types/emscripten": "^1.39.4",
+    "@types/lodash": "^4.14.168",
+    "@types/sqlite3": "^3.1.7",
+    "@types/uuid": "^8.3.0",
     "@typescript-eslint/eslint-plugin": "^4.18.0",
     "@typescript-eslint/parser": "^4.18.0",
     "@vue/cli-plugin-babel": "~4.5.0",
@@ -65,15 +68,6 @@
     "worker-plugin": "^5.0.0"
   },
   "_id": "note-app@1.0.0",
-  "gitHooks": {
-    "pre-commit": "lint-staged"
-  },
   "license": "MIT",
-  "lint-staged": {
-    "*.{js,jsx,vue,ts,tsx}": [
-      "vue-cli-service lint --fix",
-      "git add"
-    ]
-  },
   "readme": "ERROR: No README data found!"
 }

@@ -6,7 +6,8 @@
     "paths": {
       "utils/*": ["src/utils/*"],
       "domain/*": ["src/domain/*"],
-      "drivers/*": ["src/drivers/*"]
+      "drivers/*": ["src/drivers/*"],
+      "textlint/*": ["../textlint/*"]
     }
   },
   "include": [

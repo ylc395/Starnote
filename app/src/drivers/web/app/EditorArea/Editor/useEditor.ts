@@ -45,28 +45,31 @@ export function useEditor(editor: Editor) {
   };
 
   onMounted(() => {
-    const markdownEditor = new MarkdownEditor({
-      el: editorRef.value!,
-      statusbar: [wordCounter, lineCounter, cursorPosition],
-      toolbar: [
-        boldButton,
-        italicButton,
-        codeButton,
-        strikeThroughButton,
-        superscriptButton,
-        subscriptButton,
-        heading1Button,
-        blockquoteButton,
-        bulletListButton,
-        orderedListButton,
-        linkButton,
-        imageButton,
-        horizontalLineButton,
-        taskButton,
-        togglePreviewButton,
-        toggleFullscreen,
-      ],
-    });
+    const markdownEditor = new MarkdownEditor(
+      {
+        el: editorRef.value!,
+        statusbar: [wordCounter, lineCounter, cursorPosition],
+        toolbar: [
+          boldButton,
+          italicButton,
+          codeButton,
+          strikeThroughButton,
+          superscriptButton,
+          subscriptButton,
+          heading1Button,
+          blockquoteButton,
+          bulletListButton,
+          orderedListButton,
+          linkButton,
+          imageButton,
+          horizontalLineButton,
+          taskButton,
+          togglePreviewButton,
+          toggleFullscreen,
+        ],
+      },
+      new Worker('textlint/textlint-worker.js', { type: 'module' }),
+    );
 
     const isNewNote = editor.isJustCreated;
     let editingContent: null | string = null;
