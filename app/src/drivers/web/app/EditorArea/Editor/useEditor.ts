@@ -21,6 +21,7 @@ import {
   taskButton,
   togglePreviewButton,
   toggleFullscreen,
+  lintStatus,
 } from '@ylc395/markdown-editor';
 import '@ylc395/markdown-editor/dist/index.css';
 import { Editor, TITLE_STATUS_TEXT } from 'domain/entity';
@@ -54,7 +55,7 @@ export function useEditor(editor: Editor) {
       {
         el: editorRef.value!,
         value: editor.content.value,
-        statusbar: [wordCounter, lineCounter, cursorPosition],
+        statusbar: [lintStatus, wordCounter, lineCounter, cursorPosition],
         toolbar: [
           boldButton,
           italicButton,

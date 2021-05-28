@@ -14,7 +14,10 @@ export class Previewer {
   private readonly el = document.createElement('article');
   private editorTop = 0;
   private isScrolling = false;
+  private readonly resizeObserver: ResizeObserver;
   constructor(private readonly editor: Editor) {
+    this.resizeObserver = new ResizeObserver(this.layout.bind(this, false));
+
     this.render(editor.getContent());
     this.layout();
     this.initListeners();
@@ -28,16 +31,19 @@ export class Previewer {
     { leading: true },
   );
 
-  private layout() {
+  private layout(init = true) {
     this.setEditorTop();
 
     const {
       view: { scrollDOM, dom: rootDOM, contentDOM },
     } = this.editor;
 
-    this.el.className = `${style['previewer']} ${this.editor.options.classNamePrefix}editor-previewer`;
-    scrollDOM.after(this.el);
-    scrollDOM.style.width = '50%';
+    if (init) {
+      this.el.className = `${style['previewer']} ${this.editor.options.classNamePrefix}editor-previewer`;
+      scrollDOM.after(this.el);
+      scrollDOM.style.width = '50%';
+    }
+
     window.requestAnimationFrame(() => {
       contentDOM.style.paddingBottom = `${scrollDOM.clientHeight}px`;
 
@@ -70,6 +76,7 @@ export class Previewer {
       this.scrollToTopLineOfEditor,
     );
     this.el.addEventListener('scroll', this.scrollToTopLineOfPreviewer);
+    this.resizeObserver.observe(this.editor.view.dom);
   }
 
   private getLineEl(line: number) {
@@ -245,6 +252,7 @@ export class Previewer {
       'scroll',
       this.scrollToTopLineOfEditor,
     );
+    this.resizeObserver.disconnect();
   }
 
   get isFull() {
