@@ -17,7 +17,6 @@ export class Previewer {
   private readonly resizeObserver: ResizeObserver;
   constructor(private readonly editor: Editor) {
     this.resizeObserver = new ResizeObserver(this.layout.bind(this, false));
-
     this.render(editor.getContent());
     this.layout();
     this.initListeners();
@@ -32,8 +31,6 @@ export class Previewer {
   );
 
   private layout(init = true) {
-    this.setEditorTop();
-
     const {
       view: { scrollDOM, dom: rootDOM, contentDOM },
     } = this.editor;
@@ -59,15 +56,11 @@ export class Previewer {
       this.el.style.top = `${scrollTop - rootTop}px`;
       this.el.style.bottom = `${rootBottom - scrollBottom}px`;
       this.el.style.paddingBottom = `${this.el.clientHeight}px`;
+      this.editorTop = scrollTop;
     });
   }
 
-  private setEditorTop = () => {
-    this.editorTop = this.editor.view.scrollDOM.getBoundingClientRect().top;
-  };
-
   private initListeners() {
-    this.editor.on(EditorEvents.FullscreenChanged, this.setEditorTop);
     this.editor.on(EditorEvents.StateChanged, this.highlightFocusedLine);
     this.editor.on(EditorEvents.DocChanged, this.render);
     this.editor.on(EditorEvents.ContentSet, this.render);
@@ -244,7 +237,6 @@ export class Previewer {
 
   destroy() {
     this.el.removeEventListener('scroll', this.scrollToTopLineOfPreviewer);
-    this.editor.off(EditorEvents.FullscreenChanged, this.setEditorTop);
     this.editor.off(EditorEvents.StateChanged, this.highlightFocusedLine);
     this.editor.off(EditorEvents.DocChanged, this.render);
     this.editor.off(EditorEvents.ContentSet, this.render);

@@ -14,7 +14,6 @@ export enum Events {
   DocChanged = 'change:doc',
   StateChanged = 'change:state',
   ContentSet = 'set:content',
-  FullscreenChanged = 'change:fullscreen',
   Lint = 'lint',
 }
 export interface EditorOptions {
@@ -94,14 +93,12 @@ export class Editor extends EventEmitter {
       dom.style.bottom = '';
       dom.style.right = '';
       dom.style.left = '';
-      this.emit(Events.FullscreenChanged, false);
     } else {
       dom.style.setProperty('position', 'fixed', 'important');
       dom.style.top = '0px';
       dom.style.bottom = '0px';
       dom.style.right = '0px';
       dom.style.left = '0px';
-      this.emit(Events.FullscreenChanged, true);
     }
   }
 
