@@ -12,13 +12,9 @@ import type { SyntaxNode } from '../markdown/syntaxTree';
 export class Previewer {
   private readonly renderer = new MarkdownIt({ breaks: true }).use(sourceMap);
   private readonly el = document.createElement('article');
-  private readonly editor: Editor;
-  private readonly editorTop: number;
+  private editorTop = 0;
   private isScrolling = false;
-  constructor(editor: Editor) {
-    this.editor = editor;
-    this.editorTop = editor.view.scrollDOM.getBoundingClientRect().top;
-
+  constructor(private readonly editor: Editor) {
     this.render(editor.getContent());
     this.layout();
     this.initListeners();
@@ -33,6 +29,8 @@ export class Previewer {
   );
 
   private layout() {
+    this.setEditorTop();
+
     const {
       view: { scrollDOM, dom: rootDOM, contentDOM },
     } = this.editor;
@@ -58,7 +56,12 @@ export class Previewer {
     });
   }
 
+  private setEditorTop = () => {
+    this.editorTop = this.editor.view.scrollDOM.getBoundingClientRect().top;
+  };
+
   private initListeners() {
+    this.editor.on(EditorEvents.FullscreenChanged, this.setEditorTop);
     this.editor.on(EditorEvents.StateChanged, this.highlightFocusedLine);
     this.editor.on(EditorEvents.DocChanged, this.render);
     this.editor.on(EditorEvents.ContentSet, this.render);
@@ -96,6 +99,10 @@ export class Previewer {
     const { top, from, height } = view.visualLineAtHeight(this.editorTop);
     const node = getNodeAt(view.state, from, 1);
     const getParentFencedCode = (node: SyntaxNode): SyntaxNode | null => {
+      if (node.type.is('FencedCode')) {
+        return node;
+      }
+
       if (!node.parent) {
         return null;
       }
@@ -230,6 +237,7 @@ export class Previewer {
 
   destroy() {
     this.el.removeEventListener('scroll', this.scrollToTopLineOfPreviewer);
+    this.editor.off(EditorEvents.FullscreenChanged, this.setEditorTop);
     this.editor.off(EditorEvents.StateChanged, this.highlightFocusedLine);
     this.editor.off(EditorEvents.DocChanged, this.render);
     this.editor.off(EditorEvents.ContentSet, this.render);
