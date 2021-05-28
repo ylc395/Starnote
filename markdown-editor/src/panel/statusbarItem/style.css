@@ -1,0 +1,4 @@
+.lint-status {
+  display: inline-flex;
+  align-items: center;
+}

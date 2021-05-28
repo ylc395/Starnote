@@ -15,6 +15,7 @@ export enum Events {
   StateChanged = 'change:state',
   ContentSet = 'set:content',
   FullscreenChanged = 'change:fullscreen',
+  Lint = 'lint',
 }
 export interface EditorOptions {
   el: HTMLElement;
@@ -47,7 +48,7 @@ export class Editor extends EventEmitter {
     this.view = new EditorView({ parent: this.options.el });
 
     if (textlintWorker) {
-      this.linter = new Linter(textlintWorker);
+      this.linter = new Linter(this, textlintWorker);
     }
 
     this.setState(this.options.value);
@@ -69,6 +70,7 @@ export class Editor extends EventEmitter {
   destroy() {
     this.previewer.destroy();
     this.view.destroy();
+    this.removeAllListeners();
   }
 
   focus() {

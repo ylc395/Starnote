@@ -18,11 +18,12 @@ interface BarOption {
   top?: boolean;
   itemClassName: string;
   className: string;
+  itemTag: string;
 }
 
 function bar(
   items: BarItem[],
-  { top, itemClassName, className }: BarOption,
+  { top, itemClassName, className, itemTag }: BarOption,
   editor: Editor,
 ) {
   return function (view: EditorView): Panel {
@@ -30,7 +31,7 @@ function bar(
     barDom.className = className;
 
     const itemsDom = items.map((item) => {
-      const dom = document.createElement(item.htmlTag || 'button');
+      const dom = document.createElement(item.htmlTag || itemTag);
 
       if (itemClassName) {
         dom.className = itemClassName;
@@ -86,6 +87,7 @@ export const statusbar = (editor: Editor) => {
   const option = {
     className: `${style['statusbar']} ${classNamePrefix}editor-statusbar`,
     itemClassName: `${classNamePrefix}editor-statusbar-item`,
+    itemTag: 'div',
   };
 
   return showPanel.of(bar(items, option, editor));
@@ -96,6 +98,7 @@ export const toolbar = (editor: Editor) => {
   const option = {
     className: `${style['toolbar']} ${classNamePrefix}editor-toolbar`,
     itemClassName: `${classNamePrefix}editor-toolbar-item`,
+    itemTag: 'button',
     top: true,
   };
 

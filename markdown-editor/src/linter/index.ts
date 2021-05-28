@@ -6,10 +6,14 @@ import type {
   TextlintWorkerCommandResponseLint,
   TextlintWorkerCommandResponseFix,
 } from '@textlint/script-compiler';
+import { Editor, Events as EditorEvents } from '../editor';
 
 export class Linter {
   private busy = Promise.resolve();
-  constructor(private readonly worker: Worker) {}
+  constructor(
+    private readonly editor: Editor,
+    private readonly worker: Worker,
+  ) {}
   private call(
     command: 'lint',
     text: string,
@@ -69,17 +73,22 @@ export class Linter {
       view.state.doc.toJSON().join('\n'),
     );
 
-    return result.messages.map(({ severity, index, message, ruleId }) => {
-      const severityMap = ['info', 'warning', 'error'] as const;
+    const diagnostics = result.messages.map(
+      ({ severity, index, message, ruleId }) => {
+        const severityMap = ['info', 'warning', 'error'] as const;
 
-      return {
-        from: index,
-        to: index,
-        message,
-        source: ruleId,
-        severity: severityMap[severity],
-      };
-    });
+        return {
+          from: index,
+          to: index,
+          message,
+          source: ruleId,
+          severity: severityMap[severity],
+        };
+      },
+    );
+
+    this.editor.emit(EditorEvents.Lint, diagnostics);
+    return diagnostics;
   }
 
   mergeConfig(rc: Record<string, unknown>) {
