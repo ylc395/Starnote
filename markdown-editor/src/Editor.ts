@@ -5,8 +5,6 @@ import { defaultHighlightStyle } from '@codemirror/highlight';
 import { languages } from '@codemirror/language-data';
 import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
 import { history } from '@codemirror/history';
-import { showPanel } from '@codemirror/panel';
-import { linter } from '@codemirror/lint';
 import { Previewer } from './preview';
 import { statusbar, toolbar } from './panel/bar';
 import { Linter } from './linter';
@@ -110,15 +108,15 @@ export class Editor extends EventEmitter {
     const { statusbar: statusbarItems, toolbar: toolbarItems } = this.options;
 
     if (statusbarItems.length > 0) {
-      extensions.push(showPanel.of(statusbar(this)));
+      extensions.push(statusbar(this));
     }
 
     if (toolbarItems.length > 0) {
-      extensions.push(showPanel.of(toolbar(this)));
+      extensions.push(toolbar(this));
     }
 
     if (this.linter) {
-      extensions.push(linter(this.linter.lint.bind(this.linter)));
+      extensions.push(this.linter.toExtension());
     }
 
     this.view.setState(

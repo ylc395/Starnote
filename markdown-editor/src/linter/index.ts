@@ -1,5 +1,6 @@
 import type { EditorView } from '@codemirror/view';
 import type { Diagnostic } from '@codemirror/lint';
+import { linter } from '@codemirror/lint';
 import type {
   TextlintWorkerCommandResponse,
   TextlintWorkerCommandResponseLint,
@@ -83,5 +84,9 @@ export class Linter {
 
   mergeConfig(rc: Record<string, unknown>) {
     return this.call('merge-config', rc);
+  }
+
+  toExtension() {
+    return linter(this.lint.bind(this));
   }
 }

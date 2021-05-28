@@ -1,3 +1,4 @@
+import { showPanel } from '@codemirror/panel';
 import type { Panel } from '@codemirror/panel';
 import type { EditorView, ViewUpdate } from '@codemirror/view';
 import style from './style.css';
@@ -80,34 +81,23 @@ function bar(
   };
 }
 
-interface Bar {
-  items: BarItem[];
-  classNamePrefix: string;
-}
-
 export const statusbar = (editor: Editor) => {
   const { statusbar: items, classNamePrefix } = editor.options;
+  const option = {
+    className: `${style['statusbar']} ${classNamePrefix}editor-statusbar`,
+    itemClassName: `${classNamePrefix}editor-statusbar-item`,
+  };
 
-  return bar(
-    items,
-    {
-      className: `${style['statusbar']} ${classNamePrefix}editor-statusbar`,
-      itemClassName: `${classNamePrefix}editor-statusbar-item`,
-    },
-    editor,
-  );
+  return showPanel.of(bar(items, option, editor));
 };
 
 export const toolbar = (editor: Editor) => {
   const { toolbar: items, classNamePrefix } = editor.options;
+  const option = {
+    className: `${style['toolbar']} ${classNamePrefix}editor-toolbar`,
+    itemClassName: `${classNamePrefix}editor-toolbar-item`,
+    top: true,
+  };
 
-  return bar(
-    items,
-    {
-      className: `${style['toolbar']} ${classNamePrefix}editor-toolbar`,
-      itemClassName: `${classNamePrefix}editor-toolbar-item`,
-      top: true,
-    },
-    editor,
-  );
+  return showPanel.of(bar(items, option, editor));
 };
