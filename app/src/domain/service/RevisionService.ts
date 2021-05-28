@@ -40,7 +40,7 @@ export interface Git {
   clone(url: string): Promise<void>;
   commit(commitMessage: string): Promise<void>;
   getStatus(): Promise<FileGitStatus[]>;
-  restore(path: string, commit?: string): Promise<NoteDataObject>;
+  restore(path: string, commit?: string): Promise<NoteDataObject>; // do not promise that file existed
 }
 
 export const token = Symbol();
@@ -72,7 +72,10 @@ export class RevisionService {
 
       // modify
       if (note.getPath() === path) {
-        await this.noteRepository.updateNote(note, ['content', 'title']);
+        await Promise.all([
+          this.noteRepository.updateNote(note, ['content', 'title']),
+          this.createFileByItem(note),
+        ]);
         await this.refreshGitStatus();
         return;
       }
