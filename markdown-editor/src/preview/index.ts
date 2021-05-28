@@ -5,7 +5,7 @@ import debounce from 'lodash.debounce';
 import { sourceMap } from './markdownItPlugins';
 import { Events as EditorEvents } from '../editor';
 import type { Editor } from '../editor';
-import style from './style.css';
+import style from './style.module.css';
 import { getNodeAt } from '../markdown/syntaxTree';
 import type { SyntaxNode } from '../markdown/syntaxTree';
 
@@ -36,7 +36,7 @@ export class Previewer {
     } = this.editor;
 
     if (init) {
-      this.el.className = `${style['previewer']} ${this.editor.options.classNamePrefix}editor-previewer`;
+      this.el.className = `${style['previewer']} ${this.editor.options.classNamePrefix}previewer`;
       scrollDOM.after(this.el);
       scrollDOM.style.width = '50%';
     }

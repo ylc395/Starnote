@@ -55,6 +55,7 @@ export function useEditor(editor: Editor) {
       {
         el: editorRef.value!,
         value: editor.content.value,
+        classNamePrefix: 'markdown-editor-',
         statusbar: [lintStatus, wordCounter, lineCounter, cursorPosition],
         toolbar: [
           boldButton,

@@ -18,14 +18,14 @@ import type { Command } from '@codemirror/view';
 import * as commands from '../../markdown/commands';
 import * as MARKS from '../../markdown/marks';
 import { getNodeAt, isMarkOf, getBlockMark } from '../../markdown/syntaxTree';
-import style from '../style.css';
+import style from './style.module.css';
 import type { BarItem } from '../bar';
 
 function updateIconStatus(mark: MARKS.Mark): BarItem['onUpdate'] {
   return function (update, itemEl) {
     const { from } = update.state.selection.main;
     const node = getNodeAt(update.state, from);
-    const className = style['toolbar-item-checked'];
+    const className = style['button-checked'];
 
     const isMark = (() => {
       if (mark.isBlock) {
@@ -55,6 +55,7 @@ function button({
   icon: string;
 }): BarItem {
   return {
+    htmlTag: 'button',
     htmlContent: icon,
     title,
     onClick: action,

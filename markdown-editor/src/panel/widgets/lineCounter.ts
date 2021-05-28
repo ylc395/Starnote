@@ -6,6 +6,7 @@ function getLines(state: EditorState) {
 }
 
 export const lineCounter: BarItem = {
+  className: 'line-counter',
   onMounted(view, itemEl) {
     itemEl.textContent = getLines(view.state);
   },

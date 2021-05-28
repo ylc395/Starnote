@@ -1,17 +1,16 @@
-import infoIcon from 'bootstrap-icons/icons/info-square.svg';
-import warningIcon from 'bootstrap-icons/icons/exclamation-square.svg';
-import errorIcon from 'bootstrap-icons/icons/x-square.svg';
+import infoIcon from 'bootstrap-icons/icons/info-circle.svg';
+import warningIcon from 'bootstrap-icons/icons/exclamation-triangle.svg';
+import errorIcon from 'bootstrap-icons/icons/x-circle.svg';
 import type { Diagnostic } from '@codemirror/lint';
 import type { BarItem } from '../bar';
 import { Events as EditorEvents } from '../../editor';
-import style from './style.css';
+import style from './style.module.css';
 
+const className = style['lint-status'];
 const template = `
-<div>
-    <span class=${style['lint-status']}>${errorIcon}{{ errorCount }}</span>
-    <span class=${style['lint-status']}>${warningIcon}{{ warningCount }}</span>
-    <span class=${style['lint-status']}>${infoIcon}{{ infoCount }}</span>
-</div>
+    <span class="${className}">${errorIcon}{{ errorCount }}</span>
+    <span class="${className}">${warningIcon}{{ warningCount }}</span>
+    <span class="${className}">${infoIcon}{{ infoCount }}</span>
 `;
 
 const groupDiagnostics = (diagnostics: Diagnostic[]) => {
@@ -23,6 +22,7 @@ const groupDiagnostics = (diagnostics: Diagnostic[]) => {
 };
 
 export const lintStatus: BarItem = {
+  className: 'lint-status-group',
   onMounted(view, el, editor) {
     editor.on(EditorEvents.Lint, (diagnostics: Diagnostic[]) => {
       const { info, warning, error } = groupDiagnostics(diagnostics);
