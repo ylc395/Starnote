@@ -6,13 +6,6 @@ import type { BarItem } from '../bar';
 import { Events as EditorEvents } from '../../editor';
 import style from './style.module.css';
 
-const className = style['lint-status'];
-const template = `
-    <span class="${className}">${errorIcon}{{ errorCount }}</span>
-    <span class="${className}">${warningIcon}{{ warningCount }}</span>
-    <span class="${className}">${infoIcon}{{ infoCount }}</span>
-`;
-
 const groupDiagnostics = (diagnostics: Diagnostic[]) => {
   return {
     info: diagnostics.filter(({ severity }) => severity === 'info'),
@@ -24,6 +17,14 @@ const groupDiagnostics = (diagnostics: Diagnostic[]) => {
 export const lintStatus: BarItem = {
   className: 'lint-status-group',
   onMounted(view, el, editor) {
+    const countClassName = `${editor.options.classNamePrefix}lint-status-count ${style['lint-status-count']}`;
+    const className = `${editor.options.classNamePrefix}lint-status ${style['lint-status']}`;
+    const template = `
+        <span class="${className}">${errorIcon}<span class="${countClassName}">{{ errorCount }}</span></span>
+        <span class="${className}">${warningIcon}<span class="${countClassName}">{{ warningCount }}</span></span>
+        <span class="${className}">${infoIcon}<span class="${countClassName}">{{ infoCount }}</span></span>
+    `;
+
     editor.on(EditorEvents.Lint, (diagnostics: Diagnostic[]) => {
       const { info, warning, error } = groupDiagnostics(diagnostics);
 

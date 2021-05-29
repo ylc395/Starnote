@@ -5,4 +5,9 @@
 .lint-status {
   display: inline-flex;
   align-items: center;
+  margin-left: 8px;
+}
+
+.lint-status-count {
+  margin-left: 0.2em;
 }
